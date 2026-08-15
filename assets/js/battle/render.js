@@ -26,6 +26,11 @@
     var canvas = document.createElement("canvas");
     canvas.className = "battle-canvas";
     canvas.setAttribute("role", "img");
+    /* Labelled even before a battle runs — an unlabelled canvas is invisible
+     * to a screen reader. The real outcome is announced by the verdict, which
+     * is a live region. */
+    canvas.setAttribute("aria-label",
+      "Battlefield, " + level.map.cols + " by " + level.map.rows + " squares");
     wrap.appendChild(canvas);
     container.appendChild(wrap);
 

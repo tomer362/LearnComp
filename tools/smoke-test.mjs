@@ -128,6 +128,10 @@ const boardPainted = await page.evaluate(() => {
 });
 check(boardPainted > 10, "the board is actually drawn, not blank", "opaque samples: " + boardPainted);
 check((await page.locator(".battle-controls .btn").count()) >= 15, "each battle has playback controls");
+check((await page.locator(".battle-canvas[aria-label]").count()) === 5,
+  "every battlefield is labelled for screen readers");
+check((await page.locator('.verdict[role="status"][aria-live]').count()) === 5,
+  "outcomes are announced, not conveyed by colour alone");
 
 section("Battle flow — lose, diagnose, win");
 const e2 = page.locator(".exercise").nth(1); // b2: needs three towers

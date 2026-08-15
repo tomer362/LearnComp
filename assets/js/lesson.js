@@ -362,7 +362,11 @@ window.LC = window.LC || {};
     card.appendChild(bar);
     card.appendChild(output.el);
 
+    /* The outcome must never be conveyed only by colour or by the animation:
+     * announce it. See spec/08-quality-checklist.md and spec/09-battle-game.md. */
     var verdict = el("div", "verdict");
+    verdict.setAttribute("role", "status");
+    verdict.setAttribute("aria-live", "polite");
     card.appendChild(verdict);
     var hintBox = el("div", "hints");
     card.appendChild(hintBox);
