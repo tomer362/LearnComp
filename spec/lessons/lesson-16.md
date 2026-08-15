@@ -245,362 +245,569 @@ Intro: *"שני את המספר. שני את המילה. ואז — בזהירו
 *(Deliberately inviting her to break it here, in the sandbox, means the
 `RecursionError` in the boss is an old acquaintance rather than a catastrophe.)*
 
-## Training exercises
+## The battle levels
 
-### e1 — Down the Stairs · 20 XP, 5 🪙
+**Control model: build script + strategy function.** Recursion shows up in both
+halves, on purpose, because that is the honest picture: a recursive function is
+not a targeting trick, it is a way of writing a repetition whose length you did
+not know when you started.
 
-**brief:** כתבי פונקציה רקורסיבית `stairs(n)` שמדפיסה ספירה לאחור מ-`n` עד 1,
-ואז את השורה `The floor.` — בלי שום לולאה. קראי לה עם 5.
+### The new tower: ⚡ lightning
+
+Unlocked here, and chosen to fit the lesson. 120 gold, range 3.0, 18 damage,
+0.8 shots a second — and **the bolt chains to up to three enemies in range at
+once**. Against a lone monster it is worse than an archer costing less than half
+as much. Against a crowd it is the best thing in the game.
+
+That is why every lightning level below sends monsters in tight packs, and it is
+why the tower belongs in the recursion lesson: a chain is a thing that hops to
+the next one, and then the next one, and then stops. She already knows the shape.
+
+### Two facts about recursion in this engine, both verified
+
+1. **A runaway recursion in her build script raises a real Python error before
+   the battle starts:** `RecursionError: Maximum call stack size exceeded`, with
+   a line number. Not a hang, not a frozen tab.
+2. **A runaway recursion inside `choose_target` ends the battle as a loss**, and
+   the engine reports the same message with the explanation attached. The camp
+   survives the tick it happened on and then the fight simply stops.
+
+L1 and L4 are built on exactly those two facts. She should meet each of them on
+purpose, in a level designed for it, rather than at midnight in the boss.
+
+### The maps
+
+**`ROAD`** — a straight lane along row 4 (18 or 21 columns). L1 and L2.
+
+**`BEND`** (18 × 10) — the lesson-14 map, reused so the terrain is familiar while
+the code gets strange. L3 and L4.
+
+**`LABYRINTH`** (15 × 9) — the boss. Three corridors folded back on each other,
+41 cells long, and the shape is the point: it contains itself.
+
+```js
+LABYRINTH = [[0,1],[1,1],[2,1],[3,1],[4,1],[5,1],[6,1],[7,1],[8,1],[9,1],[10,1],[11,1],[12,1],
+             [12,2],[12,3],
+             [12,4],[11,4],[10,4],[9,4],[8,4],[7,4],[6,4],[5,4],[4,4],[3,4],[2,4],
+             [2,5],[2,6],
+             [2,7],[3,7],[4,7],[5,7],[6,7],[7,7],[8,7],[9,7],[10,7],[11,7],[12,7],[13,7],[14,7]]
+```
+
+---
+
+### L1 — Down the Corridor · 20 XP, 5 🪙
+
+**Why this mechanic:** a `for` loop would build this wall in two lines, and the
+level forbids it. That is not cruelty, it is the cheapest possible place to meet
+a base case: five towers, one function, and a `if left == 0: return` that she can
+delete on purpose to watch the whole thing fall over.
+
+**brief:** חמישה מגדלים לאורך הדרך, במרווחים של שלוש עמודות, מ-`x = 2`.
+
+הפעם **בלי לולאה**. כתבי פונקציה `corridor(x, y, left)` שמציבה מגדל אחד וקוראת
+לעצמה בשביל השאר — עם `x` גדול יותר בשלוש, ועם `left` קטן יותר באחת.
+
+וכמו תמיד: **קודם כותבים את העצירה.** מה `corridor` צריכה לעשות כש-`left` הוא 0?
+
+```js
+map: { cols: 18, rows: 8, path: [[0,4],[1,4], … ,[17,4]] },
+gold: 250, campHp: 3, seed: 61, allowed: ["archer"],
+waves: [
+  { delay: 0,  enemies: [{ kind: "satyr",     count: 10, gap: 0.45 }] },
+  { delay: 6,  enemies: [{ kind: "harpy",     count:  8, gap: 0.5  }] },
+  { delay: 13, enemies: [{ kind: "hellhound", count:  5, gap: 0.8  }] },
+],
+```
 
 **starter:**
 ```python
-def stairs(n):
-    # 1. base case first: what happens when there are no stairs left?
-    # 2. then: print this stair and go one step down
-    print(n)
+def corridor(x, y, left):
+    # 1. base case first: what happens when there are none left to build?
+    # 2. then: build one here, and call yourself for the rest
+    place_tower("archer", x, y)
 
-stairs(5)
+corridor(2, 3, 5)
 ```
 
 **solution:**
 ```python
-def stairs(n):
-    if n == 0:
-        print("The floor.")
+def corridor(x, y, left):
+    if left == 0:
         return
-    print(n)
-    stairs(n - 1)
+    place_tower("archer", x, y)
+    corridor(x + 3, y, left - 1)
 
-stairs(5)
+corridor(2, 3, 5)
 ```
 
 **check:**
 ```js
-{ kind: "source",
-  mustInclude: ["def stairs"], mustExclude: ["while", "for"],
-  message: { he: "המדרגות האלה יורדות רק ברקורסיה — בלי while ובלי for",
-             en: "These stairs go down by recursion only — no while, no for" },
-  also: { kind: "output", mode: "normalized",
-          expect: "5\n4\n3\n2\n1\nThe floor." } }
+{ kind: "battle",
+  also: { kind: "source",
+    mustInclude: ["def corridor", "corridor("], mustExclude: ["for ", "while "],
+    message: { he: "המסדרון הזה נבנה ברקורסיה בלבד — בלי for ובלי while",
+               en: "This corridor is built by recursion only — no for, no while" } } }
 ```
 
 **hints:**
-1. שתי שאלות לפני שכותבים משהו: מתי הפונקציה **לא** צריכה לקרוא לעצמה? ומה
-   נהיה קטן יותר בכל קריאה?
-2. מקרה הבסיס הוא `if n == 0:` — בפנים מדפיסים `The floor.` ואז `return` כדי
-   לצאת. אחריו, מחוץ ל-`if`, מדפיסים את `n` וקוראים ל-`stairs` עם `n - 1`.
-3. סדר השורות בגוף הפונקציה: `if n == 0:` / `print("The floor.")` / `return` /
-   `print(n)` / `stairs(n - 1)`. אם ה-`print(n)` שלך יושב לפני ה-`if`, יודפס גם
-   0. אם שכחת את ה-`return` במקרה הבסיס, הפונקציה תמשיך למספרים שליליים.
+1. הריצי כמו שזה. נבנה מגדל אחד, והפונקציה נגמרה. מה חסר בשורה האחרונה של הגוף
+   כדי שהיא תמשיך?
+2. שני חלקים, ותמיד בסדר הזה: `if left == 0:` ומתחתיו `return` — זו העצירה.
+   ואחרי ה-`if`, הצבה אחת, ואז קריאה ל-`corridor` עם `x + 3` ועם `left - 1`.
+3. גוף הפונקציה, שורה אחרי שורה: `if left == 0:` / `return` /
+   `place_tower("archer", x, y)` / `corridor(x + 3, y, left - 1)`. חמישה מגדלים
+   ייצאו בעמודות 2, 5, 8, 11 ו-14. עכשיו נסי דבר אחד בכוונה: מחקי את שתי שורות
+   העצירה והריצי. תקבלי `RecursionError: Maximum call stack size exceeded` עם
+   מספר שורה — זה המנוע עוצר אותך בבטחה, וזו הודעה, לא אסון. אחר כך החזירי אותן.
 
-### e2 — The Echo of the Corridor · 25 XP, 6 🪙
+---
 
-**brief:** כתבי פונקציה רקורסיבית `echo(word, times)` שמדפיסה את `word` בדיוק
-`times` פעמים, בלי לולאה. קראי לה עם `"Ariadne"` ו-4.
+### L2 — Count the Thread · 30 XP, 8 🪙
 
-**starter:**
-```python
-def echo(word, times):
-    # 1. base case first
-    # 2. then one print, and a call with a smaller number
-    print(word)
+**Why this mechanic:** two recursions with two different jobs. `total_hp` walks a
+list and **returns a number**; `build_line` walks a list and **does something**
+and returns nothing. Same shape, opposite purpose — and the base cases are
+different too: one ends at the end of the list, the other ends when a counter
+runs out.
 
-echo("Ariadne", 4)
-```
+The budget is capped at exactly the right answer, so the arithmetic has to be
+right and the recursion has to actually reach the end of the list.
 
-**solution:**
-```python
-def echo(word, times):
-    if times == 0:
-        return
-    print(word)
-    echo(word, times - 1)
+**brief:** אותו כלל של אתמול — קשת אחת לכל 160 נקודות חיים, מעוגל כלפי מעלה —
+אבל היום בלי אף לולאה בכל התוכנית.
 
-echo("Ariadne", 4)
-```
+שתי פונקציות רקורסיביות:
+- `total_hp(wave, i)` — **מחזירה** את סכום החיים של כל המפלצות מהמקום `i` והלאה.
+- `build_line(spots, i, left)` — מציבה `left` מגדלים, החל מהמשבצת `i` ברשימה.
 
-**check:**
+שימי לב שהעצירות שלהן שונות: אחת נעצרת כשנגמרה הרשימה, והשנייה כשנגמרו המגדלים.
+
 ```js
-{ kind: "source",
-  mustInclude: ["def echo"], mustExclude: ["while", "for"],
-  message: { he: "ההד חוזר ברקורסיה בלבד — בלי while ובלי for",
-             en: "The echo repeats by recursion only — no while, no for" },
-  also: { kind: "output", mode: "normalized",
-          expect: "Ariadne\nAriadne\nAriadne\nAriadne" } }
+map: { cols: 21, rows: 8, path: [[0,4],[1,4], … ,[20,4]] },
+gold: 400, campHp: 3, seed: 66, allowed: ["archer"],
+waves: [
+  { delay: 0,  enemies: [{ kind: "satyr",     count: 14, gap: 0.5 }] },
+  { delay: 6,  enemies: [{ kind: "harpy",     count:  8, gap: 0.6 }] },
+  { delay: 14, enemies: [{ kind: "hellhound", count:  4, gap: 0.8 }] },
+],
+check: { kind: "battle", maxGoldSpent: 250, also: … },
 ```
-*Two parameters, only one of which shrinks — this is the exercise where she sees
-that `word` rides along unchanged while `times` does the work.*
 
-**hints:**
-1. אחד משני הפרמטרים משתנה בכל קריאה, והשני נוסע איתך בלי לזוז. מי מהם?
-2. מקרה הבסיס הוא `if times == 0: return` — בלי להדפיס כלום. הקריאה הרקורסיבית
-   מעבירה את **אותה מילה** ואת `times - 1`.
-3. גוף הפונקציה: `if times == 0:` ואז `return`. אחריו `print(word)`, ואז
-   `echo(word, times - 1)`. שימי לב שהמילה עוברת כמו שהיא — אם תשני גם אותה,
-   ההד יישמע אחרת בכל שורה.
-
-### e3 — Sum of the Steps · 25 XP, 6 🪙
-
-**brief:** כתבי פונקציה רקורסיבית `total_steps(n)` ש**מחזירה** את סכום כל
-המספרים מ-1 עד `n` — בלי לולאה, בלי `sum`. הדפיסי את התוצאה עבור 10.
+*(14 × 20 + 8 × 30 + 4 × 70 = **800** HP → exactly 5 archers. Four leak one; six
+cost 300 and break the cap.)*
 
 **starter:**
 ```python
-def total_steps(n):
-    # 1. what do you return when there are no stairs left?
-    # 2. and what do you return in every other case?
+import math
+
+SPOTS = [[2,3],[5,5],[8,3],[11,5],[14,3],[17,5]]
+
+def total_hp(wave, i):
+    # base case: what is the total from the end of the list onwards?
     return 0
 
-print(total_steps(10))
+def build_line(spots, i, left):
+    # base case: what do you build when there are none left?
+    return
+
+needed = math.ceil(total_hp(get_wave(), 0) / 160)
+build_line(SPOTS, 0, needed)
 ```
 
 **solution:**
 ```python
-def total_steps(n):
-    if n == 0:
-        return 0
-    return n + total_steps(n - 1)
+import math
 
-print(total_steps(10))
+SPOTS = [[2,3],[5,5],[8,3],[11,5],[14,3],[17,5]]
+
+def total_hp(wave, i):
+    if i == len(wave):
+        return 0
+    return wave[i]["hp"] + total_hp(wave, i + 1)
+
+def build_line(spots, i, left):
+    if left == 0:
+        return
+    place_tower("archer", spots[i][0], spots[i][1])
+    build_line(spots, i + 1, left - 1)
+
+needed = math.ceil(total_hp(get_wave(), 0) / 160)
+build_line(SPOTS, 0, needed)
 ```
 
 **check:**
 ```js
-{ kind: "source",
-  mustInclude: ["def total_steps", "return"], mustExclude: ["while", "for", "sum"],
-  message: { he: "כאן צריך רקורסיה שמחזירה ערך — בלי לולאה ובלי sum",
-             en: "This needs a recursion that returns a value — no loop, no sum" },
-  also: { kind: "output", mode: "normalized", expect: "55" } }
+{ kind: "battle",
+  maxGoldSpent: 250,
+  also: { kind: "source",
+    mustInclude: ["def total_hp", "def build_line"],
+    mustExclude: ["for ", "while "],
+    message: { he: "שתי הפונקציות חייבות להיות רקורסיביות — בלי for ובלי while",
+               en: "Both functions have to be recursive — no for, no while" } } }
 ```
 
 **hints:**
-1. עד עכשיו הרקורסיות שלך הדפיסו. הפעם אסור להדפיס בתוך הפונקציה — מה היא צריכה
-   למסור החוצה במקום? ומה הערך הנכון להחזיר במקרה הבסיס?
-2. `total_steps(4)` הוא 4 ועוד התוצאה של `total_steps(3)`. במקרה הבסיס, כשאין
-   מדרגות בכלל, הסכום הוא 0.
-3. שתי שורות אחרי ה-`if`: `if n == 0:` מחזיר `return 0`, ואחריו
-   `return n + total_steps(n - 1)`. אם קיבלת `None` — יש מסלול בפונקציה שאין בו
-   `return`, וזה בדיוק מה שלמדת בשיעור 14. עקבי ביד לפי הטבלה מכירון: 55 הוא
-   הסכום של 1 עד 10.
+1. הדפיסי את `needed` לפני שאת בונה. כרגע `total_hp` מחזירה 0 תמיד, אז מה יוצא,
+   וכמה מגדלים זה בונה?
+2. `total_hp` היא בדיוק התבנית של סכום ברקורסיה: מקרה בסיס שמחזיר 0 כשנגמרה
+   הרשימה, ואחרת — האיבר הנוכחי **ועוד** התוצאה של הקריאה על השאר. הפריט הנוכחי
+   הוא `wave[i]["hp"]`.
+3. `total_hp`: `if i == len(wave): return 0`, ואחריו
+   `return wave[i]["hp"] + total_hp(wave, i + 1)`.
+   `build_line`: `if left == 0: return`, ואחריו
+   `place_tower("archer", spots[i][0], spots[i][1])` ו-
+   `build_line(spots, i + 1, left - 1)`.
+   הסכום הוא 800, ולכן `needed` הוא 5. אם יצאו לך שישה מגדלים — הוצאת 300 מתוך
+   תקציב של 250 והשלב נפסל. אם קיבלת `None` במקום מספר, יש מסלול ב-`total_hp`
+   בלי `return` — זה השיעור מאתמול, והוא חוזר.
 
-### e4 — Fix the Broken Thread · 30 XP, 8 🪙
+---
 
-**The debugging exercise, and the one that makes the boss survivable.** The
-starter crashes on purpose.
+### L3 — Chain Lightning · 30 XP, 8 🪙
 
-**brief:** הקוד שלפנייך אמור לספור לפידים בירידה: שני לפידים בכל קומה, `depth`
-קומות. במקום זה הוא קורס. תקני אותו כך שיחזיר את המספר הנכון עבור 7 קומות
-(התשובה היא 14) — ואל תשני את הקריאה בשורה האחרונה.
+**Why this mechanic:** recursion that **returns a choice**, not a number and not
+an action. `strongest(enemies, i)` asks the rest of the list who the toughest is,
+gets an answer back, and compares itself to it. The base case is the last index —
+a list of one has an obvious answer, and everything else is that answer plus one
+comparison.
+
+The default targeting loses here, and so does every guess in the bank.
+
+**brief:** שלושה מגדלי ברק. ברק קופץ: כל פגיעה מכה עד שלוש מפלצות בטווח בבת אחת.
+מולך שישה כלבי גיהינום וארבעה קיקלופים שמגיעים צפוף.
+
+בברירת המחדל המגדלים יורים במי שהכי קרוב לשער, מתחלפים כל הזמן, ולא מפילים את
+הקיקלופים בזמן.
+
+כתבי `strongest(enemies, i)` — פונקציה **רקורסיבית** שמחזירה את המפלצת עם הכי
+הרבה `hp` מהמקום `i` והלאה — ותני ל-`choose_target` להחזיר את מה שהיא מצאה.
+בלי לולאות.
+
+השאלה שפותחת את הפתרון: אם `i` הוא כבר האיבר האחרון ברשימה, מי החזק ביותר
+מהמקום הזה והלאה?
+
+```js
+map: { cols: 18, rows: 10, path: BEND },
+gold: 360, campHp: 3, seed: 63, allowed: ["lightning"],
+waves: [
+  { delay: 0,   enemies: [{ kind: "hellhound", count: 6, gap: 1.0 }] },
+  { delay: 2.6, enemies: [{ kind: "cyclops",   count: 4, gap: 0.9 }] },
+],
+```
 
 **starter:**
 ```python
-def torches(depth):
-    return 2 + torches(depth - 1)
+place_tower("lightning", 4, 4)
+place_tower("lightning", 8, 5)
+place_tower("lightning", 12, 5)
 
-print(torches(7))
+def strongest(enemies, i):
+    # base case first: what if i is the last index?
+    return enemies[i]
+
+def choose_target(enemies):
+    return strongest(enemies, 0)
 ```
 
 **solution:**
 ```python
-def torches(depth):
-    if depth == 0:
-        return 0
-    return 2 + torches(depth - 1)
+place_tower("lightning", 4, 4)
+place_tower("lightning", 8, 5)
+place_tower("lightning", 12, 5)
 
-print(torches(7))
+def strongest(enemies, i):
+    if i == len(enemies) - 1:
+        return enemies[i]
+    rest = strongest(enemies, i + 1)
+    if enemies[i]["hp"] > rest["hp"]:
+        return enemies[i]
+    return rest
+
+def choose_target(enemies):
+    return strongest(enemies, 0)
 ```
 
 **check:**
 ```js
-{ kind: "source",
-  mustInclude: ["def torches", "if"], mustExclude: ["while", "for"],
-  message: { he: "התיקון הוא מקרה בסיס בתוך הפונקציה, לא לולאה",
-             en: "The fix is a base case inside the function, not a loop" },
-  also: { kind: "output", mode: "normalized", expect: "14" } }
+{ kind: "battle",
+  also: { kind: "source",
+    mustInclude: ["def strongest"],
+    mustExclude: ["for ", "while "],
+    message: { he: "כאן צריך רקורסיה שמחזירה מפלצת — בלי for ובלי while",
+               en: "This needs a recursion that returns a monster — no for, no while" } } }
 ```
 
 **hints:**
-1. קראי את השגיאה. היא לא אומרת "טעית בחישוב" — היא אומרת שהפונקציה לא הפסיקה.
-   איזו שורה הייתה אמורה להפסיק אותה, ואיפה היא?
-2. חסר מקרה בסיס. השאלה היחידה היא מה להחזיר כשמגיעים לקומה 0 — כמה לפידים יש
-   בקומה שלא קיימת?
-3. הוסיפי בראש הפונקציה, לפני שורת ה-`return` הקיימת: `if depth == 0:` ומתחתיה
-   `return 0`. עכשיו 7 קומות מחזירות 14, כי כל קומה מוסיפה 2 והתחתונה מוסיפה 0.
-   אם קיבלת 16 — מקרה הבסיס שלך מחזיר 2 במקום 0.
+1. כרגע `strongest` מחזירה תמיד את האיבר במקום `i`, בלי להסתכל על השאר. מה היא
+   צריכה לשאול את שארית הרשימה לפני שהיא מחליטה?
+2. שאלי את הרקורסיה ושמרי את התשובה במשתנה: `rest = strongest(enemies, i + 1)`.
+   עכשיו יש לך שני מועמדים בלבד — זה שבמקום `i` והזוכה של כל השאר — וצריך
+   להחזיר את החזק מביניהם.
+3. גוף הפונקציה: `if i == len(enemies) - 1:` ומתחתיו `return enemies[i]` — זו
+   העצירה, כי מרשימה של אחד אין את מי לשאול. אחר כך
+   `rest = strongest(enemies, i + 1)`, ואז `if enemies[i]["hp"] > rest["hp"]:`
+   עם `return enemies[i]`, ובסוף `return rest`. שימי לב שהחישוב קורה **בדרך
+   חזרה** — הקריאה יורדת עד סוף הרשימה, ורק אז ההשוואות מתחילות לעלות בחזרה.
 
-## BOSS — 🌀 המבוך / The Labyrinth · 60 XP, 15 🪙
+---
 
-**boss object:** `{ name: { he: "המבוך", en: "The Labyrinth" }, icon: "🌀", hp: 6 }`
-Six test cases, one HP each. Each passing case is one wing of the maze mapped;
-the health bar is the map filling in. Partial progress is kept between attempts,
-per `spec/02-game-design.md` — losing is not possible, only unfinished.
+### L4 — The Thread That Broke · 30 XP, 8 🪙
 
-**Framing:** אנבת' מחזיקה את הקצה של החוט. את הולכת פנימה. כל אגף שתמפי הוא
-לפיד שנדלק על המפה שלה.
+**Why this mechanic:** the base case, taught by its absence, in the place where
+it costs the most. This is the same function as L3 with two lines removed — and
+the failure is not a wrong number, it is the battle stopping in the second tick.
+She has to read an error that arrives **mid-battle** and trace it to a missing
+stop, which is exactly what the boss will demand.
 
-**brief:** המבוך נתון כ-dict מקונן: לכל חדר יש `name`, `torches`, ו-`rooms` —
-רשימה של חדרים נוספים (שיכולה להיות ריקה). כתבי **שתי** פונקציות רקורסיביות:
+**brief:** הקוד רץ, המגדלים בנויים, והקרב נגמר אחרי שנייה וחצי בהפסד. הודעת
+השגיאה אומרת `Maximum call stack size exceeded`.
 
-- `count_torches(room)` — מחזירה את סך כל הלפידים בחדר הזה **ובכל מה שנמצא
-  בתוכו**, עד הסוף.
-- `deepest_level(room)` — מחזירה כמה קומות עמוק המבוך הזה. חדר בלי תת-חדרים הוא
-  קומה אחת. חדר שיש בו חדר שיש בו חדר — שלוש.
+ההודעה הזאת לא אומרת "טעית בחישוב". היא אומרת שהפונקציה לא הפסיקה לקרוא לעצמה.
+יש בדיוק שני דברים לבדוק — ואת יודעת מה הם.
 
-מתחת לפונקציות יש מתקן בדיקה של כירון. **אל תשני אותו.** כשאת מריצה בעצמך הוא
-יבקש ממך אות בין `A` ל-`F` (באות גדולה) ויבדוק את האגף הזה.
+תקני את `strongest` ואל תשני שום דבר אחר.
+
+```js
+map: { cols: 18, rows: 10, path: BEND },
+gold: 360, campHp: 3, seed: 64, allowed: ["lightning"],
+waves: [
+  { delay: 0, enemies: [{ kind: "hellhound", count: 8, gap: 0.7 }] },
+  { delay: 2, enemies: [{ kind: "cyclops",   count: 5, gap: 0.9 }] },
+],
+```
+
+**starter:** (runs, then kills the battle on the second tick)
+```python
+place_tower("lightning", 4, 4)
+place_tower("lightning", 8, 5)
+place_tower("lightning", 12, 5)
+
+def strongest(enemies, i):
+    rest = strongest(enemies, i + 1)
+    if enemies[i]["hp"] > rest["hp"]:
+        return enemies[i]
+    return rest
+
+def choose_target(enemies):
+    return strongest(enemies, 0)
+```
+
+**solution:**
+```python
+place_tower("lightning", 4, 4)
+place_tower("lightning", 8, 5)
+place_tower("lightning", 12, 5)
+
+def strongest(enemies, i):
+    if i == len(enemies) - 1:
+        return enemies[i]
+    rest = strongest(enemies, i + 1)
+    if enemies[i]["hp"] > rest["hp"]:
+        return enemies[i]
+    return rest
+
+def choose_target(enemies):
+    return strongest(enemies, 0)
+```
+
+**check:**
+```js
+{ kind: "battle",
+  also: { kind: "source", mustInclude: ["if i =="], mustExclude: ["for ", "while "],
+    message: { he: "התיקון הוא מקרה בסיס בתוך הפונקציה, לא לולאה",
+               en: "The fix is a base case inside the function, not a loop" } } }
+```
+
+**hints:**
+1. שתי השאלות של כל רקורסיה: מתי היא **לא** קוראת לעצמה, ומה נהיה קטן יותר בכל
+   קריאה. אחת מהשתיים נענית כאן. השנייה לא.
+2. `i` אכן גדל בכל קריאה — הבעיה היא שאף אחד לא בודק מתי הוא הגיע לסוף. איזה
+   ערך של `i` אומר "זה האיבר האחרון ברשימה"?
+3. הוסיפי שתי שורות **בראש** הפונקציה, לפני כל השאר: `if i == len(enemies) - 1:`
+   ומתחתיה `return enemies[i]`. עכשיו הרקורסיה יש לה קרקעית. שימי לב שהיא חייבת
+   לשבת ראשונה: אם תשימי אותה אחרי שורת ה-`rest`, הקריאה העצמית תקרה לפני
+   הבדיקה והכול יישאר בדיוק כמו שהיה.
+
+---
+
+## BOSS — 🌀 המבוך / The Labyrinth · 70 XP, 18 🪙
+
+**boss object:** `{ name: { he: "המבוך", en: "The Labyrinth" }, icon: "🌀", hp: 4 }`
+
+Four waves, one HP each. Each wave she survives is one corridor of the maze
+mapped, and the health bar is the map filling in. Partial progress is kept
+between attempts (`spec/02-game-design.md`), so a run that dies to the cyclopes
+still banks the three corridors before them. **Losing is not possible here, only
+unfinished.**
+
+**Why this mechanic:** both recursions at once, on the largest wave in Act IV —
+eighty monsters. The build is recursive because one function has to raise two
+different kinds of tower from two different lists, and `raise_towers(kind, spots,
+i)` does it by walking a list it was handed. The targeting is recursive because
+the answer to "who is the biggest threat in this list" is "the biggest of the
+first one and whatever the rest of the list says".
+
+Verified: **the engine's own targeting loses this battle**, and so does every
+degenerate strategy in the bank.
+
+**Framing:** אנבת' מחזיקה את הקצה של החוט בפתח. את הולכת פנימה. כל גל שתעצרי הוא
+מסדרון שנדלק על המפה שלה.
+
+**brief:** המסדרון מתקפל שלוש פעמים וחוזר על עצמו. ארבעה גלים, שמונים מפלצות,
+490 זהב.
+
+הבנייה: פונקציה **אחת** בשם `raise_towers(kind, spots, i)` שמקבלת סוג מגדל
+ורשימת משבצות, ומציבה את כולן ברקורסיה. קראי לה פעמיים — פעם ל-`LIGHTNING`
+ופעם ל-`ARCHERS`.
+
+הקרב: `strongest(enemies, i)` מ-L3, ו-`choose_target` שמחזירה את מה שהיא מצאה.
+
+בלי `for` ובלי `while`. בשום מקום.
+
+```js
+map: { cols: 15, rows: 9, path: LABYRINTH },
+gold: 490, campHp: 5, seed: 71, allowed: ["archer", "lightning"],
+waves: [
+  { delay: 0,  enemies: [{ kind: "satyr",     count: 22, gap: 0.3  }] },
+  { delay: 5,  enemies: [{ kind: "harpy",     count: 18, gap: 0.35 }] },
+  { delay: 12, enemies: [{ kind: "hellhound", count: 18, gap: 0.35 }] },
+  { delay: 24, enemies: [{ kind: "cyclops",   count: 12, gap: 0.6  },
+                         { kind: "harpy",     count: 10, gap: 0.35 }] },
+],
+```
 
 **starter:**
 ```python
-LABYRINTHS = {
-    "A": {"name": "Empty Cell", "torches": 2, "rooms": []},
+LIGHTNING = [[6, 2], [9, 3], [5, 5]]
+ARCHERS = [[3, 2], [13, 3]]
 
-    "B": {"name": "Two Doors", "torches": 1, "rooms": [
-            {"name": "Hall",    "torches": 3, "rooms": []},
-            {"name": "Kitchen", "torches": 4, "rooms": []},
-         ]},
+def raise_towers(kind, spots, i):
+    # base case first: what happens when i has passed the end of the list?
+    return
 
-    "C": {"name": "Stair 1", "torches": 1, "rooms": [
-            {"name": "Stair 2", "torches": 1, "rooms": [
-                {"name": "Stair 3", "torches": 1, "rooms": [
-                    {"name": "Stair 4", "torches": 1, "rooms": [
-                        {"name": "Stair 5", "torches": 1, "rooms": []},
-                    ]},
-                ]},
-            ]},
-         ]},
+# call it twice, once for each list
 
-    "D": {"name": "Wide Hall", "torches": 0, "rooms": [
-            {"name": "North", "torches": 1, "rooms": []},
-            {"name": "East",  "torches": 2, "rooms": []},
-            {"name": "South", "torches": 3, "rooms": []},
-            {"name": "West",  "torches": 4, "rooms": []},
-         ]},
+def strongest(enemies, i):
+    return enemies[i]
 
-    "E": {"name": "Entrance", "torches": 2, "rooms": [
-            {"name": "Dark Wing", "torches": 0, "rooms": [
-                {"name": "Torch Room", "torches": 5, "rooms": []},
-                {"name": "Black Hall", "torches": 0, "rooms": [
-                    {"name": "Bottom", "torches": 1, "rooms": []},
-                ]},
-            ]},
-            {"name": "Bright Wing", "torches": 3, "rooms": []},
-         ]},
-
-    "F": {"name": "Daedalus Gate", "torches": 3, "rooms": [
-            {"name": "Workshop", "torches": 4, "rooms": [
-                {"name": "Forge", "torches": 2, "rooms": []},
-                {"name": "Model Room", "torches": 1, "rooms": [
-                    {"name": "Wing Case", "torches": 6, "rooms": []},
-                ]},
-            ]},
-            {"name": "Arena", "torches": 0, "rooms": [
-                {"name": "Sand Pit", "torches": 2, "rooms": [
-                    {"name": "Under Pit", "torches": 1, "rooms": [
-                        {"name": "The Heart", "torches": 9, "rooms": []},
-                    ]},
-                ]},
-            ]},
-            {"name": "Storeroom", "torches": 5, "rooms": []},
-         ]},
-}
-
-
-def count_torches(room):
-    # start from this room's own torches,
-    # then add what every sub-room gives back
-    return 0
-
-
-def deepest_level(room):
-    # a room with no sub-rooms is one level deep.
-    # otherwise: one plus the depth of the deepest sub-room
-    return 1
-
-
-# ===== Chiron's test rig - do not change anything below this line =====
-maze = LABYRINTHS[input()]
-print(count_torches(maze))
-print(deepest_level(maze))
+def choose_target(enemies):
+    return strongest(enemies, 0)
 ```
 
 **solution:**
 ```python
-def count_torches(room):
-    total = room["torches"]
-    for sub in room["rooms"]:
-        total = total + count_torches(sub)
-    return total
+LIGHTNING = [[6, 2], [9, 3], [5, 5]]
+ARCHERS = [[3, 2], [13, 3]]
 
+def raise_towers(kind, spots, i):
+    if i == len(spots):
+        return
+    place_tower(kind, spots[i][0], spots[i][1])
+    raise_towers(kind, spots, i + 1)
 
-def deepest_level(room):
-    best = 1
-    for sub in room["rooms"]:
-        level = 1 + deepest_level(sub)
-        if level > best:
-            best = level
-    return best
+raise_towers("lightning", LIGHTNING, 0)
+raise_towers("archer", ARCHERS, 0)
+
+def strongest(enemies, i):
+    if i == len(enemies) - 1:
+        return enemies[i]
+    rest = strongest(enemies, i + 1)
+    if enemies[i]["hp"] > rest["hp"]:
+        return enemies[i]
+    return rest
+
+def choose_target(enemies):
+    return strongest(enemies, 0)
 ```
-*(The `LABYRINTHS` literal and the test rig are unchanged from the starter; the
-revealed solution shows only the two function bodies, which is all she is asked
-to write.)*
 
 **check:**
 ```js
-{ kind: "cases",
-  mode: "normalized",
-  cases: [
-    { stdin: ["A"], expect: "2\n1",  label: { he: "התא הריק",        en: "The Empty Cell" } },
-    { stdin: ["B"], expect: "8\n2",  label: { he: "שתי הדלתות",      en: "Two Doors" } },
-    { stdin: ["C"], expect: "5\n5",  label: { he: "גרם המדרגות",     en: "The Long Stair" } },
-    { stdin: ["D"], expect: "10\n2", label: { he: "האולם הרחב",      en: "The Wide Hall" } },
-    { stdin: ["E"], expect: "11\n4", label: { he: "האגף האפל",       en: "The Dark Wing" } },
-    { stdin: ["F"], expect: "33\n5", label: { he: "שער דדלוס",       en: "Daedalus' Gate" } },
-  ] }
+{ kind: "battle",
+  also: { kind: "source",
+    mustInclude: ["def raise_towers", "def strongest"],
+    mustExclude: ["for ", "while "],
+    message: { he: "המבוך נבנה ונלחם ברקורסיה בלבד — שתי הפונקציות קוראות לעצמן, ואין כאן אף לולאה",
+               en: "The Labyrinth is built and fought by recursion only — both functions call themselves, and there is no loop" } } }
 ```
 
-**The six cases, and what each one is for** — this is the design, not decoration:
+**The four waves, and what each one is for** — this is the design, not decoration:
 
-| # | Wing | Shape | Torches | Depth | Kills the bug where… |
-| --- | --- | --- | --- | --- | --- |
-| A | Empty Cell | חדר בודד, `rooms` ריקה | 2 | 1 | הפונקציה לא מטפלת ברשימה ריקה, או מחזירה 0 במקום הלפידים של החדר עצמו |
-| B | Two Doors | קומה אחת, שני ילדים | 8 | 2 | סוכמים רק את הילד הראשון, או שוכחים את חדר הכניסה |
-| C | The Long Stair | שרשרת בעומק 5, ילד יחיד בכל קומה | 5 | 5 | העומק נספר כ-2 כי לא צוללים רקורסיבית |
-| D | The Wide Hall | קומה אחת, ארבעה ילדים, כניסה עם 0 לפידים | 10 | 2 | העומק נספר לפי **מספר** החדרים ולא לפי הקינון |
-| E | The Dark Wing | לא סימטרי: ענף עמוק וענף רדוד, כמה חדרים עם 0 לפידים | 11 | 4 | לוקחים את העומק של הענף **האחרון** במקום המקסימלי |
-| F | Daedalus' Gate | הכול ביחד: שלושה ענפים, עומק 5, 33 לפידים | 33 | 5 | כל האמור לעיל, ביחד |
+| # | Wave | What it tests |
+| --- | --- | --- |
+| 1 | 22 satyrs, very tight | שהבנייה בכלל קרתה. רקורסיה בלי מקרה בסיס נופלת כאן לפני שהמפלצת הראשונה זזה |
+| 2 | 18 harpies | שיש קשתות. מגדלי ברק פוגעים במעופפות, אבל שלושה מהם לבד לא מספיקים |
+| 3 | 18 hellhounds, packed | שהברק אכן משורשר — שלוש מכות בפגיעה אחת, וזה מה שמחזיק את הגל |
+| 4 | 12 cyclopes + 10 harpies | שהאסטרטגיה בוחרת את המסוכן ולא את הקרוב. כאן ברירת המחדל נופלת |
 
-*Order matters: A and B are winnable almost immediately (the health bar moves in
-the first minute), C and D isolate the depth logic, and E is the one that
-actually requires `max`-style thinking. F is the victory lap.*
+*Order matters: the health bar moves in the first ten seconds, which is what
+keeps her in the fight. Wave 4 is where the lesson's idea is actually tested.*
 
 **hints:**
-1. שתי הפונקציות נראות דומות אבל שואלות שאלות שונות. עבור `count_torches`:
-   מה את יודעת בוודאות על חדר **בלי** תת-חדרים? ועבור `deepest_level`: אם לחדר
-   יש שלושה ילדים בעומקים שונים — איזה מהם קובע?
-2. שתיהן מתחילות מערך התחלתי ומשפרות אותו בלולאה על `room["rooms"]`.
-   ב-`count_torches` הערך ההתחלתי הוא `room["torches"]`, ובכל סיבוב **מוסיפים**
-   את מה שמחזירה קריאה רקורסיבית על תת-החדר. ב-`deepest_level` הערך ההתחלתי הוא
-   1, ובכל סיבוב **משווים** מול `1 + deepest_level(sub)` ושומרים את הגדול.
-   מקרה הבסיס בשתיהן מוסתר: על רשימה ריקה הלולאה לא רצה בכלל.
-3. `count_torches`: `total = room["torches"]`, ואז
-   `for sub in room["rooms"]:` ובתוכה `total = total + count_torches(sub)`,
-   ובסוף `return total`.
-   `deepest_level`: `best = 1`, ואז `for sub in room["rooms"]:` ובתוכה
-   `level = 1 + deepest_level(sub)` ו-`if level > best: best = level`,
-   ובסוף `return best`. שימי לב לשני דברים ש**כמעט כולם** נתקלים בהם: `return`
-   חייב לשבת **אחרי** הלולאה ולא בתוכה (אחרת חוזרים אחרי החדר הראשון), וב-
-   `deepest_level` מוסיפים 1 לתוצאה של הילד — לא לתוצאה הסופית.
+1. שתי הפונקציות רקורסיביות, ושתיהן נראות אחרת. אחת **עושה** משהו ולא מחזירה
+   כלום; השנייה **מחזירה** משהו ולא עושה כלום. באיזו מהן מקרה הבסיס הוא "נגמרה
+   הרשימה", ובאיזו הוא "זה האיבר האחרון"?
+2. `raise_towers` נעצרת כש-`i` שווה ל-`len(spots)` — כלומר עברנו את הסוף. אחרת
+   היא מציבה מגדל אחד וקוראת לעצמה עם `i + 1`. שימי לב ש-`kind` ו-`spots`
+   נוסעים איתה בלי להשתנות, ורק `i` גדל — בדיוק כמו `word` ו-`times` בהד.
+   `strongest` היא הפונקציה מ-L3 בלי שינוי.
+3. `raise_towers`: `if i == len(spots): return`, ואז
+   `place_tower(kind, spots[i][0], spots[i][1])` ו-
+   `raise_towers(kind, spots, i + 1)`. מתחת לפונקציה, בשוליים, שתי קריאות:
+   `raise_towers("lightning", LIGHTNING, 0)` ו-`raise_towers("archer", ARCHERS, 0)`
+   — שימי לב שהפונקציה אחת, והיא בונה שני סוגי מגדלים לגמרי, כי הסוג הוא פרמטר.
+   `strongest` היא העתקה מדויקת מ-L3. אם הקרב נגמר אחרי שנייה — אחת מהשתיים
+   איבדה את מקרה הבסיס שלה, וההודעה תגיד לך באיזו שורה.
 
-**Victory cutscene**: החוט האדום נמתח מאחורייך עד הפתח, ואנבת' מושכת. המפה
-מלאה. מעל הדלת האחרונה חרוט שם, בכתב יד שאת כבר מזהה: *Daedalus*.
+**Victory cutscene**: החוט האדום נמתח מאחורייך עד הפתח, ואנבת' מושכת. המפה מלאה.
+מעל הדלת האחרונה חרוט שם, בכתב יד שאת כבר מזהה: *Daedalus*.
 
-## Optional side quest — "Fibonacci and the Golden Ratio" · 25 XP, 6 🪙
+---
 
-Marked clearly as optional, never blocking (`spec/07-curriculum.md`).
+## SIDE BATTLE — "The Golden Wall" · 25 XP, 6 🪙 · **optional**
 
-**brief:** סדרת פיבונאצ'י: כל מספר הוא סכום שני קודמיו, ומתחילים ב-0 ו-1.
-כתבי `fib(n)` רקורסיבית והדפיסי את 12 האיברים הראשונים. אחר כך חלקי כל איבר
-בקודם לו והסתכלי לאן זה מתכנס.
+`optional: true`. Marked clearly, never blocking (`spec/07-curriculum.md`).
+
+**Why this mechanic:** the first recursion in the course with **two** base cases,
+and a genuinely pretty reason for it. Fibonacci jumps two steps back, so it needs
+a stop for 0 and a stop for 1 — remove either one and the engine says so. The
+wall it builds stands at columns 2, 3, 5, 8, 13, which is a spacing that gets
+looser as the monsters get further from the spawn, and which happens to be the
+proportion the Greeks carved into the Parthenon.
+
+**brief:** בני חומה שהמרווחים בה הם מספרי פיבונאצ'י: כל מספר הוא סכום שני
+קודמיו.
+
+- `fib(n)` — רקורסיבית, מחזירה את המספר ה-`n` בסדרה. `fib(0)` הוא 0,
+  `fib(1)` הוא 1.
+- `build_fib(n, left)` — רקורסיבית, מציבה קשת בעמודה `fib(n)` וממשיכה הלאה.
+
+`build_fib(3, 5)` יבנה בעמודות 2, 3, 5, 8 ו-13.
+
+```js
+optional: true,
+map: { cols: 18, rows: 8, path: [[0,4],[1,4], … ,[17,4]] },
+gold: 300, campHp: 3, seed: 67, allowed: ["archer"],
+waves: [
+  { delay: 0,  enemies: [{ kind: "satyr",     count: 9, gap: 0.45 }] },
+  { delay: 6,  enemies: [{ kind: "harpy",     count: 7, gap: 0.5  }] },
+  { delay: 13, enemies: [{ kind: "hellhound", count: 4, gap: 0.8  }] },
+],
+```
+
+**starter:**
+```python
+def fib(n):
+    # two base cases here, not one
+    return n
+
+def build_fib(n, left):
+    if left == 0:
+        return
+    place_tower("archer", fib(n), 3)
+    build_fib(n + 1, left - 1)
+
+build_fib(3, 5)
+```
 
 **solution:**
 ```python
@@ -611,31 +818,42 @@ def fib(n):
         return 1
     return fib(n - 1) + fib(n - 2)
 
-for i in range(12):
-    print(fib(i))
+def build_fib(n, left):
+    if left == 0:
+        return
+    place_tower("archer", fib(n), 3)
+    build_fib(n + 1, left - 1)
 
-print(round(fib(16) / fib(15), 5))
+build_fib(3, 5)
 ```
-Output: `0 1 1 2 3 5 8 13 21 34 55 89`, each on its own line, then `1.61803`.
 
 **check:**
 ```js
-{ kind: "source", mustInclude: ["def fib"],
-  message: { he: "כאן צריך פונקציה רקורסיבית בשם fib",
-             en: "This one needs a recursive function named fib" },
-  also: { kind: "output", mode: "contains", expect: "1.61803" } }
+{ kind: "battle",
+  also: { kind: "source", mustInclude: ["def fib"],
+    mustExclude: ["for ", "while "],
+    message: { he: "משימת הצד דורשת fib רקורסיבית שקופצת שני צעדים אחורה",
+               en: "This side battle needs a recursive fib that steps two back" } } }
 ```
 
-**Two base cases**, not one — the first time she meets that, and worth a sentence:
-`fib` צריכה עצירה גם ל-0 וגם ל-1, כי היא קופצת שני צעדים אחורה.
+**myth callout**: היחס בין שני מספרים עוקבים בסדרה מתקרב ל-1.618 — **יחס הזהב**.
+הוא חוזר בפרתנון, בקונכיות ובחמניות. היוונים לא ידעו לכתוב `def`, אבל את היחס
+הם מצאו.
 
-**myth callout**: היחס 1.618 נקרא **יחס הזהב**, והוא חוזר בפרתנון, בקונכיות
-ובחמניות. היוונים לא ידעו לכתוב `def`, אבל את היחס הם מצאו.
+**hints:**
+1. `fib` קופצת **שני** צעדים אחורה בכל קריאה, לא אחד. כמה נקודות עצירה צריך
+   בשביל זה, ולמה אחת לא מספיקה?
+2. שתי שורות `if` בראש הפונקציה: אחת ל-`n == 0` שמחזירה 0, ואחת ל-`n == 1`
+   שמחזירה 1. אחריהן שורה אחת שמחברת את שתי הקריאות.
+3. `if n == 0: return 0`, `if n == 1: return 1`, ואז
+   `return fib(n - 1) + fib(n - 2)`. עכשיו נסי למחוק **רק** את הבדיקה של 1
+   ולהריץ: תקבלי `RecursionError`, כי `fib(1)` יקרא ל-`fib(0)` ול-`fib(-1)`,
+   ומשם זה יורד לנצח. שתי קפיצות אחורה דורשות שתי קרקעיות.
 
-*Performance note*: `fib(16)` is ~3,000 calls in this naive form — fine in
-Skulpt. Do not let her go past ~22 without a warning; `fib(30)` is 2.7 million
-calls and will hit the 5-second `execLimit`. That is a **teachable moment, not a
-bug** — say so in a callout: "רקורסיה תמימה יכולה להיות יקרה מאוד."
+**Performance note**: `build_fib(3, 5)` computes `fib` up to 7 — a few dozen
+calls, instant. `fib(30)` in this naive form is 2.7 million calls and will hit
+the 5-second `execLimit`. That is a **teachable moment, not a bug**: "רקורסיה
+תמימה יכולה להיות יקרה מאוד." Do not let a level ask for more than about `fib(20)`.
 
 ## Reward & Recap
 
