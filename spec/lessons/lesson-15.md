@@ -173,8 +173,8 @@ exists).
     איתן. `random.seed` הוא הדבר הכי קרוב שיש למתכנתת לתפוס את החוט ולומר
     "מכאן, בבקשה, שוב" — וזה שימושי מאוד כשמחפשים באג במשחק.
 
-12. **code (runnable)** — הצצה למה שנבנה בסוף השיעור, סיבוב אחד של קרב. כל שורה
-    כאן היא משהו שהיא כבר יודעת, חוץ מ-`random`:
+12. **code (runnable)** — הצצה לאיך `random` נראה בתוך קוד אמיתי. כל שורה כאן
+    היא משהו שהיא כבר יודעת, חוץ משורה אחת:
     ```python
     import random
 
@@ -191,8 +191,37 @@ exists).
     print(f"Sphinx: {sphinx_hp} HP")
     ```
     Caption: פונקציה שקוראת לפונקציה, ערך ברירת מחדל, ערך שחוזר ונשמר במשתנה —
-    כל זה מאתמול. הדבר היחיד החדש הוא שורה אחת של `random`. במשימה נוסיף לולאה
-    ונקבל משחק.
+    כל זה מאתמול. הדבר היחיד החדש הוא שורה אחת של `random`.
+
+13. **prose + code (runnable: false)** — **ועכשיו על שדה הקרב.** שתי השורות
+    שיעשו את כל ההבדל היום הן אלה:
+    ```python
+    import math
+
+    def choose_target(enemies):
+        best = enemies[0]
+        for e in enemies:
+            gap = math.sqrt((e["x"] - best["x"]) ** 2 + (e["y"] - best["y"]) ** 2)
+            print(gap)
+        return best
+    ```
+    Caption: לכל מפלצת ברשימה יש `x` ו-`y` — המיקום שלה על הלוח. `math.sqrt`
+    על ההפרשים בריבוע הוא המרחק האמיתי ביניהן, ומרחק אמיתי הוא מה שמאפשר
+    לשאול "מי עומדת צפוף עם מי".
+
+14. **callout · warn** — כותרת: *"פגז מתפוצץ, חץ לא"*.
+    לתותח יש רדיוס פיצוץ של 1.1 משבצות: כל מי שנמצא בתוכו סופג את המכה
+    המלאה. לכוון לראש השיירה זה מגדל אחד ומפלצת אחת. לכוון לאמצע זה אותו
+    מגדל ושלוש מפלצות. המשחק לבד תמיד מכוון לראש — ובדיוק בגלל זה יש היום
+    שלב שאי אפשר לעבור בלי למדוד.
+    *(This callout is the bridge from `math.sqrt` as arithmetic to `math.sqrt` as
+    a weapon. Without it, level L2 reads as an arbitrary puzzle.)*
+
+15. **callout · warn** — כותרת: *"אף בדיקה בקורס לא משווה מספר אקראי"*.
+    קרב שהתוצאה שלו תלויה בגלגול הוא קרב שיכול להכשיל אותך בלי סיבה שאת רואה.
+    לכן יש בשיעור הזה בדיוק **קרב צד אחד** עם `random`, הוא מסומן כרשות, וכל
+    גלגול אפשרי בו מנצח. הקוביות בוחרות **איזו** תוכנית טובה תיבנה, לא אם
+    תנצחי.
 
 ## Try It (ungraded)
 
@@ -781,8 +810,8 @@ def choose_target(enemies):
   developer's machine. Rules for this course:
   1. **Never** hard-code a seeded random value in a `check.expect`.
   2. Teach block 10 shows the code without printing expected values.
-  3. e2 checks reproducibility (`first == second`), which is true in every
-     implementation.
+  3. The side battle asserts only that the battle was won and that `random` was
+     used — and every possible draw wins, so no outcome depends on the generator.
   If a future lesson genuinely needs fixed random output, generate the expected
   string **by running it in Skulpt** via `tools/verify-python.mjs` and record in
   a comment that it is Skulpt-specific.
@@ -793,9 +822,10 @@ def choose_target(enemies):
   **`random.shuffle` is deliberately not used anywhere in this lesson** — it is
   not on the verified list; if verification shows it works, it may be added to
   the Try It block only, never to a check.
-- **`regex` mode and trailing newlines**: e1 and e3 anchor with `^…\\s*$`.
-  `checker.js` should run regex checks against the trimmed output; the `\\s*`
-  is belt-and-braces so a stray newline never fails her.
+- **No level in this lesson checks printed output.** Everything graded is the
+  simulated battle plus a `source` rule, which removes the whole class of
+  "trailing newline failed me" problems that the earlier draft had to defend
+  against.
 - **The side battle is the only place `random` touches a graded outcome, and it
   cannot change one.** All three squares in `EXTRA` were forced by hand and all
   three win; nine seeds were run and all nine win. If that level is ever retuned,

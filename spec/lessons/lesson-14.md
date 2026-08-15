@@ -58,7 +58,7 @@ battle of the day asks for exactly one line.
 looks like it works, and then returns `None` and breaks everything downstream.
 This is the single most common wall a beginner hits with functions. It gets a
 dedicated `compare` block, a dedicated `error` block, and a dedicated debugging
-exercise (e2). Do not let it be a footnote.
+battle of its own (L2). Do not let it be a footnote.
 
 Scope is taught **through** `return`, not as a separate topic: a variable born
 inside a function dies when the function ends — and `return` is how you get
@@ -939,14 +939,16 @@ deserves a visible, permanent acknowledgement, not a toast that fades.
   requires all of it. `also` now also accepts an **array** of rules, so a level
   can demand a construct and a printed line at once — not needed here, but it is
   how lesson 15's reports are checked.
-- **`sum()` is deliberately unused** in e4 even though she learned it in L10.
-  The accumulator pattern makes the returned value visibly flow into a variable,
-  which is the point being taught. If she solves it with `sum()` plus a list she
-  built from returns, that also passes the check — accept it and say so in the
-  success message.
-- Quest `source` check matches `def room_name` etc. **with a single space**;
-  `checker.js` should normalise runs of whitespace in the source before matching
-  so `def  room_name` does not fail her.
+- **`sorted()` is deliberately unused** in every strategy function. Skulpt raises
+  `'<' not supported between instances of 'dict' and 'dict'` on a list of dicts,
+  and `key=` would need a `lambda`, which the course excludes. Every "pick the
+  best one" here is the keep-the-best loop. Do not let a future draft slip a
+  `sorted` into a `choose_target`.
+- **`source` rules here match identifiers, never spacing-sensitive expressions.**
+  `mustInclude: ["def threat"]` is safe; `mustInclude: ["threat(e) > threat(best)"]`
+  would fail her for writing the comparison the other way round, and nothing in
+  this lesson does that. `checker.js` should still normalise runs of whitespace
+  before matching so `def  threat` does not fail her.
 - All output checks are `normalized`. No `input()` in this lesson.
 - **Every starter in this lesson runs without a syntax error before she writes
   anything.** Stub bodies carry a placeholder statement (`print(n)`, `return 0`)

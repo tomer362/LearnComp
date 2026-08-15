@@ -237,6 +237,29 @@ first), Grover (offers to hold the scrolls, drops them).
     זו בדיוק הסיבה שהמילה `def` קיימת. *(Keep it two or three sentences; the myth
     aside is seasoning, not a history lesson.)*
 
+14. **prose + code (runnable: false)** — **ועכשיו על שדה הקרב.** כל מה שראית
+    עד כאן היה עם `print`, כי ככה קל לראות מה קורה. אבל שרטוט לא חייב להדפיס
+    משהו. הוא יכול לבנות משהו:
+    ```python
+    def build_wall(row):
+        place_tower("archer", 2, row)
+        place_tower("archer", 5, row)
+        place_tower("archer", 8, row)
+
+    build_wall(1)
+    build_wall(4)
+    build_wall(7)
+    ```
+    Caption: תשעה מגדלים בחמש שורות קוד. שורת ה-`def` לא בנתה כלום — היא רק
+    הסבירה מה זו חומה. שלוש הקריאות הן שבנו.
+
+15. **callout · warn** — כותרת: *"שריון אוכל נזק"*.
+    לפני שבונים חומה מול משהו כבד: נזק לכל מכה הוא **הנזק פחות השריון**, ולא
+    פחות מ-1. קשת מכה 10, ולקיקלופ עם שריון 5 היא מורידה 5 — חצי. תותח מכה 28
+    ומוריד לו 23. זה מה שהופך את השאלה "איזה מגדל" לשאלה אמיתית ולא לטעם אישי.
+    *(This is the single fact that makes level L3 solvable rather than arbitrary.
+    It belongs in the teaching, not only in the brief.)*
+
 ## Try It (ungraded)
 
 Free-play editor. Nothing checked, nothing scored.
@@ -702,10 +725,11 @@ for row in ROWS:
   **whatever Skulpt actually prints**, because that is what she will see. If the
   wordings diverge badly, keep the Skulpt text in the `error` block and add one
   Hebrew line: "בפייתון האמיתי הניסוח קצת שונה — הכוונה זהה."
-- **Combined checks** use the `source` + `also: { output }` pattern from
-  lesson-01 e1/e4 (`.claude/rules/lesson-authoring.md`). Both must pass. The
-  `source` check is the outer one so that "this needs a function" is the message
-  she reads first; the loose output check rides along in `also`.
+- **Every graded level is `check: { kind: "battle", also: { kind: "source", … } }`.**
+  The battle half is the game; the `source` half is the lesson. Both must pass,
+  and the `also` rule always carries its own `message`, because a level that fails
+  without saying why is worse than no level. `also` also accepts an **array** of
+  rules if a level ever needs a construct and a printed line at once.
 - **`source` checks here inspect the stripped skeleton** (comments and string
   literals removed), so `mustInclude: ["def"]` cannot be satisfied by a comment
   reading `# def`. None of this lesson's requirements are comments or literals,

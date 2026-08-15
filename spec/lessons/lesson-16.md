@@ -14,9 +14,11 @@
 | **new vocabulary** | recursion / רקורסיה, base case / מקרה בסיס, stack / מחסנית (mentioned once, by metaphor) |
 | **requires** | L13 `def` · L14 `return` + scope · L12 מבנים מקוננים · L9–11 lists ו-dicts · L7 `while` · L6 `if` |
 | **item** | 🧵 חוט אריאדנה / Ariadne's String |
-| **boss** | 🌀 **המבוך / The Labyrinth** — HP 6, אחד לכל אגף שנפתר |
-| **XP** | 20 + 25 + 25 + 30 (training) + 60 (boss) + 30 (bonus) = **190** |
-| **drachmas** | 5 + 6 + 6 + 8 + 15 = **40** 🪙 |
+| **control model** | build script + strategy function (from L14) |
+| **towers unlocked** | ⚡ **lightning** — chains to 3 enemies at once |
+| **boss** | 🌀 **המבוך / The Labyrinth** — HP 4, אחד לכל גל שנעצר |
+| **XP** | 20 + 30 + 30 + 30 (training battles) + 70 (boss) + 25 (optional side battle) + 30 (bonus) = **235** |
+| **drachmas** | 5 + 8 + 8 + 8 + 18 + 6 = **53** 🪙 |
 
 ## Teaching goal
 
@@ -40,6 +42,13 @@ Honesty requirement: recursion is **not** a better loop. For a flat list, `for`
 wins and this lesson says so out loud in a `compare` block. Recursion earns its
 place when the data has things inside things — which is exactly the Labyrinth,
 and exactly the boss.
+
+That honesty has a cost the levels have to pay for: **no battle in this lesson is
+mechanically impossible to win with a `for` loop.** The engine cannot tell how she
+computed a target. So every graded level here carries
+`mustExclude: ["for ", "while "]` in its `also` rule, with a message that says why.
+The rule is a training constraint, stated as one — never disguised as a
+mechanical limit she is supposed to discover.
 
 ## Story beat
 
@@ -225,6 +234,26 @@ the base case, and the lesson may say that outright, as a joke that is also true
     Caption for the pair: על רשימה רגילה, `for` מנצח. רקורסיה משתלמת כשיש דברים
     **בתוך** דברים ואת לא יודעת כמה עמוק — בדיוק כמו המבוך. כלי, לא קסם.
 
+13. **prose** — **אז למה הקרבות היום אוסרים לולאות?** שאלה הוגנת, ומגיעה לה
+    תשובה ישרה.
+
+    הרשימות שהמשחק מוסר לך בקרב — הגל, המפלצות בטווח — הן שטוחות. לולאה
+    הייתה עובדת בכולן. הערב הן אסורות **בכוונה**, כמו מאמן שקושר לך יד אחת
+    מאחורי הגב: את התבנית הזאת צריך לכתוב ארבע או חמש פעמים לפני שרואים
+    אותה, ואין דרך לכתוב אותה בלי לכתוב אותה.
+
+    ומעבר לזה — המבוך עצמו הוא הדבר שיש בתוכו את עצמו. את הולכת בו הלילה,
+    ומעניין לכתוב אותו באותה צורה שבה הוא בנוי.
+
+    כל שלב היום יגיד לך במפורש שהאיסור הוא כלל אימון. לא נעמיד פנים שהמשחק
+    לא יודע לספור בלולאה.
+
+14. **callout · warn** — כותרת: *"רקורסיה שברחה — באמצע קרב"*.
+    אם `choose_target` קוראת לעצמה בלי עצירה, הקרב **נגמר באותו רגע** ונרשם
+    כהפסד: `Maximum call stack size exceeded`. לא מגדל אחד מפספס תור — הכול.
+    זו אותה שגיאה בדיוק שראית בתוכנית רגילה, רק שהפעם היא עולה לך במחנה.
+    ראי אותה פעם אחת בכוונה במגרש האימונים, ואז לא תיבהלי ממנה בבוס.
+
 ## Try It (ungraded)
 
 ```python
@@ -239,8 +268,9 @@ echo("Ariadne", 4)
 ```
 
 Intro: *"שני את המספר. שני את המילה. ואז — בזהירות, זה בסדר גמור — מחקי את שתי
-השורות של מקרה הבסיס והריצי, כדי לראות איך נראית רקורסיה בלי עצירה. המנוע יעצור
-את זה תוך חמש שניות ולא ישבור כלום. זה המגרש שלך."*
+השורות של מקרה הבסיס והריצי, כדי לראות איך נראית רקורסיה בלי עצירה. תקבלי
+`RecursionError: Maximum call stack size exceeded` עם מספר שורה, מיד, בלי
+להמתין ובלי שיישבר כלום. זה המגרש שלך."*
 
 *(Deliberately inviting her to break it here, in the sandbox, means the
 `RecursionError` in the boss is an old acquaintance rather than a catastrophe.)*
@@ -270,7 +300,7 @@ the next one, and then the next one, and then stops. She already knows the shape
    a line number. Not a hang, not a frozen tab.
 2. **A runaway recursion inside `choose_target` ends the battle as a loss**, and
    the engine reports the same message with the explanation attached. The camp
-   survives the tick it happened on and then the fight simply stops.
+   survives the tick it happened on and then the fight stops there.
 
 L1 and L4 are built on exactly those two facts. She should meet each of them on
 purpose, in a level designed for it, rather than at midnight in the boss.
@@ -861,11 +891,12 @@ the 5-second `execLimit`. That is a **teachable moment, not a bug**: "רקורס
 כלום. עוזרת לחזור — וזה החלק שאנשים שוכחים." (Bead #16. Act IV complete.)
 
 **Achievements possible here**:
-- *Base Case First* — עברה את e1 בלי רמזים
-- *Stack Overflow* — ראתה רקורסיה אינסופית קורסת (בשיעור או ב-Try It). הישג על
-  שבירה מכוונת, במכוון
-- *Cartographer* — הפילה את כל שישה אגפי המבוך
-- *Golden* — סיימה את משימת הצד של פיבונאצ'י
+- *Base Case First* — ניצחה את L1 בלי רמזים
+- *Stack Overflow* — ראתה רקורסיה אינסופית קורסת (בשיעור, ב-Try It או ב-L4).
+  הישג על שבירה מכוונת, במכוון
+- *Storm Caller* — בנתה את מגדל הברק הראשון שלה
+- *Cartographer* — עצרה את כל ארבעת הגלים של המבוך
+- *Golden* — ניצחה את קרב הצד של פיבונאצ'י
 - *Completionist (Act IV)* — כל התרגילים בשיעורים 13–16
 
 **Recap bullets**:
@@ -875,6 +906,10 @@ the 5-second `execLimit`. That is a **teachable moment, not a bug**: "רקורס
 - בלי מקרה בסיס מקבלים `RecursionError` — זו הודעה, לא אסון
 - קודם יורדים עד הסוף, ורק בדרך חזרה מצטברות התשובות
 - על רשימה שטוחה עדיפה לולאה; רקורסיה היא לדברים שיש בתוכם דברים
+- רקורסיה יכולה **להחזיר ערך** (`total_hp`), **לבחור** (`strongest`) או פשוט
+  **לעשות** (`raise_towers`) — אותה צורה, שלוש עבודות
+- רקורסיה שברחה בתוך `choose_target` מסיימת את הקרב בהפסד באותו רגע
+- ברק משורשר פוגע בשלוש מפלצות בבת אחת, ולכן הוא שווה קהל
 
 **Next teaser (Act V opens)**: *"יצאת מהמבוך. על השער כתובה נבואה בת שבע שורות,
 ואף אחד לא מצליח לקרוא אותה — כי היא כתובה כמחרוזת אחת ארוכה."*
@@ -883,68 +918,76 @@ the 5-second `execLimit`. That is a **teachable moment, not a bug**: "רקורס
 
 | She does | She sees | Hint / explainer must cover |
 | --- | --- | --- |
-| שוכחת מקרה בסיס | `RecursionError` / הודעת המנוע על מגבלת זמן | e4 בדיוק בשביל זה |
+| שוכחת מקרה בסיס בבנייה | `RecursionError: Maximum call stack size exceeded` לפני שהקרב מתחיל | L1 בדיוק בשביל זה |
+| שוכחת מקרה בסיס באסטרטגיה | הקרב נעצר אחרי שנייה ונחשב הפסד, עם אותה הודעה | L4 בדיוק בשביל זה |
 | קוראת לעצמה עם אותו ארגומנט | אותה שגיאה | הבעיה חייבת להיות קטנה יותר, לא רק שונה |
-| שמה `return` בתוך הלולאה | סופרת רק את הילד הראשון | מקרה B ומקרה D בבוס תופסים את זה |
-| שוכחת `return` בענף אחד | `None`, או `TypeError` על חיבור עם `NoneType` | הקישור לשיעור 14 מפורש |
-| `deepest_level` מחזירה מספר ילדים | מקרה C נכשל (2 במקום 5) | עומק הוא קינון, לא כמות |
-| לוקחת את העומק של הילד האחרון | מקרה E נכשל | צריך את המקסימלי, לא את האחרון |
-| מוסיפה 1 לתוצאה הסופית ולא לילד | מקרה C או E נכשל | `1 + deepest_level(sub)` בתוך הלולאה |
-| מוסיפה `print` בתוך הפונקציה הרקורסיבית | פלט מלוכלך, כל המקרים נכשלים | להסביר שהמתקן משווה פלט מדויק; לנפות באגים אפשר עם `print` ואז למחוק |
-| משנה את מתקן הבדיקה | מקרים נכשלים בלי סיבה נראית לעין | הערה ברורה בקוד + כפתור "החזרי את המתקן" בעורך |
+| שמה את מקרה הבסיס **אחרי** הקריאה העצמית | אותה שגיאה, והתיקון נראה כאילו הוא כבר שם | העצירה חייבת לרוץ לפני הקפיצה |
+| `if i == len(enemies)` במקום `len(enemies) - 1` | `IndexError` באמצע קרב | האינדקס האחרון הוא האורך פחות אחת |
+| שוכחת `return` בענף אחד | `None`, ואז השוואה שזורקת `TypeError` | הקישור לשיעור 14 מפורש |
+| מנסה לפתור עם `for` | הקרב נוצח, והבדיקה נכשלת עם הודעה מפורשת | להגיד ישר: זה אילוץ אימון, לא מגבלה של המשחק |
+| קוראת למשתנה `format` או `before` | אין בעיה — ה-`mustExclude` הוא `"for "` עם רווח | ראי Implementation notes |
+| מוסיפה `print` בתוך הפונקציה הרקורסיבית | יומן קרב ענק, אלפי שורות, הדף נתקע | לנפות באגים אפשר עם `print`, ואז למחוק — האסטרטגיה נקראת עשר פעמים בשנייה לכל מגדל |
 
 ## Implementation notes
 
-- **⚠️ Infinite recursion must be verified in Skulpt before this lesson ships.**
-  This is the single highest-risk item in Act IV. CPython raises
-  `RecursionError: maximum recursion depth exceeded`; Skulpt runs on the JS stack
-  and may instead:
-  (a) throw a JS `RangeError: Maximum call stack size exceeded` that the engine
-  does not recognise as a Python error, (b) hit `execLimit` and surface as
-  `TimeLimitError`, or (c) freeze the tab if the stack blows before the exec
-  limit is polled. Required work:
-  1. Run `def f(n): print(n); f(n-1)` through `tools/verify-python.mjs` and record
-     the actual behaviour and message.
-  2. `engine.js` must normalise **whatever it is** into a friendly in-theme error
-     ("החוט נגמר — נראה שהפונקציה קוראת לעצמה בלי עצירה") while still showing the
-     real message underneath, per the "never suppress the real error" rule.
-  3. Paste the real message into teach block 6 and into e4's expected failure
-     state. Do not ship the CPython text if Skulpt prints something else.
-  4. If the tab can actually freeze (case c), add a recursion-depth guard in the
-     engine before this lesson goes live. She must never lose work to a hang.
+- **✅ Infinite recursion is settled — measured, not assumed.** This was the
+  highest-risk item in Act IV and both halves now have recorded behaviour:
+  1. **In the build script**, a recursion with no base case raises a real, caught
+     Python error: `RecursionError: Maximum call stack size exceeded (line N)`.
+     The battle never starts, the page does not freeze, and the line number is
+     usable. This is what L1's "delete the stop on purpose" invitation relies on.
+  2. **Inside `choose_target`**, the same runaway is caught by `sim.js` as a
+     strategy error: the battle ends immediately as a loss with
+     `Maximum call stack size exceeded`, and `play.js` surfaces the real message
+     with an explanation. This is L4's entire subject.
+
+  Both messages say `Maximum call stack size exceeded` rather than CPython's
+  `maximum recursion depth exceeded`. Teach block 6 must print **the Skulpt
+  wording**, with one Hebrew line noting that real Python phrases it a little
+  differently and means the same thing. Do not paste the CPython text.
+- **Every level was simulated headless** against `assets/js/battle/sim.js`, and
+  the two strategy levels were run against the same eleven-strategy degenerate
+  bank as lessons 14 and 15.
+
+  | Level | Solution | Empty | Default targeting | Notes |
+  | --- | --- | --- | --- | --- |
+  | L1 | wins 3/3, 5 archers, 28s | loses | n/a (build only) | 3 towers → 3 leak; no base case → `RecursionError` |
+  | L2 | wins 3/3, 5 archers, 26s | loses | n/a (build only) | 4 towers → 1 leaks; 6 towers → over the 250 cap |
+  | L3 | wins 3/3, 3 lightning, 30s | loses | **loses** | also won by "highest HP" and "most armour" — the same cyclops, reached by reasoning |
+  | L4 | wins 3/3, 3 lightning, 31s | loses | **loses** | the broken starter ends the battle as a strategy error, as designed |
+  | boss | wins 5/5, 5 towers, 80 monsters, 67s | loses | **loses** | only "highest HP" also wins, and that is what the recursion computes |
+  | side | wins 3/3, 5 archers, 24s | loses | n/a (build only) | 3 towers → 2 leak; `fib` missing the `n == 1` stop → `RecursionError` |
 - **Every starter in this lesson runs without a syntax error before she writes
   anything.** Stub bodies carry a placeholder statement (`print(n)`, `return 0`)
   rather than a bare comment, because a comment-only body raises
   `IndentationError` the moment she presses Run — an error that teaches nothing
   and reads as "you broke it before you started".
-- **Recursion depth used by this lesson is tiny** — maximum 5 levels in the boss,
-  10 in e3, ~16 in the optional Fibonacci. No legitimate solution comes near any
-  stack limit.
-- **`mustExclude: ["while", "for"]` must match whole words**, not substrings.
-  A variable named `forest`, `before` or `format` contains `for`, and failing her
-  for that would be indefensible. `checker.js` should tokenise the (already
-  comment- and string-stripped) skeleton and compare tokens, or use word
-  boundaries. Add a regression test for `torches_before = 0`.
-- **The boss uses `kind: "cases"` with queued stdin.** Confirm that `engine.js`
-  resolves `inputfun` from the queue without rendering the in-page prompt during
-  grading; the prompt should appear only when *she* presses Run. The rig calls
-  bare `input()` with no prompt string, so nothing extra can leak into stdout —
-  verify that Skulpt writes nothing to output for a bare `input()`, and if it
-  does, switch the six cases to `mode: "contains"` and re-record the expectations.
-- **The rig is fixed code below a marker line.** `editor.js` should render the
-  marker comment distinctly and offer a "restore the rig" action; a learner who
-  deletes `print(count_torches(maze))` will fail all six cases with no idea why.
-  This is the first exercise in the course with untouchable code, so the
-  affordance has to be obvious.
-- **Health bar wiring**: `checker.js` returns per-case results; `game.js` maps
-  passing cases → boss HP drained, and persists partial progress so a learner who
-  gets A–D today keeps 4 HP of damage tomorrow (`spec/02-game-design.md`).
-  The case `label` fields exist for the "האגף האפל נפתח" toast on each hit.
-- **Verify the nested-dict literal parses in Skulpt** exactly as written — 60
-  lines of nested `{}`/`[]` with trailing commas is the largest literal in the
-  course. Trailing commas inside dict and list literals are valid Python 3 and
-  are on the verified list, but this specific block should still be run through
-  `tools/verify-python.mjs`.
+- **Recursion depth in the build phase is tiny** — five frames in L1, six in L2,
+  three in the boss's `raise_towers`, and `fib(7)` in the side battle. The
+  strategy-phase depth is discussed above and is the only one worth watching.
+- **`mustExclude` is written as `["for ", "while "]`, with the trailing space.**
+  `checkSource` does a plain substring match on the comment- and string-stripped
+  skeleton, so a bare `"for"` would fail her for naming a variable `format`,
+  `before` or `forest` — indefensible. With the space, `for x in …` and
+  `while n > 0:` are caught and `format(` and `before ` are not. Better still
+  would be `checker.js` tokenising the skeleton and comparing tokens; until it
+  does, keep the space and add a regression test for `towers_before = 0`.
+- **Health bar wiring**: the boss has 4 HP and the sim already records which wave
+  each kill and each leak belonged to. `game.js` should drain one HP per wave
+  survived and persist it, so a run that dies to the cyclopes still banks three
+  corridors (`spec/02-game-design.md`). The wave table above supplies the toast
+  text for each hit.
+- **Recursion depth used by this lesson is small but not trivial.** `strongest`
+  recurses once per enemy in range, and the boss's tightest moment puts roughly a
+  dozen monsters inside a lightning tower's 3.0 radius at once — about twelve
+  frames of Python stack, called ten times a second. That is comfortable. A
+  future level that puts fifty enemies in one tower's range would not be; measure
+  before shipping one.
+- **`print` inside a strategy function is a performance trap, not an error.**
+  `choose_target` runs once per tower per shot — several hundred times in a short
+  battle and several thousand in the boss. A debug `print` there produces a battle
+  log large enough to hurt the page. Say so in the hint, and have the engine cap
+  the log rather than let it grow without bound.
 - **No `type()` checks anywhere.** An earlier draft distinguished nested lists
   with `type(thing) == list`; the dict-with-`rooms`-key shape removes the need
   entirely, which keeps the boss inside verified territory and inside what she

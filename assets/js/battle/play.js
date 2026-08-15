@@ -82,6 +82,18 @@
    * with an idle tower is not a problem worth mentioning. */
   function diagnose(sim, level) {
     if (!sim) return null;
+    var check = level.check || {};
+
+    /* Budget and tower-cap failures are DEFINITIVE — they must be reported
+     * before any heuristic like "a tower never fired", which would otherwise
+     * shadow them and send her looking in the wrong place. */
+    if (check.maxTowers !== undefined && sim.towers.length > check.maxTowers) return {
+      he: "בנית " + sim.towers.length + " מגדלים, והשלב מרשה " + check.maxTowers + ". צריך לנצח עם פחות.",
+      en: "You built " + sim.towers.length + " towers and this level allows " + check.maxTowers + ". You have to win with fewer." };
+
+    if (check.maxGoldSpent !== undefined && sim.goldSpent > check.maxGoldSpent) return {
+      he: "הוצאת " + sim.goldSpent + " זהב, והתקציב של השלב הוא " + check.maxGoldSpent + ".",
+      en: "You spent " + sim.goldSpent + " gold and this level's budget is " + check.maxGoldSpent + "." };
 
     if (sim.buildErrors && sim.buildErrors.length) {
       var b = sim.buildErrors[0];

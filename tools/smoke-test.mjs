@@ -287,6 +287,74 @@ const battleExtras = await page.evaluate(async () => {
 });
 for (const [name, ok] of battleExtras) check(ok, name);
 
+/* A budget or tower-cap failure is definitive and must not be shadowed by a
+ * heuristic like "a tower never fired", which would send her looking in the
+ * wrong place entirely. */
+section("Level constraints are explained");
+const constraints = await page.evaluate(async () => {
+  const base = {
+    map: { cols: 12, rows: 7, path: Array.from({ length: 12 }, (_, x) => [x, 4]) },
+    gold: 600, campHp: 3, seed: 1, allowed: ["archer"],
+    waves: [{ delay: 0, enemies: [{ kind: "satyr", count: 3, gap: 1 }] }],
+  };
+  const txt = (v) => (v.reason ? (v.reason.en || "") + (v.reason.he || "") : "");
+  const cap = await LC.Checker.check({ ...base, check: { kind: "battle", maxTowers: 2 } },
+    'place_tower("archer",2,3)\nplace_tower("archer",4,3)\nplace_tower("archer",6,3)\nplace_tower("archer",8,3)');
+  const gold = await LC.Checker.check({ ...base, check: { kind: "battle", maxGoldSpent: 100 } },
+    'place_tower("archer",2,3)\nplace_tower("archer",4,3)\nplace_tower("archer",6,3)');
+  return [
+    ["a tower cap is enforced", cap.pass === false],
+    ["and named in the message", /allows 2|מרשה 2/.test(txt(cap))],
+    ["a gold budget is enforced", gold.pass === false],
+    ["and named in the message", /budget is 100|תקציב.*100/.test(txt(gold))],
+  ];
+});
+for (const [name, ok] of constraints) check(ok, name);
+
+/* Battle bosses have no test cases, so the old segment-counting bar always
+ * drew one segment. It tracks the monster's own HP now. */
+section("Boss health bar");
+const bossBar = await page.evaluate(async () => {
+  const path = Array.from({ length: 16 }, (_, x) => [x, 4]);
+  LC.registerLesson({
+    id: "99", act: 1, slug: "boss-test", minutes: 1,
+    title: { he: "בוס", en: "Boss" },
+    item: { id: "x", icon: "x", name: { he: "x", en: "x" }, desc: { he: "x", en: "x" } },
+    prophecy: { lines: [{ he: "x", en: "x" }] }, teach: [], training: [],
+    quest: {
+      id: "qb", xp: 10, drachmas: 1, title: { he: "בוס", en: "Boss" }, brief: { he: "x", en: "x" },
+      boss: { icon: "🐂", name: { he: "המינוטאור", en: "The Minotaur" }, hp: 420 },
+      map: { cols: 16, rows: 7, path }, gold: 1200, campHp: 5, seed: 1, allowed: ["cannon"],
+      waves: [{ delay: 0, enemies: [{ kind: "minotaur", count: 1, gap: 1 }] }],
+      starter: "", solution: "", hints: [{ he: "a", en: "a" }, { he: "b", en: "b" }, { he: "c", en: "c" }],
+      check: { kind: "battle" },
+    },
+    recap: { bullets: [{ he: "x", en: "x" }], next: { he: "x", en: "x" } },
+  });
+  LC.Lesson.mount("99");
+  const bar = document.querySelector(".boss-track-hp");
+  const name = document.querySelector(".boss-name");
+  return { exists: !!bar, named: name ? /Minotaur|מינוטאור/.test(name.textContent) : false };
+});
+check(bossBar.exists, "a battle boss renders an HP bar");
+check(bossBar.named, "and the boss is named");
+
+const drain = await page.evaluate(async () => {
+  const ta = document.querySelector(".exercise .editor-area");
+  ta.value = Array.from({ length: 12 }, (_, i) => `place_tower("cannon", ${i + 2}, ${i % 2 ? 3 : 5})`).join("\n");
+  document.querySelector(".exercise .btn-run").click();
+  await new Promise((r) => setTimeout(r, 1500));
+  const mid = parseFloat(document.querySelector(".boss-fill").style.width) || 100;
+  await new Promise((r) => setTimeout(r, 6000));
+  const end = parseFloat(document.querySelector(".boss-fill").style.width) || 0;
+  return { mid, end };
+});
+check(drain.end < drain.mid, "the boss bar drains as it takes damage",
+  `${drain.mid}% → ${drain.end}%`);
+
+await page.goto(url("lessons/lesson-01.html"));
+await page.waitForSelector(".beat-teach");
+
 section("Beginner error diagnosis");
 const diagnoses = await page.evaluate(async () => {
   const cases = [

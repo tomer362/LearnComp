@@ -385,6 +385,20 @@ a { color: var(--bronze-lit); }
   transition: background .5s ease, opacity .5s ease;
 }
 .boss-seg.gone { background: rgba(255, 255, 255, .14); opacity: .5; }
+/* Battle bosses drain a continuous bar driven by the monster's own HP. */
+.boss-track-hp {
+  display: block;
+  height: 12px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, .14);
+  overflow: hidden;
+}
+.boss-fill {
+  height: 100%;
+  width: 100%;
+  background: var(--blood);
+  transition: width .2s linear;
+}
 .boss-tag {
   background: var(--blood); color: #fff; font-size: .65rem; font-weight: 800;
   padding: .05em .45em; border-radius: 4px; margin-inline-start: .4rem;

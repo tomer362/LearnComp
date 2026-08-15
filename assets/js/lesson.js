@@ -290,11 +290,42 @@ window.LC = window.LC || {};
       speedBtn.textContent = next + "×";
     });
 
+    /* Boss bar. The old version counted `check.cases`, which battle bosses do
+     * not have — it always drew a single segment. Track the boss monster's own
+     * HP from the simulation instead. */
+    var bossBar = null, bossFill = null, bossSeen = 0;
+    if (level.boss) {
+      var boss = el("div", "boss");
+      boss.appendChild(el("div", "boss-name", (level.boss.icon || "👹") + " " + LC.esc(LC.t(level.boss.name))));
+      bossBar = el("div", "boss-track boss-track-hp");
+      bossFill = el("div", "boss-fill");
+      bossBar.appendChild(bossFill);
+      boss.appendChild(bossBar);
+      host.appendChild(boss);
+    }
+
     var startHp = level.campHp === undefined ? 10 : level.campHp;
     view.onUpdate(function (snap) {
       hudHp.textContent = "🏛️ " + snap.campHp + "/" + startHp;
       hudGold.textContent = "🪙 " + snap.gold;
       hudWave.textContent = "👾 " + snap.enemies.length;
+
+      if (bossFill) {
+        /* The boss is the toughest thing on the field. Once it has appeared,
+         * keep the bar at its last value rather than snapping back to full. */
+        var toughest = null;
+        for (var i = 0; i < snap.enemies.length; i++) {
+          var e = snap.enemies[i];
+          if (!toughest || e.maxHp > toughest.maxHp) toughest = e;
+        }
+        if (toughest && toughest.maxHp >= (level.boss.hp || 0)) {
+          bossSeen = Math.max(0, toughest.hp / toughest.maxHp);
+          bossFill.style.width = (bossSeen * 100) + "%";
+        } else if (bossSeen > 0) {
+          bossSeen = 0;
+          bossFill.style.width = "0%";
+        }
+      }
     });
     hudHp.textContent = "🏛️ " + startHp + "/" + startHp;
     hudGold.textContent = "🪙 " + level.gold;
@@ -327,13 +358,14 @@ window.LC = window.LC || {};
      * the coordinates while she writes the code that uses them */
     var battle = isBattle ? battlePanel(card, ex) : null;
 
-    /* boss health bar */
+    /* A non-battle boss (multiple test cases) still drains a segmented bar.
+     * Battle bosses use the HP bar drawn inside battlePanel instead. */
     var bossBar = null;
-    if (isQuest && ex.boss) {
+    if (isQuest && ex.boss && !isBattle) {
       var boss = el("div", "boss");
       boss.appendChild(el("div", "boss-name", ex.boss.icon + " " + LC.esc(LC.t(ex.boss.name))));
       var track = el("div", "boss-track");
-      var total = (ex.check.cases || []).length || 1;
+      var total = ((ex.check || {}).cases || []).length || 1;
       for (var b = 0; b < total; b++) {
         track.appendChild(el("span", "boss-seg"));
       }
