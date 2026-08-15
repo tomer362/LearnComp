@@ -100,6 +100,9 @@
       if (b.type === "onPath") return {
         he: "אי אפשר לבנות על השביל עצמו — המפלצות הולכות שם. בחרי משבצת דשא ליד השביל.",
         en: "You cannot build on the path itself — that is where the monsters walk. Pick a grass square beside it." };
+      if (b.type === "onRock") return {
+        he: "המשבצת (" + b.x + ", " + b.y + ") היא סלע — אי אפשר לבנות עליה. `get_map()` מחזיר \"rock\" למשבצות כאלה.",
+        en: "The square (" + b.x + ", " + b.y + ") is a rock — you cannot build there. `get_map()` reports those as \"rock\"." };
       if (b.type === "offMap") return {
         he: "המשבצת (" + b.x + ", " + b.y + ") נמצאת מחוץ למפה. בדקי את המספרים.",
         en: "The square (" + b.x + ", " + b.y + ") is off the map. Check the numbers." };

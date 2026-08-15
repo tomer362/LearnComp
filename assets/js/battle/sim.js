@@ -87,6 +87,11 @@
     var buildErrors = [];
     var onPath = {};
     for (var p = 0; p < path.length; p++) onPath[path[p][0] + "," + path[p][1]] = true;
+    /* Rocks are documented as unbuildable and get_map() reports them as such,
+     * so the engine has to actually enforce it. */
+    var onRock = {};
+    var rocks = level.map.rock || [];
+    for (var rk = 0; rk < rocks.length; rk++) onRock[rocks[rk][0] + "," + rocks[rk][1]] = true;
     var occupied = {};
 
     for (var i = 0; i < placements.length; i++) {
@@ -101,6 +106,7 @@
         buildErrors.push({ type: "offMap", x: pl.x, y: pl.y }); continue;
       }
       if (onPath[key]) { buildErrors.push({ type: "onPath", x: pl.x, y: pl.y }); continue; }
+      if (onRock[key]) { buildErrors.push({ type: "onRock", x: pl.x, y: pl.y }); continue; }
       if (occupied[key]) { buildErrors.push({ type: "occupied", x: pl.x, y: pl.y }); continue; }
       if (goldLeft < spec.cost) { buildErrors.push({ type: "tooPoor", kind: pl.kind, cost: spec.cost, gold: goldLeft }); continue; }
 

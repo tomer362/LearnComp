@@ -290,6 +290,24 @@ for (const [name, ok] of battleExtras) check(ok, name);
 /* A budget or tower-cap failure is definitive and must not be shadowed by a
  * heuristic like "a tower never fired", which would send her looking in the
  * wrong place entirely. */
+section("Rocks are unbuildable");
+const rockCheck = await page.evaluate(async () => {
+  const level = {
+    map: { cols: 10, rows: 6, path: Array.from({ length: 10 }, (_, x) => [x, 4]), rock: [[3, 3]] },
+    gold: 300, campHp: 3, seed: 1, allowed: ["archer"],
+    waves: [{ delay: 0, enemies: [{ kind: "satyr", count: 3, gap: 1.2 }] }],
+    check: { kind: "battle" },
+  };
+  const onRock = await LC.Checker.check(level, 'place_tower("archer", 3, 3)');
+  const mapSays = await LC.Engine.run("g = get_map()\nprint(g[3][3])", {});
+  return {
+    rejected: onRock.pass === false,
+    explained: /rock|סלע/.test(onRock.reason ? (onRock.reason.en || "") + (onRock.reason.he || "") : ""),
+  };
+});
+check(rockCheck.rejected, "a tower on a rock is rejected");
+check(rockCheck.explained, "and the reason names the rock");
+
 section("Level constraints are explained");
 const constraints = await page.evaluate(async () => {
   const base = {
