@@ -2,6 +2,10 @@
 
 > **Act II — The Lightning Thief · גנב הברק** · Stop 5 of 20
 > Structure follows `spec/lessons/lesson-01.md`. Schema: `spec/04-lesson-template.md`.
+> **The game is the course**: the graded work here is five battle levels, not
+> exercises. Level schema and the Python API: `spec/09-battle-game.md`.
+> Control model: **build script** (`place_tower`, `get_gold`, `tower_cost`,
+> `get_wave`, `get_map`, `camp_hp`). No `choose_target`, no classes.
 
 | | |
 | --- | --- |
@@ -12,8 +16,10 @@
 | **new vocabulary** | `True`, `False`, `bool`, `==`, `!=`, `<=`, `>=`, `and`, `or`, `not` |
 | **requires** | L1 `print`/strings/`#` · L2 variables, `type()` · L3 `input()`, `int()`, f-strings · L4 arithmetic, `%` |
 | **item** | 🔮 עדשת האורקל / The Oracle's Lens |
-| **XP** | 20 + 25 + 25 + 30 (training) + 50 (quest) + 30 (bonus) = **180** |
+| **XP** | 20 + 25 + 25 + 30 (training battles) + 50 (great battle) + 30 (bonus) = **180** |
 | **drachmas** | 5 + 6 + 7 + 8 + 14 = **40** 🪙 |
+| **towers** | 🏹 archer (50) · 💣 cannon (90) — the cannon arrives here |
+| **monsters** | 🐐 satyr · 🦅 harpy · 🐺 hellhound · 👹 cyclops (armour 5) |
 
 ## Teaching goal
 
@@ -28,6 +34,14 @@ to *produce* an answer before she learns to *act* on one. Lesson 6 is the whole
 reason lesson 5 exists, and lesson 5 is what makes lesson 6 painless. If she
 tries to write `if` here, the hint text welcomes the instinct and tells her it
 arrives tomorrow.
+
+**In the battles, she is the `if`.** Her program asks the battlefield a question
+— `get_gold() >= tower_cost("cannon")` — prints the answer, and *she* reads it
+and decides what to build. That is not a workaround for the missing `if`; it is
+the honest order of operations. A condition is written before it is wired up,
+and lesson 6 wires up the exact expressions she writes today. Level b4's line
+`not (get_gold() >= tower_cost("archer"))` becomes lesson 7's loop condition
+word for word.
 
 ## Story beat
 
@@ -205,6 +219,25 @@ English mirror for the `en` side of each line, same six lines, same rhythm.
     מדפיס **האם** נשארו פחות מעשרה. אלה שתי שאלות שונות ושתי תשובות מטיפוסים
     שונים. אנאבת' אומרת שרוב הבאגים שלה בגיל שלוש־עשרה היו בדיוק פה.
 
+15. **prose + code · runnable** — the bridge into the battles. Three of the game
+    words she already owns return **numbers**, and a number on its own does not
+    decide anything.
+    ```python
+    print(get_gold())
+    print(tower_cost("cannon"))
+    print(get_gold() >= tower_cost("cannon"))
+    ```
+    On the training field this prints `500`, `90`, `True`. Explain (he): שתי
+    השורות הראשונות מדפיסות **כמה**. השלישית מדפיסה **האם** — והיא היחידה שאפשר
+    להחליט לפיה. `tower_cost` מחזיר את המחיר בלי שתצטרכי לזכור אותו, וזה חשוב:
+    מחיר שנכתב מהזיכרון הוא באג שמחכה לשינוי בטבלת המחירים.
+
+16. **callout · tip** — title: היום את ה־`if`.
+    text: התוכנית שלך תחשב את התשובה, תדפיס אותה, ואת תסתכלי עליה ותחליטי מה
+    לבנות. זה נשמע כמו חצי עבודה — וזה בדיוק הסדר הנכון. קודם כותבים את השאלה,
+    מחר מחברים אותה למי שפועל לפיה. השורות שתכתבי היום יעברו מחר, מילה במילה,
+    אחרי המילה `if`.
+
 ## Try It (ungraded)
 
 Free-play editor, nothing checked. Intro (he): *"התור שלך לשאול את האורקל. שני
@@ -223,252 +256,377 @@ print(bolt_stolen and days_left < 3)
 Output as shipped: `True`, `True`, `False`. Suggested experiment in the intro:
 "נסי לשנות את `days_left` ל־2 ולראות איזו שורה מתהפכת."
 
-## Training exercises
+## Training battles
 
-### e1 — Two answers for the Oracle · 20 XP, 5 🪙
+Four battles, each one a real defense that has to hold. **Lesson 5 is the lesson
+where *she* is the `if`**: her program computes an answer, prints it, and she
+reads it and decides what to build. Tomorrow the program starts making that
+decision by itself, and the expression she writes today is exactly the one that
+will sit after the word `if`. Say that out loud in the briefs — it turns "why am
+I only printing?" into "I am writing the condition first, and wiring it up
+tomorrow".
 
-**brief (he)**: האורקל שואלת אותך שתי שאלות. שורה 1: האם 7 גדול מ־3? שורה 2:
-האם 4 שווה ל־5? הדפיסי את שתי התשובות — אבל אל תכתבי את המילים `True` ו־`False`
-בעצמך. תני לפייתון לענות.
+Every level here is `check.kind: "battle"` with an `also` `source` rule. The
+battle is what she watches; the `source` rule is what makes the booleans
+compulsory. Both were verified by simulation (see Implementation notes).
+
+### b1 — לוח האיומים / The Threat Board · 20 XP, 5 🪙
+
+**Why this mechanic**: `get_gold()` hands her a **number**. A number does not
+tell her whether it is enough — a comparison does. This is the smallest possible
+version of that idea, next to a battle she can lose.
+
+```js
+map: { cols: 10, rows: 7, path: [[0,4],[1,4],[2,4],[3,4],[4,4],[5,4],[6,4],[7,4],[8,4],[9,4]] },
+gold: 120, campHp: 3, seed: 11, allowed: ["archer"],
+waves: [ { delay: 0, enemies: [ { kind: "satyr", count: 5, gap: 0.9 } ] } ],
+```
+
+**brief (he)**: חמישה סאטירים בשביל, ומגדל אחד על הדשא. מגדל אחד לא עוצר חמישה —
+הוסיפי עוד קשת ב־`(6, 3)`.
+
+ואז, לפני הקרב, כירון רוצה שתי תשובות על לוח האיומים: **האם נשאר זהב בקופה?**
+ו**האם הקופה ריקה?** אל תכתבי `True` או `False` ביד — תני לפייתון לחשב אותם.
 
 **starter**
 ```python
-# the Oracle is waiting
+place_tower("archer", 3, 3)
+
 print()
 print()
 ```
 
 **solution**
 ```python
-print(7 > 3)
-print(4 == 5)
+place_tower("archer", 3, 3)
+place_tower("archer", 6, 3)
+
+print(get_gold() > 0)
+print(get_gold() == 0)
 ```
+Verified: the camp holds at 3/3, all five satyrs die, 100 of 120 gold spent, and
+the log reads `True` then `False`. The starter alone (one tower) leaks two.
 
 **check**
 ```js
 check: {
-  kind: "source",
-  mustInclude: [">", "=="],
-  mustExclude: ["True", "False"],
-  message: { he: "האורקל צריכה שתשאלי שאלה, לא שתכתבי את התשובה בעצמך. השתמשי ב־> וב־==",
-             en: "The Oracle needs a question, not the answer typed by hand. Use > and ==" }
+  kind: "battle",
+  also: { kind: "source", mustInclude: [">", "=="],
+          message: { he: "ההגנה החזיקה, אבל לוח האיומים ריק. שתי השורות צריכות לחשב תשובה — עם > ועם ==",
+                     en: "The defense held, but the threat board is empty. The two lines must compute an answer — with > and with ==" } }
 }
 ```
-Plus a second check on the same exercise:
-```js
-{ kind: "output", mode: "normalized", expect: "True\nFalse" }
-```
 
 **hints**
-1. (he) "אם תכתבי `print(7)` תקבלי 7. מה צריך להיות בין 7 לבין 3 כדי שפייתון
-   יענה `True` במקום להדפיס מספר?"
-2. (he) "הסימנים הם `>` לשאלת 'גדול מ' ו־`==` לשאלת 'שווה ל'. שני סימני שווה,
-   לא אחד."
-3. (he) "שורה ראשונה: `print(7 > 3)` — פייתון פותר את `7 > 3`, מקבל `True`,
-   ומדפיס אותו. שורה שנייה בנויה אותו דבר, עם `==` במקום `>`."
+1. (he) "הריצי כמו שזה וצפי. כמה עברו? ומה הודפס בין הסוגריים הריקים של ה־`print`?"
+2. (he) "שורת `place_tower` נוספת במשבצת `(6, 3)`. ולשתי השורות של `print`:
+   הסימן `>` שואל 'גדול מ', והסימן `==` שואל 'שווה ל'. שני סימני שווה, לא אחד."
+3. (he) "`place_tower(\"archer\", 6, 3)` מתחת לשורה הראשונה. אחר כך
+   `print(get_gold() > 0)` — `get_gold()` מחזיר מספר, והסימן הופך אותו לתשובה.
+   השורה השנייה בנויה אותו דבר עם `== 0`. 120 פחות שני מגדלים של 50 זה 20, אז
+   הראשונה תיתן `True` והשנייה `False`."
 
-### e2 — The bunk count · 25 XP, 6 🪙
+### b2 — מה שהקופה אומרת / What the Treasury Says · 25 XP, 6 🪙
 
-**brief (he)**: בקתת הרמס גדושה. יש בה 11 חניכים ו־8 מיטות. שמרי את שני
-המספרים במשתנים בשמות `campers` ו־`beds`, והדפיסי שלוש שורות: (1) האם יש יותר
-חניכים ממיטות? (2) האם המספרים שווים? (3) כמה חניכים נשארים בלי מיטה — מספר,
-לא תשובת אמת.
+**Why this mechanic**: the comparison is between **two numbers she did not
+choose** — `get_gold()` and `tower_cost("cannon")`. That is the difference
+between a boolean exercise and a boolean *decision*: she cannot answer it by
+looking, she has to ask.
+
+```js
+map: { cols: 12, rows: 7,
+       path: [[0,1],[1,1],[2,1],[3,1],[4,1],[4,2],[4,3],[4,4],
+              [5,4],[6,4],[7,4],[8,4],[9,4],[10,4],[11,4]] },
+gold: 240, campHp: 3, seed: 12, allowed: ["archer", "cannon"],
+waves: [
+  { delay: 0, enemies: [ { kind: "satyr", count: 5, gap: 0.7 } ] },
+  { delay: 8, enemies: [ { kind: "cyclops", count: 1, gap: 2 },
+                         { kind: "hellhound", count: 2, gap: 1.5 } ] },
+],
+```
+
+**brief (he)**: קיקלופ אחד, שני כלבי גיהינום וחמישה סאטירים. לקיקלופ יש שריון 5,
+וקשת מוציאה ממנו 5 נקודות בלבד בכל חץ. תותח מוציא 23.
+
+השאלה הראשונה שלך היא **האם את יכולה להרשות לעצמך תותח**. הדפיסי את התשובה,
+תסתכלי עליה, ואז בני: תותח ב־`(5, 3)` ושלוש קשתות ב־`(2, 2)`, `(3, 3)`
+ו־`(9, 3)`. בסוף הדפיסי שורה שנייה: **האם הקופה התרוקנה?**
+
+ארבע קשתות בלי תותח לא מספיקות פה. נסי את זה אחר כך אם את רוצה לראות למה.
 
 **starter**
 ```python
-campers = 11
-beds = 8
+print(get_gold())
+print(tower_cost("cannon"))
 
-# three lines here
+place_tower("archer", 2, 2)
 ```
+*(The starter prints two numbers. Turning two numbers into one answer is the
+whole exercise.)*
 
 **solution**
 ```python
-campers = 11
-beds = 8
-print(campers > beds)
-print(campers == beds)
-print(campers - beds)
+print(get_gold() >= tower_cost("cannon"))
+
+place_tower("cannon", 5, 3)
+place_tower("archer", 2, 2)
+place_tower("archer", 3, 3)
+place_tower("archer", 9, 3)
+
+print(get_gold() == 0)
 ```
-Verified output: `True` / `False` / `3`.
+Verified: 3/3, eight kills, 240 of 240 spent, log `True` / `True`. Two different
+four-archer layouts at 200 gold both leak.
 
 **check**
 ```js
-{ kind: "output", mode: "normalized", expect: "True\nFalse\n3" }
+check: {
+  kind: "battle",
+  also: { kind: "source", mustInclude: [">=", "==", "tower_cost", "get_gold"],
+          message: { he: "את צריכה לשאול את המשחק, לא לזכור מספרים: get_gold() מול tower_cost(\"cannon\") עם >=, ובסוף בדיקה עם ==",
+                     en: "Ask the game rather than remembering numbers: get_gold() against tower_cost(\"cannon\") with >=, and a final check with ==" } }
+}
 ```
 
 **hints**
-1. (he) "שתי השורות הראשונות הן שאלות. השורה השלישית היא חשבון רגיל משיעור 4.
-   שימי לב מתי את מצפה ל־`True`/`False` ומתי למספר."
-2. (he) "שורה 1 משתמשת ב־`>`, שורה 2 ב־`==`, שורה 3 ב־`-`."
-3. (he) "`print(campers > beds)` שואל אם 11 גדול מ־8 ומדפיס `True`.
-   `print(campers == beds)` שואל אם הם שווים ומדפיס `False`. `print(campers -
-   beds)` מחשב 11 פחות 8 ומדפיס 3 — שלושה חניכים ישנים על הרצפה."
+1. (he) "יש לך שני מספרים בפלט. איזה סימן הופך שני מספרים לתשובה אחת של 'מספיק'
+   או 'לא מספיק'?"
+2. (he) "`>=` זה 'גדול או שווה'. הסדר קבוע: הסימן הגדול קודם. השורה נראית כמו
+   `get_gold() >= tower_cost(\"cannon\")` — שתי פונקציות, סימן אחד ביניהן."
+3. (he) "שורה ראשונה: `print(get_gold() >= tower_cost(\"cannon\"))`. פייתון פותר
+   קודם את שתי הפונקציות (240 ו־90), משווה, ומדפיס `True`. אחרי שראית `True`,
+   בני את התותח ואת שלוש הקשתות. השורה האחרונה, `print(get_gold() == 0)`, אומרת
+   לך אם נשאר משהו בקופה — וכשהיא `True`, סיימת לבזבז."
 
-### e3 — Permission to leave · 25 XP, 7 🪙
+### b3 — שתי שאלות, תשובה אחת / Two Questions, One Answer · 25 XP, 7 🪙
 
-**brief (he)**: לפי חוקי המחנה, מותר לצאת למסע רק אם את **גם** בת 13 לפחות
-**וגם** יש לך נשק. כירון שוקל להקל: אולי יספיק אחד מהשניים. עם `age = 14`
-ו־`has_weapon = False`, הדפיסי שתי שורות: התשובה לפי החוק המחמיר, ואז התשובה
-לפי החוק המקל.
+**Why this mechanic**: `and` and `or` with the **same two questions** on both
+sides. Only the connector changes, so the two output lines isolate exactly what
+`and` and `or` do — the same contrast as the old "permission to leave", now with
+numbers the battlefield supplies.
+
+```js
+map: { cols: 14, rows: 8,
+       path: [[0,5],[1,5],[2,5],[3,5],[3,4],[3,3],[3,2],[4,2],[5,2],[6,2],
+              [7,2],[8,2],[8,3],[8,4],[9,4],[10,4],[11,4],[12,4],[13,4]] },
+gold: 260, campHp: 3, seed: 13, allowed: ["archer", "cannon"],
+waves: [
+  { delay: 0,  enemies: [ { kind: "satyr", count: 8, gap: 0.5 } ] },
+  { delay: 9,  enemies: [ { kind: "harpy", count: 7, gap: 0.7 } ] },
+  { delay: 19, enemies: [ { kind: "hellhound", count: 5, gap: 1.1 } ] },
+],
+```
+
+**brief (he)**: שלושה גלים, ושתי שאלות לפני שמתחילים. הכלל המחמיר: יוצאים לקרב
+רק אם **גם** יש לפחות 400 זהב **וגם** למחנה יש 3 חיים לפחות. הכלל המקל: מספיק
+**אחד מהשניים**.
+
+הדפיסי את שתי התשובות — אותן שתי שאלות בדיוק בשתי השורות, רק המילה באמצע
+משתנה. ואז בני הגנה שמחזיקה: שלוש קשתות ותותח.
 
 **starter**
 ```python
-age = 14
-has_weapon = False
+place_tower("archer", 2, 4)
+place_tower("archer", 4, 3)
 
-# strict rule
 print()
-# loose rule
 print()
 ```
 
 **solution**
 ```python
-age = 14
-has_weapon = False
-print(age >= 13 and has_weapon)
-print(age >= 13 or has_weapon)
+print(get_gold() >= 400 and camp_hp() >= 3)
+print(get_gold() >= 400 or camp_hp() >= 3)
+
+place_tower("archer", 2, 4)
+place_tower("archer", 4, 3)
+place_tower("cannon", 7, 3)
+place_tower("archer", 10, 5)
 ```
-Verified output: `False` / `True`.
+Verified: 3/3, twenty kills, 240 of 260 spent, log `False` then `True`. Three
+archers (150 gold) leak two.
 
 **check**
 ```js
-{ kind: "output", mode: "normalized", expect: "False\nTrue" }
+check: {
+  kind: "battle",
+  also: { kind: "source", mustInclude: ["and", "or", "camp_hp"],
+          message: { he: "שתי השורות צריכות את אותן שתי שאלות — אחת עם and ואחת עם or, ואחת מהן על camp_hp()",
+                     en: "Both lines need the same two questions — one joined with and, one with or, and one of them about camp_hp()" } }
+}
 ```
-plus
-```js
-{ kind: "source", mustInclude: [" and ", " or "],
-  message: { he: "החוק המחמיר דורש and, והמקל דורש or. שתי השורות חייבות להשתמש בהם",
-             en: "The strict rule needs and, the loose rule needs or" } }
-```
-*(Note the surrounding spaces in the `mustInclude` strings — see Implementation
-notes. A bare `"or"` would also match inside `for`.)*
 
 **hints**
-1. (he) "החוק המחמיר דורש ששני התנאים יתקיימו. יש לה 14 — זה בסדר. יש לה נשק?
-   אז מה התשובה הכוללת?"
-2. (he) "`and` דורש ששני הצדדים יהיו `True`. `or` מסתפק בצד אחד. הצד השמאלי בשתי
-   השורות הוא אותו דבר: `age >= 13`."
-3. (he) "`age >= 13` נותן `True`, ו־`has_weapon` הוא `False`. `True and False`
-   הוא `False` — היא לא יוצאת. `True or False` הוא `True` — לפי החוק המקל היא
-   יוצאת. שורה ראשונה: `print(age >= 13 and has_weapon)`."
+1. (he) "יש לך 260 זהב, לא 400. אז הצד השמאלי של שתי השורות נותן את אותה תשובה.
+   למה בכל זאת שתי השורות לא יוצאות זהות?"
+2. (he) "`and` דורש ששני הצדדים יהיו `True`. `or` מסתפק באחד. כל צד הוא שאלה
+   שלמה בפני עצמה: `get_gold() >= 400` היא שאלה אחת, `camp_hp() >= 3` היא שנייה."
+3. (he) "`get_gold() >= 400` נותן `False` (יש 260). `camp_hp() >= 3` נותן `True`
+   (יש בדיוק 3). `False and True` הוא `False` — לפי הכלל המחמיר לא יוצאים.
+   `False or True` הוא `True` — לפי המקל יוצאים. השורה הראשונה:
+   `print(get_gold() >= 400 and camp_hp() >= 3)`, והשנייה זהה עם `or`."
 
-### e4 — The Oracle answers a stranger · 30 XP, 8 🪙
+### b4 — מה שאסור שיקרה / What Must Not Happen · 30 XP, 8 🪙
 
-**brief (he)**: האורקל מקבלת מבקר חדש. קלטי ממנו מספר ימים עד היפוך הקיץ
-(זכרי ש־`input()` מחזיר string), והדפיסי שתי שורות: (1) האם נשארו פחות מ־10
-ימים? (2) האם מספר הימים זוגי?
+**Why this mechanic**: `not (get_gold() >= tower_cost("archer"))` is the answer
+to **"am I finished spending?"** — and it is, word for word, the loop condition
+she will write in lesson 7. Here she evaluates it once, by hand, after each
+tower. In two lessons the computer will evaluate it for her, over and over,
+until it flips. Nothing else in the course sets up a later lesson this exactly.
+
+```js
+map: { cols: 14, rows: 8, path: <the same LONG road as b3> },
+gold: 250, campHp: 3, seed: 14, allowed: ["archer"],
+waves: [
+  { delay: 0,  enemies: [ { kind: "satyr", count: 8, gap: 0.5 } ] },
+  { delay: 9,  enemies: [ { kind: "harpy", count: 7, gap: 0.7 } ] },
+  { delay: 19, enemies: [ { kind: "hellhound", count: 6, gap: 1.0 } ] },
+],
+```
+
+**brief (he)**: אותה דרך, גל שלישי כבד יותר, ורק קשתות מותרות. יש 250 זהב —
+בדיוק חמש קשתות. ארבע לא יספיקו, וכדי לדעת מתי הגעת לחמש יש לך שורה אחת:
+
+```python
+print(not (get_gold() >= tower_cost("archer")))
+```
+
+השורה הזאת אומרת **"אי אפשר לקנות עוד קשת"**. כל עוד היא `False` — חסר לך מגדל.
+כשהיא `True` — סיימת. הוסיפי מגדלים עד שהיא מתהפכת, והדפיסי לפניה שורה נוספת:
+האם הקופה **לא** ריקה.
 
 **starter**
 ```python
-days = input("How many days until the solstice? ")
+place_tower("archer", 2, 4)
+place_tower("archer", 4, 3)
 
-print()
-print()
+print(not (get_gold() >= tower_cost("archer")))
 ```
-*(The starter deliberately leaves out `int()`. If she compares straight away she
-gets the `TypeError` from teach block 8 — an error she has already met in a calm
-moment.)*
 
 **solution**
 ```python
-days = int(input("How many days until the solstice? "))
-print(days < 10)
-print(days % 2 == 0)
+place_tower("archer", 2, 4)
+place_tower("archer", 4, 3)
+place_tower("archer", 6, 3)
+place_tower("archer", 9, 3)
+place_tower("archer", 11, 5)
+
+print(get_gold() != 0)
+print(not (get_gold() >= tower_cost("archer")))
 ```
+Verified: 3/3, twenty-one kills, 250 of 250 spent, log `False` then `True`. Four
+archers (200 gold) leak one — and with four towers the printed line still reads
+`False`, which is the point.
 
 **check**
 ```js
-{ kind: "cases", cases: [
-    { stdin: ["9"],  expect: "True\nFalse" },
-    { stdin: ["12"], expect: "False\nTrue" },
-    { stdin: ["10"], expect: "False\nTrue" },
-    { stdin: ["1"],  expect: "True\nFalse" } ] }
+check: {
+  kind: "battle",
+  also: { kind: "source", mustInclude: ["!=", "not"],
+          message: { he: "הדוח הזה דורש את שתי המילים של היום: != לשאלה 'לא שווה', ו־not כדי להפוך תשובה",
+                     en: "This report needs both of today's words: != for 'not equal', and not to flip an answer" } }
+}
 ```
-All four verified against the runtime. The `input()` prompt text is rendered in
-the Iris-message panel and never reaches stdout, so it does not appear in
-`expect` — the convention established in lesson 3.
 
 **hints**
-1. (he) "הריצי את הקוד כמו שהוא והקלידי 9. איזו שגיאה קיבלת? מה היא אומרת על
-   הטיפוסים של שני הצדדים?"
-2. (he) "`input()` תמיד מחזיר string. עטפי אותו ב־`int()` כמו בשיעור 3. לשאלת
-   הזוגיות את צריכה את `%` משיעור 4 — שארית החלוקה ב־2."
-3. (he) "קודם `days = int(input(...))` כדי שיהיה לך מספר. אחר כך `print(days <
-   10)`. לשורה השנייה: מספר זוגי הוא מספר ששארית החלוקה שלו ב־2 היא 0, כלומר
-   `days % 2 == 0` — שימי לב שיש פה גם `%` וגם `==`."
+1. (he) "הריצי עם שני המגדלים שכבר יש. מה השורה האחרונה מדפיסה, ומה זה אומר לך
+   לעשות עכשיו?"
+2. (he) "`not` הופך תשובה: `not False` הוא `True`. כל עוד `get_gold() >=
+   tower_cost(\"archer\")` נותן `True` (אפשר לקנות עוד), ה־`not` הופך אותו
+   ל־`False`. הוסיפי מגדל, הריצי שוב, והסתכלי."
+3. (he) "עם 250 זהב יש מקום לחמש קשתות. אחרי החמישית `get_gold()` הוא 0,
+   `0 >= 50` הוא `False`, ו־`not False` הוא `True` — סיימת. השורה השנייה,
+   `print(get_gold() != 0)`, שואלת אם נשאר משהו: אחרי חמישה מגדלים היא `False`.
+   שימי לב שהשתיים אומרות דברים הפוכים והתשובות שלהן הפוכות."
 
-## Quest — "חידת האורקל / The Oracle's Riddle" · 50 XP, 14 🪙
+## The great battle — "חידת האורקל / The Oracle's Riddle" · 50 XP, 14 🪙
 
-**brief (he)**: האורקל מוכנה לאשר תיאוריה אחת על גנב הברק — אבל רק אם תגישי לה
-אותה כרשימת שאלות. שמרי את חמש העובדות האלה במשתנים:
-
+```js
+map: { cols: 14, rows: 8,
+       path: [[0,2],[1,2],[2,2],[3,2],[4,2],[4,3],[4,4],[4,5],
+              [5,5],[6,5],[7,5],[8,5],[8,4],[8,3],[8,2],
+              [9,2],[10,2],[11,2],[12,2],[13,2]],
+       rock: [[11,5],[12,6]] },
+gold: 400, campHp: 3, seed: 17, allowed: ["archer", "cannon"],
+waves: [
+  { delay: 0,  enemies: [ { kind: "satyr", count: 10, gap: 0.4 } ] },
+  { delay: 10, enemies: [ { kind: "harpy", count: 8, gap: 0.6 } ] },
+  { delay: 22, enemies: [ { kind: "hellhound", count: 6, gap: 1.0 } ] },
+],
 ```
-suspect = "Luke"
-seen_near_the_bolt = True
-has_alibi = False
-days_left = 9
-hero_age = 14
+
+**Why this mechanic**: five lines that together *are an argument*, printed before
+a battle whose outcome she has to earn. The Oracle will not answer a question
+that has not been asked precisely, and the last line is the one that matters —
+it says there is no margin. Chiron reads the five answers back to her as one
+sentence in the completion text.
+
+**brief (he)**: השביל מתפתל פעמיים, שלושה גלים מגיעים בזה אחר זה, ויש לך 400 זהב.
+האורקל מוכנה לאשר את תוכנית ההגנה שלך — אבל רק אם תגישי אותה כחמש שאלות, לפי
+הסדר, כשכל תשובה **מחושבת ולא מוקלדת**:
+
+1. האם למחנה יש בדיוק 3 חיים?
+2. האם הקופה **לא** ריקה?
+3. האם **אי אפשר** להרשות לעצמך 500 זהב של מגדלים?
+4. האם אפשר לקנות תותח **וגם** למחנה יש 3 חיים לפחות?
+5. האם יש עודף — יותר מ־3 חיים **או** לפחות 500 זהב?
+
+ואז בני הגנה שמחזיקה בשלושת הגלים בלי שאף מפלצת תעבור.
+
+**starter**
+```python
+# the five answers, then the defense
+place_tower("archer", 2, 1)
 ```
-
-ואז הדפיסי בדיוק חמש שורות, לפי הסדר, כשכל שורה מחושבת ולא מוקלדת ביד:
-
-1. האם החשוד הוא Luke?
-2. האם הוא נראה ליד הברק **וגם** אין לו אליבי?
-3. האם נשארו יותר מ־10 ימים?
-4. האם הגיבורה בת 13 לפחות **וגם** נשארו יותר מ־3 ימים?
-5. האם התיק סגור? תיק נסגר אם יש אליבי **או** אם נשארו יותר מ־30 יום.
 
 **solution**
 ```python
-suspect = "Luke"
-seen_near_the_bolt = True
-has_alibi = False
-days_left = 9
-hero_age = 14
+print(camp_hp() == 3)
+print(get_gold() != 0)
+print(not (get_gold() >= 500))
+print(get_gold() >= tower_cost("cannon") and camp_hp() >= 3)
+print(camp_hp() > 3 or get_gold() >= 500)
 
-print(suspect == "Luke")
-print(seen_near_the_bolt and not has_alibi)
-print(days_left > 10)
-print(hero_age >= 13 and days_left > 3)
-print(has_alibi or days_left > 30)
+place_tower("archer", 2, 1)
+place_tower("archer", 3, 3)
+place_tower("cannon", 5, 4)
+place_tower("archer", 7, 4)
+place_tower("cannon", 9, 3)
+place_tower("archer", 11, 1)
 ```
-Verified output:
+Verified log:
 ```
+True
+True
 True
 True
 False
-True
-False
 ```
+and the battle: 3/3, twenty-four kills, 380 of 400 gold spent. Four archers
+(200 gold) leak two.
 
 **check**
 ```js
-{ kind: "output", mode: "normalized", expect: "True\nTrue\nFalse\nTrue\nFalse" }
-```
-plus
-```js
-{ kind: "source", mustInclude: ["==", " and ", " or ", "not "],
-  message: { he: "הנבואה הזו דורשת את כל הכלים של השיעור: ==, and, or ו־not",
-             en: "This one needs every tool in the lesson: ==, and, or and not" } }
+check: {
+  kind: "battle",
+  also: { kind: "source", mustInclude: ["==", "!=", ">=", "and", "or", "not"],
+          message: { he: "הנבואה הזאת דורשת את כל הכלים של השיעור: ==, !=, >=, and, or ו־not",
+                     en: "This one needs every tool in the lesson: ==, !=, >=, and, or and not" } }
+}
 ```
 
 **hints**
-1. (he) "חמש שורות פלט, חמש שורות `print`. עברי שאלה־שאלה ושאלי את עצמך: איזה
-   סימן או איזו מילה מתאימים לשאלה הזו? שורה 2 מכילה את המילה 'וגם' ואת המילה
-   'אין'."
-2. (he) "שורה 1 היא `==` על מחרוזת. שורות 2 ו־4 הן `and`. שורה 5 היא `or`.
-   'אין לו אליבי' זה `not has_alibi` — הפיכה של `False` ל־`True`."
-3. (he) "נתחיל: `print(suspect == \"Luke\")` — השוואת מחרוזות, שימי לב לגרשיים
-   ולאות גדולה. שורה 2: `seen_near_the_bolt` כבר `True`, ו־`not has_alibi` הופך
-   את ה־`False` ל־`True`, אז `True and True` נותן `True`. שורה 3 שואלת אם 9 גדול
-   מ־10 — קראי אותה שוב לפני שאת כותבת. את שלוש האחרונות תסיימי לבד."
-
-**Why this is the quest**: it is the first program she writes where the output is
-an *argument*. Five lines of `True`/`False` that together say "Luke was near the
-bolt, has no alibi, time is short, she is allowed to go, and this case is not
-closed." Chiron reads it back to her in the completion text as a sentence.
+1. (he) "חמש שורות פלט, חמש שורות `print`. עברי שאלה־שאלה ושאלי: איזה סימן או
+   איזו מילה מתאימים? בשאלה 3 יש 'אי אפשר', בשאלה 4 יש 'וגם', בשאלה 5 יש 'או'."
+2. (he) "שורה 1 היא `==`, שורה 2 היא `!=`, שורה 3 היא `not` סביב שאלה שלמה
+   בסוגריים, שורה 4 היא `and`, שורה 5 היא `or`. את המספרים אל תכתבי מהזיכרון —
+   `get_gold()` ו־`camp_hp()` יודעים אותם."
+3. (he) "נתחיל: `print(camp_hp() == 3)` נותן `True`. שורה 3 —
+   `print(not (get_gold() >= 500))` — קודם פייתון שואל אם 400 גדול או שווה
+   ל־500 (`False`), ואז `not` הופך ל־`True`. שורה 5 היא היחידה שמסתיימת
+   ב־`False`, וזה בדיוק מה שהאורקל רצתה שתראי: אין עודף, לא בחיים ולא בזהב.
+   להגנה: שישה מגדלים סביב שתי הפניות — `(2,1)`, `(3,3)`, תותח ב־`(5,4)`,
+   `(7,4)`, תותח ב־`(9,3)`, `(11,1)`."
 
 ## Reward & Recap
 
@@ -478,7 +636,8 @@ desc (he): "עדשת זכוכית עכורה מעליית הגג. כשמסתכל
 
 **Achievements possible here**
 - *Truth Seeker* — ran a program whose output was `True` or `False`.
-- *Debugger* — hit the `TypeError` in e4 and then passed it.
+- *Quartermaster* — first battle won with every last coin spent (`get_gold()`
+  ends at 0), which b2, b4 and the great battle all do.
 - *No Hints Needed* — completed the lesson with zero hints spent.
 
 **Recap bullets**
@@ -487,6 +646,7 @@ desc (he): "עדשת זכוכית עכורה מעליית הגג. כשמסתכל
 - `!= < > <= >=` מחזירים גם הם `True` או `False`, ועובדים גם על מחרוזות
 - `and` דורש ששניהם יהיו `True`, `or` מסתפק באחד, `not` הופך את התשובה
 - `input()` תמיד מחזיר string — בלי `int()` השוואה למספר תיתן `TypeError`
+- `get_gold()`, `camp_hp()` ו־`tower_cost()` מחזירים מספרים — השוואה הופכת מספר להחלטה
 
 **Next teaser (he)**: *"עכשיו את יודעת לשאול. מחר תגלי מה עושים עם התשובה —
 הדרך מחוץ למחנה מתפצלת לשלוש, וגרובר מחכה שתחליטי."*
@@ -503,6 +663,10 @@ desc (he): "עדשת זכוכית עכורה מעליית הגג. כשמסתכל
 | `print(campers => 12)` | `SyntaxError: bad input on line N` | הסדר הוא `>=` ו־`<=`, הסימן הגדול קודם |
 | `print(a AND b)` | `SyntaxError: bad input on line N` | `and` / `or` / `not` באותיות קטנות תמיד |
 | `print(not(a and b))` נקרא כמו `print((not a) and b)` | לא שגיאה — תשובה אחרת | `not` נדבק חזק יותר מ־`and`; סוגריים פותרים את זה |
+| `print(get_gold)` בלי סוגריים | מדפיס `<built-in function get_gold>` | פונקציה בלי `()` היא הפקודה עצמה, לא התוצאה שלה |
+| `place_tower("archer", 4, 4)` על השביל | הקרב נכשל, והמנוע אומר "אי אפשר לבנות על השביל עצמו" | המשבצות של השביל שמורות למפלצות; בונים לידו |
+| מגדל רחוק מדי מהשביל | "המגדל במשבצת (x, y) רחוק מדי מהשביל ולא ירה אף פעם" | טווח הקשת הוא 2.6 משבצות; ליד השביל, לא בפינה |
+| כותבת `True` ביד במקום להשוות | ההגנה מחזיקה אבל השלב לא עובר, עם הודעת ה־`message` | הקרב זה חצי; לוח האיומים חייב **לחשב** את התשובה |
 
 ## Implementation notes
 
@@ -516,36 +680,63 @@ desc (he): "עדשת זכוכית עכורה מעליית הגג. כשמסתכל
   `island`. Every logical-operator source check in this lesson uses `" and "`,
   `" or "` and `"not "` with the spaces included. This convention applies to
   every lesson from here on.
-- **`mustExclude` on e1** blocks `True`/`False` as literal text. It also blocks
-  them inside a comment, which is acceptable — the failure message names the
-  requirement clearly.
+- **Every level here was simulated headlessly** with `assets/js/battle/{sim,pyapi,play}.js`
+  loaded into a Node VM exactly the way `tools/verify-python.mjs` does it. For
+  each of the five: the stated `solution` **wins**, an empty program **loses**,
+  the solution satisfies its own `also` `source` rule, and the starter behaves as
+  described. The "verified" lines under each solution are simulation output, not
+  estimates.
+- **Each level is also unwinnable by the obvious cheaper build**, and that was
+  simulated too: one tower in b1 leaks 2, four archers in b2 leak 1 (two
+  different layouts), three archers in b3 leak 2, four archers in b4 leak 1, four
+  archers in the great battle leak 2.
 - **No `if` anywhere in this lesson**, including in hint text. If her submitted
   source contains `if`, the checker may show a friendly non-failing note: *"את
   מקדימה את כירון בשיעור שלם. `if` מגיע מחר — היום רק מדפיסים את התשובה."*
-- **`input()` prompts do not reach stdout** in this engine (Skulpt passes the
-  prompt to `inputfun`, which the UI renders as an Iris-message). Confirmed by
-  running e4 with queued stdin: output was exactly `"True\nFalse\n"`. No `cases`
-  `expect` in this lesson includes prompt text.
+  It must not fail her: a working `if` in a lesson-5 battle is a learner running
+  ahead, not a learner breaking a rule.
+- **Booleans cannot be forced by the battle alone, and that is stated openly.**
+  Without `if`, no boolean she computes can change where a tower lands, so every
+  level pairs `check.kind: "battle"` with an `also` `source` rule. The `message`
+  on each one names the requirement in her language, because "the camp survived
+  and I still failed" is otherwise the worst feedback in the course. The battle
+  half is not decoration: each level's defense has to be built correctly and can
+  be lost, and the printed answer is what tells her which defense to build.
+- **No level here uses `input()`.** A battle level runs her script once, before
+  the wave, with no stdin queued — `input()` would return `""` and confuse her.
+  `input()` stays in the teaching blocks and the training ground, where lesson 3
+  put it.
+- **The cannon is introduced here, and its one hard rule is not.** `spec/09-battle-game.md`:
+  the cannon cannot hit anything flying. Lesson 5's b2 and the great battle both
+  contain harpies, and both solutions carry archers that cover them, so nothing
+  breaks — but the rule itself is lesson 6's headline and must not be spoiled
+  here. Keep it out of the briefs.
 - Chained comparison (`3 < 5 < 10`) **does** work in Skulpt, but it is not taught
   here — one new idea per lesson. If she discovers it, the engine will not
   punish her.
-- **Two checks on one exercise use the `also` field**, the pattern established
-  by lesson 1 (e1 and e4) and required by `.claude/rules/lesson-authoring.md`.
-  Every "plus" check written in this file is an `also`:
-  ```js
-  check: { kind: "source", mustInclude: [">", "=="], mustExclude: ["True", "False"],
-           message: { he: "…", en: "…" },
-           also: { kind: "output", mode: "normalized", expect: "True\nFalse" } }
-  ```
-  Applies to e1, e3 and the quest here, and to every `source` + `output` pair in
-  lessons 6, 7 and 8.
+- **A battle level's second check is its `also` field.** `checker.js` runs the
+  battle first and applies `also` only once the objective passed, so she never
+  sees a source complaint about a defense that already collapsed. `also.kind`
+  may be `"source"` or `"output"`; every level in this lesson uses `"source"`,
+  which is the half `tools/verify-python.mjs` asserts.
+- **`mustInclude` matching is word-aware for bare identifiers** (`checker.js`
+  `present()`), so `"and"` does not match `island` and `"not"` does not match
+  `cannot`. Anything containing punctuation — `">="`, `"=="`, `"!="` — matches
+  literally. That is why this file no longer pads the operator words with
+  spaces: `["and", "or", "not"]` is now both correct and readable.
+- **The default objective is a perfect defense.** `campHp: 3` never has to drop
+  to zero to fail a level — one leak is a loss, because `check.campHpAtLeast`
+  defaults to the starting HP. The three hearts exist so a hopeless run ends
+  quickly instead of playing out for a minute.
 - **`source` checks read a stripped skeleton** — comments and string literals are
   removed before matching (`.claude/rules/lesson-authoring.md`). Two consequences
-  in this lesson, both benign and both intentional:
-  - e1's `mustExclude: ["True", "False"]` matches the bare keywords only, so
-    `print("True")` slips past it — and then fails the `mustInclude: [">", "=="]`
-    half, because a stripped literal leaves no comparison behind. The pair covers
-    the cheat path; neither half does alone.
-  - The quest's `mustInclude: ["=="]` is unaffected by `"Luke"` being stripped,
-    since the operator sits outside the literal.
+  here, both intentional:
+  - Typing `print("True")` cannot satisfy any level: the literal is stripped
+    before matching, so no comparison operator survives and the `also` rule
+    fails with its own message.
+  - `tower_cost("cannon")` keeps satisfying `mustInclude: ["tower_cost"]` because
+    the identifier sits outside the literal.
   No check in this lesson needs `raw: true`.
+- **Seeds are fixed per level** (11, 12, 13, 14, 17) and every battle is
+  deterministic, so a hint may safely say "run it again and watch where they get
+  through" — it will be the same place every time.

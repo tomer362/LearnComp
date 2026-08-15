@@ -2,7 +2,7 @@
 
 > **Act I — Camp Half-Blood** · Stop 2 of 20
 > Follows the reference structure in `spec/lessons/lesson-01.md`.
-> Schema: `spec/04-lesson-template.md`.
+> Schema: `spec/04-lesson-template.md` · Battle contract: `spec/09-battle-game.md`.
 
 | | |
 | --- | --- |
@@ -11,9 +11,11 @@
 | **minutes** | 25–30 |
 | **concepts** | variables, assignment, reassignment, `str` / `int` / `float`, `type()` |
 | **new vocabulary** | `=`, `type` |
-| **requires** | lesson 1 — `print()`, strings, quotes, comments, reading an error |
+| **requires** | lesson 1 — `print()`, strings, quotes, comments, `place_tower()`, reading an error |
+| **API available** | `place_tower`, `get_gold`, `tower_cost`, `camp_hp` (build script only) |
+| **towers** | 🏹 archer only |
 | **item** | 🪢 רצועת העור / The Leather Cord |
-| **XP** | 20 + 20 + 25 + 30 (training) + 50 (quest) + 30 (bonus) = **175** |
+| **XP** | 20 + 20 + 25 + 30 (four battles) + 50 (great battle) + 30 (bonus) = **175** |
 | **drachmas** | 5 + 5 + 8 + 8 + 12 = **38** 🪙 |
 
 ## Teaching goal
@@ -179,15 +181,39 @@ notes. Annabeth appears in the `myth` callout with the true-name idea.
     have named a value, you can reach it, change it, and send it anywhere.
     Title (he): *"השם האמיתי"*.
 
-13. **prose** — The honest limitation, and the hook for tomorrow: right now each
-    `print` shows one value on a line of its own, so her output looks like a
-    shopping list. Tomorrow she learns to weave names into a sentence — and to
-    let the program ask *her* a question. (Do not demonstrate f-strings here.
-    They belong to lesson 3.)
+13. **prose + code (runnable)** — the block that carries the lesson into the
+    battles. A name works **anywhere a value worked**, including inside the game
+    commands from lesson 1.
+    ```python
+    kind = "archer"
+    row = 3
+    place_tower(kind, 2, row)
+    place_tower(kind, 5, row)
+    ```
+    Caption (he): *"אותה פקודה מאתמול, רק ששני מהערכים קיבלו שם. שימי לב מה קורה
+    אם תשני את `row` ל-5: שני המגדלים זזים ביחד, כי שניהם שואלים את אותו שם."*
+    (en): *"The same command as yesterday, with two of the values given names.
+    Notice what happens if you change `row` to 5: both towers move together,
+    because both of them ask the same name."*
+    This is also where the numbers stop being decoration: `get_gold()` hands back
+    an `int` she can name, and `type()` proves it.
+    ```python
+    gold = get_gold()
+    print(gold)
+    print(type(gold))
+    ```
+
+14. **prose** — The honest limitation, and the hook for tomorrow: right now each
+    `print` shows one value on a line of its own, so her battle report looks like
+    a shopping list. Tomorrow she learns to weave names into a sentence — and to
+    let the program ask *her* a question before the wave starts. (Do not
+    demonstrate f-strings here. They belong to lesson 3.)
 
 ## Try It (ungraded)
 
-Free-play editor. Nothing is checked, nothing is scored.
+Free-play editor. Nothing is checked, nothing is scored. The game words are
+available here too, against the practice field, so a `place_tower` line runs
+without error even though nothing is defended.
 
 ```python
 hero = "Percy"
@@ -197,6 +223,10 @@ beads = 1
 print(hero)
 print(cabin)
 print(beads)
+
+gold = get_gold()
+print(gold)
+print(type(gold))
 ```
 
 Intro (he): *"המגרש שלך. שני את הערכים למה שבא לך, תוסיפי משתנה משלך, ונסי גם
@@ -205,270 +235,390 @@ Intro (he): *"המגרש שלך. שני את הערכים למה שבא לך, ת
 `print(type(cabin))` to see what Python thinks it is holding. Nothing here is
 graded."*
 
-## Training exercises
+## The battles
 
-### e1 — השם על הרצועה / A name on the cord · 20 XP, 5 🪙
+Lesson 2 is played entirely as battle levels (`spec/09-battle-game.md`). There are
+no abstract exercises: every task below is a real defense of Camp Half-Blood that
+her build script commands. All five levels use `allowed: ["archer"]`: lesson 4
+hands her a cannon for the Minotaur, and *choosing* between tower kinds inside one
+battle waits for `if` in lesson 6.
 
-**brief (he)**: *"הרצועה שלך עוד בלי שם. שימי את השם שלך בין הגרשיים בשורה
-הראשונה, והריצי."*
-**brief (en)**: *"Your cord has no name on it yet. Put your name between the
-quotes on line 1 and run."*
+**What forces variables here.** A build script can always be written with the
+numbers typed in by hand, so each level does two things: the map is built so the
+same value is needed in three, four or six places, and the level's `check.also`
+carries a `source` rule naming the variables the plan must use. A level she can
+beat by typing `place_tower("archer", 2, 3)` four times is not teaching lesson 2,
+and the checker says so in words rather than failing silently.
 
-**starter**
-```python
-hero = ""
-print(hero)
-```
+Every level below was played against the real simulation
+(`assets/js/battle/sim.js`) before it was written down: the stated solution wins
+with the camp untouched, an empty program loses, and the near-misses listed under
+each level were run too.
 
-**solution** (reference; she uses her own name)
-```python
-hero = "Annabeth"
-print(hero)
-```
+### b1 — שם למשבצת / A Name for a Square · 20 XP, 5 🪙
 
-**check** — open-ended content, so it follows lesson 1's e1 pattern: a `source`
-check plus a loose `output` check, both must pass.
+**Why this mechanic**: `place_tower` takes a name in exactly the place it took a
+value yesterday. The starter hands her two finished variables and no tower — the
+only way to get a tower on the field is to put those names inside the brackets.
+
+**brief (he)**: *"שלושה סאטירים בשביל, ומשבצת דשא אחת שמעניינת אותנו: עמודה 2,
+שורה 3.\n\nשתי השורות הראשונות כבר כתובות: `kind` מחזיק את סוג המגדל, ו-`row`
+מחזיק את מספר השורה. הוסיפי שורה שלישית שמציבה מגדל — אבל במקום להקליד את
+הערכים, שימי בסוגריים את **השמות**."*
+
+**brief (en)**: *"Three satyrs on the road, and one patch of grass that matters:
+column 2, row 3.\n\nThe first two lines are already written: `kind` holds the kind
+of tower, `row` holds the row number. Add a third line that places a tower — but
+instead of typing the values, put the **names** inside the brackets."*
+
+**level**
 ```js
-check: [
-  { kind: "source", mustInclude: ["hero"],
-    message: { he: "המשתנה חייב להישאר בשם hero, וצריך להדפיס אותו",
-               en: "Keep the variable called hero, and print it" } },
-  { kind: "output", mode: "regex", expect: "\\S" }
-]
+map: { cols: 8, rows: 6, path: [[0,4],[1,4],[2,4],[3,4],[4,4],[5,4],[6,4],[7,4]] },
+gold: 60, campHp: 3, seed: 1, allowed: ["archer"],
+waves: [ { delay: 0, enemies: [ { kind: "satyr", count: 3, gap: 1.6 } ] } ],
 ```
-The regex is what stops an empty pair of quotes from passing — `hero = ""`
-prints a blank line and fails, which is exactly the feedback she needs.
-
-**hints**
-1. *nudge* (he): *"הריצי את הקוד כמו שהוא. מה הודפס? מה יש עכשיו בתוך `hero`?"*
-   (en): *"Run it as it is. What got printed? What is inside `hero` right now?"*
-2. *tool* (he): *"ערך של string נכנס בין שני הגרשיים. שורה 2 כבר מדפיסה את מה
-   שיש שם — היא לא צריכה שינוי."*
-   (en): *"A string value goes between the two quote marks. Line 2 already
-   prints whatever is there — leave it alone."*
-3. *walkthrough* (he): *"שורה 1 יוצרת שם בשם `hero` ומכניסה לתוכו טקסט. כרגע
-   הטקסט ריק, ולכן הפלט ריק. כתבי את השם שלך בין הגרשיים: `hero = "Annabeth"` —
-   עם השם שלך במקום. שורה 2 נשארת בדיוק כמו שהיא."* → solution unlocks.
-
-### e2 — שלושה חרוזים / Three beads · 20 XP, 5 🪙
-
-**brief (he)**: *"צרי שלושה משתנים: `camper` עם הטקסט `Silena`, `beads` עם המספר
-השלם `4`, ו-`power` עם המספר `7.5`. אחר כך הדפיסי כל אחד בשורה משלו, באותו סדר."*
-**brief (en)**: *"Create three variables: `camper` holding the text `Silena`,
-`beads` holding the whole number `4`, and `power` holding `7.5`. Then print each
-one on its own line, in that order."*
 
 **starter**
 ```python
-# three beads, three kinds of value
+kind = "archer"
+row = 3
 ```
 
 **solution**
 ```python
-camper = "Silena"
-beads = 4
-power = 7.5
-print(camper)
-print(beads)
-print(power)
+kind = "archer"
+row = 3
+place_tower(kind, 2, row)
 ```
 
 **check**
 ```js
-check: { kind: "output", mode: "normalized", expect: "Silena\n4\n7.5" }
+check: {
+  kind: "battle",
+  also: { kind: "source", mustInclude: ["kind", "row"],
+    message: { he: "המגדל צריך לקבל את השמות `kind` ו-`row`, לא את הערכים מוקלדים ביד",
+               en: "The tower has to receive the names `kind` and `row`, not the values typed by hand" } }
+}
 ```
 
-Teaches: quotes on the string, no quotes on the numbers, and that printing a
-variable prints its value.
+**Verified**: one archer at `(2, 3)` clears all three satyrs at 3/3 camp HP.
+`row = 0` places the tower three cells from the road and it never fires — which
+is the failure the engine explains for her. `row = 5` also wins; both sides of the
+road are legal and that is worth her discovering.
 
 **hints**
-1. *nudge* (he): *"כמה שורות פלט צריכות לצאת? וכמה משתנים צריך בשביל זה?"*
-   (en): *"How many lines of output should appear? How many variables does that
-   need?"*
-2. *tool* (he): *"כל משתנה נוצר בשורה משלו בצורה `name = value`. טקסט מקבל
-   גרשיים, מספרים לא. ההדפסה היא `print(name)` — בלי גרשיים."*
-   (en): *"Each variable gets its own line, `name = value`. Text takes quotes,
-   numbers do not. Printing is `print(name)` — no quotes."*
-3. *walkthrough* (he): *"שלוש שורות יצירה ואז שלוש שורות הדפסה. השתיים
-   הראשונות: `camper = "Silena"` ואחריה `beads = 4`. המשיכי באותו דפוס עם
-   `power`, ואז שלוש שורות `print` לפי הסדר."* → solution unlocks.
+1. *nudge* (he): *"שתי השורות הראשונות כבר יצרו שני שמות. מה `kind` מחזיק כרגע, ומה `row` מחזיק?"*
+   (en): *"The first two lines already made two names. What is inside `kind` right now, and what is inside `row`?"*
+2. *tool* (he): *"`place_tower` מקבל שלושה דברים: סוג, עמודה, שורה. במקום הראשון והשלישי אפשר לשים שם של משתנה בלי גרשיים, בדיוק כמו ב-`print(hero)`."*
+   (en): *"`place_tower` takes three things: kind, column, row. In the first and third slot you can put a variable name without quotes, exactly like in `print(hero)`."*
+3. *walkthrough* (he): *"השורה השלישית היא `place_tower(kind, 2, row)`. `kind` בלי גרשיים — Python מחפש את השם ומוצא בפנים את `\"archer\"`. העמודה 2 נשארת מספר מוקלד, כי לא נתנו לה שם. `row` מביא את 3."*
+   (en): *"The third line is `place_tower(kind, 2, row)`. `kind` with no quotes — Python looks the name up and finds `\"archer\"` inside. The column 2 stays a typed number, because we never named it. `row` brings the 3."* → solution unlocks.
 
-### e3 — ראש הצריף מתחלף / The counsellor changes · 25 XP, 8 🪙
+### b2 — אותה שורה, ארבע פעמים / The Same Row, Four Times · 20 XP, 5 🪙
 
-**brief (he)**: *"קלריס לקחה פיקוד. אל תשני את השורות הקיימות — הוסיפי מתחתן
-שורות שמכניסות ל-`head_counselor` את `Clarisse` ול-`cabin_number` את `5`, ואז
-מדפיסות את שניהם שוב. המרשם צריך להראות מי היה ומי עכשיו."*
-**brief (en)**: *"Clarisse has taken over. Do not change the existing lines —
-add lines underneath that put `Clarisse` into `head_counselor` and `5` into
-`cabin_number`, then print both again. The registry has to show who it was and
-who it is now."*
+**Why this mechanic**: four towers, one row, one kind. Written with values, the
+plan repeats `"archer"` and `3` four times each; written with names, the row is
+decided in one place. The level is tuned so that three towers lose, so she cannot
+stop at two lines and hope.
+
+**brief (he)**: *"הפעם מגיעים גם כלבי גיהינום, והם עבים. ארבעה סאטירים מהירים
+קודם, ואחריהם ארבעה כלבים עם שריון.\n\nיש לך 220 זהב וקשת עולה 50 — כלומר בדיוק
+ארבעה מגדלים. פזרי אותם לאורך הדרך, כולם על אותה שורה, ותני לשורה שם."*
+
+**brief (en)**: *"This time hellhounds are coming too, and they are thick-skinned.
+Four fast satyrs first, then four armoured dogs.\n\nYou have 220 gold and an
+archer costs 50 — which is exactly four towers. Spread them along the road, all on
+the same row, and give that row a name."*
+
+**level**
+```js
+map: { cols: 12, rows: 7, path: [[0,4],[1,4],[2,4],[3,4],[4,4],[5,4],[6,4],[7,4],[8,4],[9,4],[10,4],[11,4]] },
+gold: 220, campHp: 3, seed: 2, allowed: ["archer"],
+waves: [
+  { delay: 0, enemies: [ { kind: "satyr", count: 4, gap: 0.8 } ] },
+  { delay: 9, enemies: [ { kind: "hellhound", count: 4, gap: 1.3 } ] },
+],
+```
 
 **starter**
 ```python
-head_counselor = "Annabeth"
-cabin_number = 6
-print(head_counselor)
-print(cabin_number)
-# add your lines below
+kind = "archer"
+row = 3
+place_tower(kind, 1, row)
 ```
 
 **solution**
 ```python
-head_counselor = "Annabeth"
-cabin_number = 6
-print(head_counselor)
-print(cabin_number)
-head_counselor = "Clarisse"
-cabin_number = 5
-print(head_counselor)
-print(cabin_number)
+kind = "archer"
+row = 3
+place_tower(kind, 1, row)
+place_tower(kind, 4, row)
+place_tower(kind, 7, row)
+place_tower(kind, 10, row)
 ```
 
 **check**
 ```js
-check: { kind: "output", mode: "normalized",
-         expect: "Annabeth\n6\nClarisse\n5" }
+check: {
+  kind: "battle",
+  also: { kind: "source", mustInclude: ["kind", "row"],
+    message: { he: "כל מגדל צריך לקבל את `kind` ואת `row` — שם אחד לסוג, שם אחד לשורה",
+               en: "Every tower must receive `kind` and `row` — one name for the kind, one for the row" } }
+}
 ```
-The check enforces the "don't edit the top" instruction for free: the old values
-must still appear first, which can only happen if the first two `print` calls run
-before the reassignment.
 
-Teaches: a name holds one value at a time, reassignment replaces it, and a
-`print` that already ran cannot be retroactively changed.
+**Verified**: four archers at columns 1, 4, 7 and 10 hold at 3/3. Three archers
+leak two monsters. Four on row 5 (the other side of the road) also wins. A fifth
+`place_tower` costs her nothing at all: there are only 20 drachmas left, the
+engine refuses the build and tells her the tower costs 50.
 
 **hints**
-1. *nudge* (he): *"מה קורה למשתנה אם כותבים לו `=` פעם שנייה, בשורה מאוחרת יותר?
-   ומה קורה ל-`print` שכבר רץ לפני זה?"*
-   (en): *"What happens to a variable if you write `=` to it a second time,
-   further down? And what happens to a `print` that already ran?"*
-2. *tool* (he): *"אפשר להשים ערך חדש לשם קיים בדיוק כמו שיצרת אותו:
-   `head_counselor = "Clarisse"`. אחרי זה כל `print` חדש יראה את הערך החדש."*
-   (en): *"You assign a new value to an existing name exactly the way you
-   created it: `head_counselor = "Clarisse"`. Every `print` after that shows the
-   new value."*
-3. *walkthrough* (he): *"את צריכה ארבע שורות חדשות מתחת לקיימות: שתיים שמשנות
-   את הערכים ושתיים שמדפיסות. הראשונה היא `head_counselor = "Clarisse"`, אחריה
-   `cabin_number = 5`, ואז `print(head_counselor)` ו-`print(cabin_number)`."*
-   → solution unlocks.
+1. *nudge* (he): *"220 חלקי 50 — כמה מגדלים זה? וכמה שורות `place_tower` יש לך כרגע?"*
+   (en): *"220 divided by 50 — how many towers is that? And how many `place_tower` lines do you have right now?"*
+2. *tool* (he): *"העתיקי את השורה שכבר קיימת עוד שלוש פעמים ושני **רק את העמודה** בכל אחת. `kind` ו-`row` נשארים אותם שמות בכל ארבע השורות."*
+   (en): *"Copy the line you already have three more times and change **only the column** in each. `kind` and `row` stay the same names on all four lines."*
+3. *walkthrough* (he): *"ארבע שורות, אותו סוג, אותה שורה, עמודות שונות: `1`, `4`, `7`, `10`. אם אחר כך תרצי להעביר את כל הקיר לשורה 5, תשני את `row = 3` ל-`row = 5` — שורה אחת, וכל ארבעת המגדלים זזים."*
+   (en): *"Four lines, same kind, same row, different columns: `1`, `4`, `7`, `10`. If you later want the whole wall on row 5, change `row = 3` to `row = 5` — one line, and all four towers move."* → solution unlocks.
 
-### e4 — מה אני מחזיקה? / What am I holding? · 30 XP, 8 🪙
+### b3 — פנקס הרב־טוראי / The Quartermaster's Ledger · 25 XP, 8 🪙
 
-**brief (he)**: *"כירון מרים ארבעה דברים אחד אחרי השני ושואל מה כל אחד מהם.
-הדפיסי את הטיפוס של כל אחד, לפי הסדר: הטקסט `Percy`, המספר `12`, המספר `1.75`,
-והטקסט `"12"` — כן, זה עם הגרשיים. ארבע שורות פלט."*
-**brief (en)**: *"Chiron holds up four things and asks what each one is. Print
-the type of each, in order: the text `Percy`, the number `12`, the number
-`1.75`, and the text `"12"` — yes, that one has quotes. Four lines of output."*
+**Why this mechanic**: this is the only level in the course where `type()` is the
+whole task, and the battle supplies the three types honestly — the tower kind is a
+`str`, the gold in the chest is an `int`, and the archer's range is a `float`. It
+also teaches the thing reassignment is really about: `gold = get_gold()` copies the
+number **at that moment**. Read the chest after building and the ledger is wrong.
+
+**brief (he)**: *"לפני כל קרב הרב־טוראי רושם שלוש שורות בפנקס, ואז מאשר שהוא לא
+התבלבל בין טקסט למספר.\n\nצרי שלושה משתנים: `kind` עם סוג המגדל, `gold` עם מה
+ש-`get_gold()` מחזיר, ו-`tower_range` עם הטווח של הקשת — `2.6`. הדפיסי את שלושת
+הערכים, ואז את שלושת הטיפוסים שלהם, בסדר הזה. שש שורות פלט.\n\nהרב־טוראי סופר
+את התיבה **לפני** שקונים משהו. ואחרי הפנקס — בני הגנה שמחזיקה."*
+
+**brief (en)**: *"Before every battle the quartermaster writes three lines in his
+ledger, then certifies that he has not confused text with a number.\n\nMake three
+variables: `kind` with the tower kind, `gold` with whatever `get_gold()` hands
+back, and `tower_range` with the archer's range — `2.6`. Print the three values,
+then their three types, in that order. Six lines of output.\n\nThe quartermaster
+counts the chest **before** anything is bought. And after the ledger — build a
+defense that holds."*
+
+**level**
+```js
+map: { cols: 10, rows: 7, path: [[0,4],[1,4],[2,4],[3,4],[4,4],[5,4],[6,4],[7,4],[8,4],[9,4]] },
+gold: 200, campHp: 3, seed: 5, allowed: ["archer"],
+waves: [
+  { delay: 0, enemies: [ { kind: "satyr", count: 6, gap: 0.6 } ] },
+  { delay: 10, enemies: [ { kind: "harpy", count: 6, gap: 0.7 } ] },
+],
+```
 
 **starter**
 ```python
-# four things. what is each one, really?
+kind = "archer"
+gold = get_gold()
+tower_range = 2.6
+
+# print the six ledger lines here
+
+place_tower(kind, 2, 3)
 ```
 
 **solution**
 ```python
-print(type("Percy"))
-print(type(12))
-print(type(1.75))
-print(type("12"))
+kind = "archer"
+gold = get_gold()
+tower_range = 2.6
+
+print(kind)
+print(gold)
+print(tower_range)
+print(type(kind))
+print(type(gold))
+print(type(tower_range))
+
+place_tower(kind, 2, 3)
+place_tower(kind, 5, 3)
+place_tower(kind, 8, 3)
 ```
-(An equally valid solution stores each in a variable first and prints
-`type(name)`. Both pass.)
 
 **check**
 ```js
-check: { kind: "output", mode: "normalized",
-         expect: "<class 'str'>\n<class 'int'>\n<class 'float'>\n<class 'str'>" }
+check: {
+  kind: "battle",
+  also: { kind: "output", mode: "normalized",
+          expect: "archer\n200\n2.6\n<class 'str'>\n<class 'int'>\n<class 'float'>" }
+}
 ```
+
+**Verified** against Skulpt: `get_gold()` really does come back as an `int`, and
+`2.6` prints as `2.6`. Three archers at columns 2, 5 and 8 hold at 3/3; two leak.
+Calling `get_gold()` after the towers are placed prints `50` and fails the ledger —
+which is the lesson, not a trap: a name holds the value it was given, and the chest
+had already been emptied.
 
 **hints**
-1. *nudge* (he): *"שלושה מהארבעה הם בדיוק מה שהם נראים. אחד מהם משקר — איזה?"*
-   (en): *"Three of the four are exactly what they look like. One of them is
-   lying — which?"*
-2. *tool* (he): *"`type(x)` מחזיר את הטיפוס של `x`, ו-`print` מראה אותו. אפשר
-   לשים אחד בתוך השני: `print(type(12))`."*
-   (en): *"`type(x)` gives the type of `x`, and `print` shows it. You can nest
-   them: `print(type(12))`."*
-3. *walkthrough* (he): *"ארבע שורות, כל אחת בצורה `print(type(...))`. הראשונה:
-   `print(type("Percy"))`. השנייה עם `12` בלי גרשיים. השלישית עם `1.75`.
-   הרביעית עם `"12"` — עם גרשיים, וזאת בדיוק הנקודה: היא תדפיס `<class 'str'>`."*
-   → solution unlocks.
+1. *nudge* (he): *"שלוש שורות ראשונות בפלט הן הערכים עצמם, ושלוש האחרונות הן שאלה אחרת לגמרי: **מה זה** כל אחד מהם."*
+   (en): *"The first three output lines are the values themselves. The last three ask a completely different question: **what** each one is."*
+2. *tool* (he): *"`print(gold)` מדפיס את הערך, `print(type(gold))` מדפיס את הטיפוס. שימי לב מה יש גרשיים ומה אין — `2.6` הוא מספר עם נקודה, לא טקסט."*
+   (en): *"`print(gold)` prints the value, `print(type(gold))` prints the type. Watch which things have quotes and which do not — `2.6` is a number with a dot, not text."*
+3. *walkthrough* (he): *"שש שורות `print` לפי הסדר: `kind`, `gold`, `tower_range`, ואז `type(kind)`, `type(gold)`, `type(tower_range)`. אם `gold` יוצא 50 במקום 200 — קראת את התיבה אחרי שכבר קנית. העבירי את `gold = get_gold()` למעלה, לפני שורות ה-`place_tower`. ואחרי הפנקס צריך שלושה מגדלים כדי להחזיק את הגל."*
+   (en): *"Six `print` lines in order: `kind`, `gold`, `tower_range`, then `type(kind)`, `type(gold)`, `type(tower_range)`. If `gold` comes out as 50 instead of 200, you read the chest after you had already spent. Move `gold = get_gold()` above the `place_tower` lines. And after the ledger you need three towers to hold the wave."* → solution unlocks.
 
-## Quest — "מגילת המרשם / The Registry Scroll" · 50 XP, 12 🪙
+### b4 — התוכנית משתנה / The Plan Changes · 30 XP, 8 🪙
 
-**brief (he)**: *"כירון מכתיב לך רשומה חדשה למגילה, ואת רושמת. צרי משתנה לכל
-שדה, ואז הדפיסי את המגילה בדיוק בסדר הזה. השורה הראשונה היא כותרת — טקסט קבוע,
-לא משתנה. השורה האחרונה היא אישור: הטיפוס של `power`, כדי שהמרשם יידע שזה מספר
-עשרוני ולא טקסט."*
+**Why this mechanic**: the road turns, so the wall has to move — and a name that
+holds one value at a time is exactly the tool for that. She writes `row = 2`, uses
+it twice, writes `row = 6`, and uses it twice more. The same name, two values,
+never at the same moment.
 
-**brief (en)**: *"Chiron dictates a new registry entry and you write it down.
-Make a variable for each field, then print the scroll in exactly this order. The
-first line is a heading — fixed text, not a variable. The last line is the
-certification: the type of `power`, so the registry knows it is a float and not
-text."*
+**brief (he)**: *"הדרך הפעם יורדת: היא רצה למעלה עד עמודה 5, פונה למטה, וממשיכה
+לאורך שורה 5 עד השער.\n\nיש לך 220 זהב — ארבעה מגדלים. שניים לא יספיקו, ושניהם
+צריכים להיות ליד החלק העליון; שני האחרים ליד החלק התחתון.\n\nהשתמשי ב-`row`
+פעמיים: תני לו את השורה העליונה, בני שני מגדלים, ואז **תני לאותו שם ערך חדש** ובני
+את שני האחרים."*
 
-Field names she must use: `full_name`, `cabin`, `cabin_number`, `summers`,
-`power`.
+**brief (en)**: *"The road drops this time: it runs along the top to column 5, turns
+down, and continues along row 5 to the gate.\n\nYou have 220 gold — four towers. Two
+will not hold, and both of those belong beside the top stretch; the other two beside
+the bottom one.\n\nUse `row` twice: give it the top row, build two towers, then
+**give the same name a new value** and build the other two."*
 
-Required output — exactly seven lines:
+**level**
+```js
+map: {
+  cols: 14, rows: 7,
+  path: [[0,1],[1,1],[2,1],[3,1],[4,1],[5,1],[5,2],[5,3],[5,4],[5,5],
+         [6,5],[7,5],[8,5],[9,5],[10,5],[11,5],[12,5],[13,5]],
+},
+gold: 220, campHp: 3, seed: 6, allowed: ["archer"],
+waves: [
+  { delay: 0, enemies: [ { kind: "satyr", count: 6, gap: 0.7 } ] },
+  { delay: 10, enemies: [ { kind: "hellhound", count: 4, gap: 1.3 } ] },
+],
 ```
-CAMP HALF-BLOOD REGISTRY
-Luke Castellan
-Hermes
-11
-2
-6.5
-<class 'float'>
+
+**starter**
+```python
+kind = "archer"
+row = 2
+place_tower(kind, 2, row)
+place_tower(kind, 4, row)
 ```
 
 **solution**
 ```python
-# registry entry, dictated by Chiron
-full_name = "Luke Castellan"
-cabin = "Hermes"
-cabin_number = 11
-summers = 2
-power = 6.5
-
-print("CAMP HALF-BLOOD REGISTRY")
-print(full_name)
-print(cabin)
-print(cabin_number)
-print(summers)
-print(power)
-print(type(power))
+kind = "archer"
+row = 2
+place_tower(kind, 2, row)
+place_tower(kind, 4, row)
+row = 4
+place_tower(kind, 7, row)
+place_tower(kind, 10, row)
 ```
 
 **check**
 ```js
-check: { kind: "output", mode: "normalized",
-         expect: "CAMP HALF-BLOOD REGISTRY\nLuke Castellan\nHermes\n11\n2\n6.5\n<class 'float'>" }
+check: {
+  kind: "battle",
+  also: { kind: "source", mustInclude: ["kind", "row"],
+    message: { he: "התוכנית צריכה להשתמש ב-`kind` וב-`row` — ושם אחד יכול להחזיק ערך חדש באמצע",
+               en: "The plan must use `kind` and `row` — and one name is allowed to hold a new value part-way down" } }
+}
 ```
 
-Why this is the right quest: it is the whole lesson in one artefact — a fixed
-string from lesson 1, five variables of three different types, and `type()` as a
-proof. It is long enough to feel like real work and contains nothing she has not
-met in the last twenty minutes. If `power` is written as `6` instead of `6.5` the
-last line reports `<class 'int'>` and the check fails, which teaches the
-int/float distinction better than any paragraph could.
+**Verified**: the starter's two towers leak three monsters and lose. Two on row 2
+plus two on row 4 hold at 3/3, and so does `row = 6` for the bottom pair — the
+road has grass on both sides. Three towers of any arrangement leak.
 
 **hints**
-1. *nudge* (he): *"תספרי את שורות הפלט. כמה מהן טקסט קבוע וכמה מהן ערכים של
-   משתנים? ומה השורה האחרונה בעצם מבקשת ממך?"*
-   (en): *"Count the output lines. How many are fixed text and how many are
-   values of variables? And what is that last line actually asking for?"*
-2. *tool* (he): *"השורה הראשונה היא string רגיל בתוך `print`, עם גרשיים. חמש
-   השורות שאחריה הן שמות משתנים בלי גרשיים. השורה האחרונה היא `type()` על
-   המשתנה האחרון."*
-   (en): *"The first line is an ordinary string inside `print`, with quotes. The
-   five after it are variable names without quotes. The last line is `type()` on
-   the last variable."*
-3. *walkthrough* (he): *"קודם חמש שורות יצירה, אחת לכל שדה — למשל
-   `full_name = "Luke Castellan"`, אחריה `cabin = "Hermes"`, אחריה
-   `cabin_number = 11`. שימי לב: `11` ו-`2` בלי גרשיים כי הם מספרים שלמים,
-   ו-`power` הוא `6.5` עם נקודה. אחר כך שבע שורות `print`: הראשונה
-   `print("CAMP HALF-BLOOD REGISTRY")`, ואז אחת לכל משתנה לפי הסדר, ובסוף
-   `print(type(power))`."* → solution unlocks.
+1. *nudge* (he): *"המגדלים בשורה 2 רואים רק את החלק העליון של הדרך. מי שומר על החלק שאחרי הפנייה?"*
+   (en): *"Towers on row 2 only see the top stretch of the road. Who is watching the part after the bend?"*
+2. *tool* (he): *"אפשר לכתוב `row = 4` באמצע התוכנית. מהשורה הזאת והלאה, כל `place_tower` שמקבל `row` יקבל את הערך החדש — מה שכבר רץ למעלה נשאר כמו שהיה."*
+   (en): *"You can write `row = 4` in the middle of the plan. From that line onwards every `place_tower` that receives `row` gets the new value — what already ran above stays as it was."*
+3. *walkthrough* (he): *"שני מגדלים ראשונים בעמודות 2 ו-4 עם `row = 2`. אחריהם שורה אחת: `row = 4`. ואז עוד שני מגדלים, בעמודות 7 ו-10, שמקבלים בדיוק את אותו `row` — רק שעכשיו יש בו 4."*
+   (en): *"The first two towers at columns 2 and 4 with `row = 2`. Then one line: `row = 4`. Then two more towers at columns 7 and 10, receiving that same `row` — which now holds 4."* → solution unlocks.
+
+## The great battle — "שרשרת המגדלים / The Necklace of Towers" · 50 XP, 12 🪙
+
+**Why this mechanic**: the biggest map so far, three waves, and exactly six towers
+of budget. The road runs along the top, drops, comes back up — so the wall is
+written in two halves, with one `row` reassigned between them. Six `place_tower`
+lines with the values typed by hand is a wall of noise; with two names it reads
+like a plan, which is the whole argument for variables.
+
+**brief (he)**: *"הלילה הראשון שבו כירון לא עומד לידך.\n\nשלושה גלים: סאטירים
+מהירים, אחריהם הרפיות, ובסוף תשעה כלבי גיהינום — והדרך מתפתלת פעמיים.
+320 זהב, קשת ב-50: שישה מגדלים, ועודף של 20.\n\nתני שם לסוג המגדל ושם לשורה שאת
+בונה עליה, ושני את השורה כשהדרך משנה כיוון. חמישה מגדלים לא מחזיקים — נסי, וצפי
+איפה זה נשבר."*
+
+**brief (en)**: *"The first night Chiron is not standing beside you.\n\nThree waves:
+fast satyrs, then harpies, then nine hellhounds — and the road bends twice. 320 gold,
+an archer at 50: six towers and twenty drachmas of change.\n\nGive the tower kind a name and the row you
+are building on a name, and change the row when the road changes direction. Five
+towers do not hold — try it, and watch where it breaks."*
+
+**level**
+```js
+map: {
+  cols: 14, rows: 8,
+  path: [[0,2],[1,2],[2,2],[3,2],[4,2],[4,3],[4,4],[4,5],[5,5],[6,5],[7,5],[8,5],
+         [9,5],[9,4],[9,3],[9,2],[10,2],[11,2],[12,2],[13,2]],
+},
+gold: 320, campHp: 3, seed: 7, allowed: ["archer"],
+waves: [
+  { delay: 0,  enemies: [ { kind: "satyr", count: 9, gap: 0.45 } ] },
+  { delay: 12, enemies: [ { kind: "harpy", count: 9, gap: 0.55 } ] },
+  { delay: 26, enemies: [ { kind: "hellhound", count: 9, gap: 0.9 } ] },
+],
+```
+
+**starter**
+```python
+# The Necklace of Towers
+kind = "archer"
+row = 1
+place_tower(kind, 2, row)
+place_tower(kind, 3, row)
+```
+
+**solution**
+```python
+# The Necklace of Towers
+kind = "archer"
+row = 1
+place_tower(kind, 2, row)
+place_tower(kind, 3, row)
+row = 4
+place_tower(kind, 5, row)
+place_tower(kind, 6, row)
+place_tower(kind, 7, row)
+place_tower(kind, 8, row)
+```
+
+**check**
+```js
+check: {
+  kind: "battle",
+  also: { kind: "source", mustInclude: ["kind", "row"],
+    message: { he: "השתמשי בשם אחד לסוג המגדל ובשם אחד לשורה, ושני את השורה כשהדרך משנה כיוון",
+               en: "Use one name for the tower kind and one for the row, and change the row when the road changes direction" } }
+}
+```
+
+**Verified**: the six towers above finish all 27 monsters at 3/3. Five towers leak
+two. Three on the top and three by the bottom stretch also wins, and so does a
+version that saves one tower for the return stretch at `(11, 1)` — several plans
+work, which is what makes it feel like a plan. A seventh `place_tower` is refused
+for lack of gold, with the engine naming the price.
+
+**hints**
+1. *nudge* (he): *"320 חלקי 50 — כמה מגדלים, וכמה עודף? ואיפה על המפה המפלצות הולכות הכי הרבה זמן?"*
+   (en): *"320 divided by 50 — how many towers, and how much change? And where on the map do the monsters spend the most time?"*
+2. *tool* (he): *"בני בשני חלקים: קודם `row` של החלק העליון ושני מגדלים, אחר כך `row` חדש ליד החלק התחתון ועוד ארבעה. הכלבים בגל האחרון הם החלק הקשה — הם עבים ואיטיים, וצריך מספיק חצים באותו קטע דרך."*
+   (en): *"Build in two halves: first a `row` for the top stretch and two towers, then a new `row` beside the bottom stretch and four more. The hounds in the last wave are the hard part — they are slow and thick, and they need enough arrows on the same stretch of road."*
+3. *walkthrough* (he): *"`kind = \"archer\"` פעם אחת. `row = 1` ושני מגדלים בעמודות 2 ו-3, שמכסים את הכניסה. אחר כך `row = 4`, וארבעה מגדלים בעמודות 5, 6, 7 ו-8 — כולם צופים על הקטע התחתון, שם הכלבים הולכים הכי לאט. זה 300 מתוך 320."*
+   (en): *"`kind = \"archer\"` once. `row = 1` and two towers at columns 2 and 3, covering the entrance. Then `row = 4`, and four towers at columns 5, 6, 7 and 8 — all watching the bottom stretch, where the hounds walk slowest. That is 300 of your 320."* → solution unlocks.
 
 ## Reward & Recap
 
@@ -481,9 +631,9 @@ value and gives it a name you can come back to."*
 **Achievements possible here**
 - *קוראת בשמות / Namer of Things* — created and printed a variable for the first
   time.
-- *בלשית טיפוסים / Type Detective* — ran a program with four or more `type()`
-  calls (e4).
-- *עקשנית / Persistent* (global) — solved an exercise after five failed runs.
+- *בלשית טיפוסים / Type Detective* — ran a battle with three or more `type()`
+  calls (b3).
+- *עקשנית / Persistent* (global) — won a battle after five failed runs.
 - *בלי רמזים / No Hints Needed* (global) — finished the lesson without buying a
   hint.
 
@@ -491,9 +641,10 @@ value and gives it a name you can come back to."*
 - משתנה הוא שם שמחזיק ערך: `beads = 4`
 - `=` זה לא "שווה" — זה חץ שמאלה: תכניס את הערך לתוך השם
 - `print(hero)` בלי גרשיים מדפיס את הערך, `print("hero")` עם גרשיים מדפיס טקסט
+- שם עובד בכל מקום שבו ערך עבד — גם בתוך `place_tower(kind, 2, row)`
 - שלושה טיפוסים בסיסיים: `str` (טקסט), `int` (מספר שלם), `float` (מספר עם נקודה)
 - `type(x)` מגלה מה יש באמת בפנים — ו-`"4"` בגרשיים הוא `str`, לא מספר
-- השמה חוזרת מחליפה את הערך הישן; מה שכבר הודפס נשאר מודפס
+- השמה חוזרת מחליפה את הערך הישן; מה שכבר הודפס נשאר מודפס, ומה שכבר נבנה נשאר בנוי
 - `NameError` אומר: שגיאת כתיב, אות גדולה, או שהשורה שיוצרת את המשתנה עוד לא רצה
 
 **Next teaser** (he): *"עכשיו התוכנית שלך זוכרת. מחר היא תשאל אותך שאלה — ותחכה
@@ -513,7 +664,12 @@ for the answer."*
 | `2beads = 5` | `SyntaxError: invalid decimal literal` | a name cannot start with a digit |
 | `camp name = "x"` | `SyntaxError: invalid syntax` | no spaces in names — use `camp_name` |
 | `"Percy" = hero` (arrow reversed) | `SyntaxError: cannot assign to literal here. Maybe you meant '==' instead of '='?` | the name goes on the left, always |
-| expects `power = 6` to be a float | last quest line prints `<class 'int'>` | a float needs a dot: `6.0` or `6.5` |
+| writes `tower_range = 2` in b3 | the last ledger line prints `<class 'int'>` | a float needs a dot: `2.6`, not `2` |
+| `place_tower("archer", 2, row)` after being told to use the names | the battle is **won** and the level still fails | the `also` message names the two variables; the level is about the names, not the win |
+| builds on a brown square | the engine says "you cannot build on the path itself" | towers stand on the grass beside the road |
+| builds on row 0 in b1 | the tower never fires — `targetsSeen` is 0 and the engine says so | further than ~2.6 cells from the road is out of range |
+| a fifth `place_tower` in b2 | "not enough gold for that tower — it costs 50 and you had 20" | 220 gold is exactly four archers; the engine refuses, it does not overdraw |
+| reads `get_gold()` after building in b3 | the ledger prints `50` instead of `200` | the name copies the value *at that moment* |
 
 **Skulpt fidelity note.** The `NameError` text above is byte-identical in Skulpt
 and CPython — that is why it is the lesson's `error` block. The two `SyntaxError`
@@ -523,24 +679,39 @@ containing `=` to the Hebrew hint "בדקי שאין רווח בשם, ושהשם
 
 ## Implementation notes
 
-- **No `input()` in this lesson.** Nothing blocks on a prompt; every check is a
-  plain run. `input()` arrives in lesson 3.
-- **`check` may be an array**, as established by lesson 1's e1: every entry must
-  pass. e1 here uses the same `source` + loose `output` pattern, which is the
-  standard shape for any exercise whose content she chooses.
+- **No `input()` in this lesson.** Nothing blocks on a prompt; every level is a
+  plain build script plus a battle. `input()` arrives in lesson 3.
+- **Every level is `check.kind: "battle"`.** Four of the five carry a `source`
+  rule in `check.also` naming the variables, and b3 carries an `output` rule
+  instead. `checker.js` already supports both shapes of `also`; note that
+  `verify-python.mjs` currently only re-checks `also` when it is a `source` rule,
+  so **b3's output requirement is not covered by the verifier until that is
+  extended** (one line in `runBattleCheck`). Do it while building this lesson —
+  lessons 3 and 4 depend on it much more heavily.
+- **`mustInclude: ["kind"]` matches whole words**, so `tower_kind` does not
+  satisfy it and `top_row` does not satisfy `row`. That is deliberate: the brief
+  names the two variables, and the failure message repeats them.
 - **Define `normalized` precisely, because lessons 3 and 4 depend on it**: trim
   each line, collapse runs of spaces and tabs *within* a line, drop leading and
   trailing blank lines — but **keep the line breaks**. A checker that collapsed
-  `\n` into a space would let a single `print("Silena 4 7.5")` pass e2, which
-  defeats the exercise.
+  `\n` into a space would let a single `print("archer 200 2.6")` pass b3, which
+  defeats the level.
 - **Verify `type()` output in Skulpt before shipping**:
   `node tools/verify-python.mjs` must confirm that `print(type("x"))` produces
-  exactly `<class 'str'>`. e4 and the quest both hard-code that string. If Skulpt
-  ever renders it differently, both checks change to
-  `{ kind: "output", mode: "regex", expect: "str[\\s\\S]*int[\\s\\S]*float[\\s\\S]*str" }`
+  exactly `<class 'str'>`. b3 hard-codes all three strings. Already checked in
+  this engine: `type(get_gold())` is `<class 'int'>` and `type(2.6)` is
+  `<class 'float'>`. If Skulpt ever renders them differently, b3's check becomes
+  `{ kind: "output", mode: "regex", expect: "str[\\s\\S]*int[\\s\\S]*float" }`
   rather than the lesson changing.
-- **Floats print without dressing up**: `print(7.5)` gives `7.5`, and `print(6.0)`
-  gives `6.0` — not `6`. The quest depends on `6.5` staying `6.5`.
+- **Floats print without dressing up**: `print(2.6)` gives `2.6`, and `print(6.0)`
+  gives `6.0` — not `6`. b3 depends on `2.6` staying `2.6`.
+- **Level numbers are load-bearing and were tuned against the simulation.** Gold
+  is always an exact multiple of 50 plus small change, so "how many towers can I
+  afford" has a clean answer she will need in lesson 4. Do not retune a wave
+  without re-running the level: three archers lose b2 by exactly two leaks, and
+  five lose the great battle by two.
+- **Seeds** are 1, 2, 5, 6, 7 for b1–b4 and the great battle. They are fixed so
+  the replay is identical every time; changing a seed changes the battle.
 - **Editor**: the smart-quote normalisation from lesson 1 matters more here,
   because she now types quotes on the right-hand side of `=` as well as inside
   `print`.

@@ -12,7 +12,7 @@
 | **new vocabulary** | `.strip`, `.upper`, `.lower`, `.replace`, `.split`, `.join`, `.center`, `f"{x:.1f}"` |
 | **requires** | L1 strings · L3 f-strings · L6 `if` · L8 `for` · L9–10 lists, indexing, slicing, `len` · L11 dicts · L13–14 functions and `return` |
 | **item** | 📜 מגילת האורקל / The Oracle's Scroll |
-| **XP** | 25 + 25 + 30 + 35 (training) + 55 (quest) + 30 (bonus) = **200** |
+| **XP** | 25 + 25 + 30 + 35 (battles) + 55 (great battle) + 30 (bonus) = **200** |
 
 ## Teaching goal
 
@@ -28,6 +28,12 @@ that, everything in this lesson is a variation on something she can already do.
 The second thing she must leave with, because it will bite her for years:
 **string methods return a new string. They never change the original.**
 
+The battles make both of these mechanical rather than academic. In the first
+level the only tower she is allowed to build has its name hidden inside a padded
+string — no decode, no tower, no defense. In the last one, nine lines of
+prophecy spell out that name down their first letters, and a missing `.strip()`
+turns the answer into whitespace and builds nothing at all.
+
 ## Story beat
 
 Act IV ended in the Labyrinth. Act V opens above ground, and the news is worse.
@@ -37,8 +43,11 @@ capitals, some in fragments, and the pieces are out of order. Annabeth has the
 scroll spread on the ping-pong table in the Big House and cannot make it say
 anything.
 
-Chiron does not offer to translate it. He points out that a prophecy is text, and
-text is something she now knows how to take apart.
+Chiron does not offer to translate it. He points out that a prophecy is text,
+text is something she now knows how to take apart — and that the Oracle does not
+send poetry. She sends **instructions**: the name of a tower the camp has never
+been permitted to raise, the order in which the monsters have to die, and a
+build plan written in a shorthand nobody has bothered to expand.
 
 The Prophecy panel (3–6 lines, no code):
 
@@ -221,249 +230,449 @@ print(line.strip()[0:3])
 Intro: *"המגילה שלך עכשיו. שני את הטקסט, נסי methods אחרים, שרשרי אותם אחד אחרי
 השני עם נקודות. שום דבר פה לא נבדק — תשברי אותו כמה שבא לך."*
 
-## Training exercises
+## Battle levels
 
-### e1 — The Oracle shouts · 25 XP, 6 🪙
+Five battles. The control model is the one she graduated to in lesson 14 — a
+build script plus a `choose_target` the game calls every time a tower needs a
+target — and every level here is decided by **text she has to take apart before
+it means anything**.
 
-The line arrived padded with whitespace and in lower case. The camp reads
-prophecies aloud, in capitals, between two seal marks.
+Every level was run through the real engine (`node tools/try-level.mjs`). For
+each one: the stated solution wins with a perfect defense, an empty program
+loses, and where the level is about targeting, the degenerate answers
+(`return 0`, `return enemies[0]`, `return None`) all lose. The measured numbers
+are recorded under each level.
+
+---
+
+### b1 — The Sealed Word · המילה החתומה · 25 XP, 6 🪙
+
+**Why this mechanic:** the level allows **one tower kind and she is not told its
+name in a form she can type**. The name exists only inside a padded, capitalised,
+X-wrapped string. Without `.strip()`, a slice and `.lower()` she places nothing
+at all, and nothing is what stops the harpies.
+
+Hermes delivers a sealed line from the Oracle. Inside it is the name of a tower
+the camp has never been allowed to build.
+
+```js
+map: { cols: 12, rows: 7,
+       path: [[0,3],[1,3],[2,3],[3,3],[4,3],[5,3],[6,3],[7,3],[8,3],[9,3],[10,3],[11,3]] },
+gold: 240, campHp: 4, seed: 31,
+allowed: ["lightning"],
+waves: [ { delay: 0, enemies: [ { kind: "satyr", count: 6, gap: 0.9 },
+                                { kind: "harpy", count: 4, gap: 1.1 } ] } ],
+```
 
 Starter:
 ```python
-line = "   a hero shall rise from the sea   "
-# print the line cleaned, in capitals, between [ and ]
-```
+SEALED = "   XXXLIGHTNINGXXX   "
 
-Required output:
-```
-[A HERO SHALL RISE FROM THE SEA]
+# the tower's name is inside SEALED.
+# clean the edges, cut off the three X on each side, make it lower case,
+# then build two of them at (4, 2) and (8, 4).
 ```
 
 Solution:
 ```python
-line = "   a hero shall rise from the sea   "
-print("[" + line.strip().upper() + "]")
+SEALED = "   XXXLIGHTNINGXXX   "
+tower = SEALED.strip()[3:-3].lower()
+
+place_tower(tower, 4, 2)
+place_tower(tower, 8, 4)
 ```
 
-- **check**: `{ kind: "output", mode: "normalized", expect: "[A HERO SHALL RISE FROM THE SEA]" }`
-- The brackets are not decoration — they are what makes `.strip()` testable.
-  Without them, whitespace normalisation would let an unstripped line pass.
-- hints:
-  1. הריצי את הקוד עם הסוגריים המרובעים מסביב, בלי לנקות כלום. מה את רואה בין
-     ה-`[` לבין ה-`a`?
-  2. את צריכה שניים: אחד שמוריד רווחים מהקצוות ואחד שהופך לאותיות גדולות.
-     שניהם methods של מחרוזת, שניהם עם נקודה.
-  3. `line.strip()` מחזיר מחרוזת בלי הרווחים. אפשר להדביק עליו עוד נקודה מיד:
-     `line.strip().upper()`. השרשור עובד כי כל method מחזיר מחרוזת חדשה שאפשר
-     להמשיך לעבוד עליה.
+```js
+check: { kind: "battle",
+  also: { kind: "source", raw: true,
+          mustExclude: ["\"lightning\"", "'lightning'"],
+          message: { he: "את שם המגדל צריך לחלץ מהמגילה, לא להקליד אותו",
+                     en: "The tower's name has to come out of the scroll, not off your keyboard" } } }
+```
 
-### e2 — Past the guards · 25 XP, 6 🪙
+Verified: solution wins 4/4 HP, ten kills. Empty program loses 4–0.
+`place_tower("archer", …)` is rejected as `notAllowed` and the level says so.
+`place_tower("LIGHTNING", …)` is rejected as `unknownTower` — the `.lower()` is
+load-bearing and the engine explains why. One lightning tower instead of two
+leaks exactly one monster, which is the closest possible miss.
 
-Hermes wraps sensitive messages in dummy characters so a curious god skimming the
-Iris channel sees nothing. Three `X` at the start, three at the end.
+Hints:
+1. הריצי עם `print(SEALED)` בשורה הראשונה. מה יש בין הגרש הפותח לבין ה-`L`, ומה
+   יש אחרי המילה?
+2. שלושה דברים לפי הסדר: להוריד רווחים מהקצוות, לחתוך שלושה תווים מכל צד,
+   ולהפוך לאותיות קטנות. לכל אחד מהם יש method או פרוסה שכבר ראית היום.
+3. `SEALED.strip()` מוריד את הרווחים. על התוצאה אפשר לחתוך מיד:
+   `SEALED.strip()[3:-3]` לוקח מהתו הרביעי ועד שלושה לפני הסוף. ואז `.lower()`
+   בסוף, כי `"LIGHTNING"` הוא לא שם של מגדל בשביל המנוע — `"lightning"` כן.
+   שמרי הכל במשתנה אחד והעבירי אותו ל-`place_tower` פעמיים.
+
+---
+
+### b2 — The Build Order · סדר הבנייה · 25 XP, 6 🪙
+
+**Why this mechanic:** the order of construction arrives as **one string with
+four names in it**, and the spots arrive as a separate list. She cannot place a
+tower until she has cut the string into a list and walked the two lists together
+with an index. This is `.split()` handing its output straight to a `for` loop.
+
+Annabeth chalked the build order on the wall of the Big House. She did not
+number it. She wrote it as a line.
+
+```js
+map: { cols: 14, rows: 8,
+       path: [[0,2],[1,2],[2,2],[3,2],[4,2],[5,2],[6,2],[6,3],[6,4],[6,5],[6,6],
+              [7,6],[8,6],[9,6],[10,6],[11,6],[12,6],[13,6]] },
+gold: 280, campHp: 4, seed: 32,
+allowed: ["archer", "cannon"],
+waves: [
+  { delay: 0, enemies: [ { kind: "satyr", count: 6, gap: 0.8 } ] },
+  { delay: 9, enemies: [ { kind: "hellhound", count: 5, gap: 0.6 } ] },
+],
+```
 
 Starter:
 ```python
-scroll = "XXXTHE FURIES ARE COMINGXXX"
-# print only the real message
-```
+ORDER = "archer-cannon-cannon-archer"
+SPOTS = [[3, 1], [5, 3], [8, 5], [11, 5]]
 
-Required output:
-```
-THE FURIES ARE COMING
+# cut ORDER into a list of tower names,
+# then build each one on the matching spot from SPOTS.
 ```
 
 Solution:
 ```python
-scroll = "XXXTHE FURIES ARE COMINGXXX"
-print(scroll[3:-3])
+ORDER = "archer-cannon-cannon-archer"
+SPOTS = [[3, 1], [5, 3], [8, 5], [11, 5]]
+
+kinds = ORDER.split("-")
+for i in range(len(kinds)):
+    place_tower(kinds[i], SPOTS[i][0], SPOTS[i][1])
 ```
 
-- **check**: `{ kind: "output", mode: "normalized", expect: "THE FURIES ARE COMING" }`
-  plus `{ kind: "source", raw: true, mustExclude: ["\"THE FURIES"], message: { he: "צריך לחתוך את המחרוזת, לא להדפיס אותה מחדש ביד", en: "Slice the string — do not retype the message" } }`
-- Teaches positive and negative indices in one slice. `.replace("X", "")` also
-  produces the right answer and is a legitimate different idea — accept it, and
-  say so in hint 3.
-- hints:
-  1. כמה תווים יש בשמירה בכל צד? ומאיזה מקום מתחילה ההודעה האמיתית?
-  2. את צריכה פרוסה: `scroll[a:b]`. ההתחלה היא מספר חיובי. הסוף אפשר לספור
-     מהסוף אחורה עם מינוס.
-  3. שלושה `X` בהתחלה, אז ההודעה מתחילה במקום 3. שלושה בסוף, אז היא נגמרת
-     שלושה לפני הקצה: `scroll[3:-3]`. דרך שנייה שגם עובדת:
-     `scroll.replace("X", "")` — פחות מדויקת אם יש `X` בתוך ההודעה, אבל פה היא
-     כשרה.
+```js
+check: { kind: "battle",
+  also: { kind: "source", mustInclude: [".split", "for "],
+          message: { he: "סדר הבנייה חייב לצאת מהמחרוזת עם ‎.split()‎ ולולאה — לא ארבע שורות ידניות",
+                     en: "The build order must come out of the string with .split() and a loop, not four hand-written lines" } } }
+```
 
-### e3 — Counting the words of fate · 30 XP, 8 🪙
+Verified: solution wins 4/4, eleven kills, 280 gold spent exactly. Empty program
+loses 4–0. Building only the first two towers loses 4–0. The kinds and the spots
+are paired by position, so `kinds[i]` and `SPOTS[i]` must move together — the
+same index into two lists, which is the pattern lesson 9 introduced.
 
-The Oracle charges by the word — literally, in drachmas — and Annabeth wants to
-know which word in the line is carrying the most weight.
+Hints:
+1. `ORDER.split("-")` מחזיר משהו. הדפיסי אותו. כמה איברים יש בו, וכמה משבצות יש
+   ב-`SPOTS`?
+2. שתי רשימות באותו אורך, ואת צריכה איבר מכל אחת בכל סיבוב. הכלי לזה הוא
+   `for i in range(len(...))` — `i` הוא אותו מספר בשתי הרשימות.
+3. `kinds = ORDER.split("-")` נותן `['archer', 'cannon', 'cannon', 'archer']`.
+   בלולאה `for i in range(len(kinds)):` הערך `kinds[i]` הוא שם המגדל ו-`SPOTS[i]`
+   הוא זוג המספרים — אז ה-x הוא `SPOTS[i][0]` וה-y הוא `SPOTS[i][1]`. שלושתם
+   נכנסים ל-`place_tower` באותה שורה.
 
-Starter:
+---
+
+### b3 — The Order of the Kill · סדר ההריגה · 30 XP, 8 🪙
+
+**Why this mechanic:** the wave is harpies over hellhounds, and **a cannon cannot
+shoot anything flying**. Left alone, the archers spend their shots on whatever is
+furthest along the road — which is usually a hellhound the cannons were already
+handling — and the harpies fly over the camp. The Oracle's line names the right
+order; she has to cut it into a list and let `choose_target` walk it.
+
+The elegant part is that she writes **one** rule and it lands differently on each
+tower: a cannon never sees a harpy in its `enemies` list at all, so it falls
+straight through to the second name in the order. She does not have to code that.
+
+```js
+map: { cols: 18, rows: 9, path: [[0,4],[1,4], … ,[17,4]] },   // straight road
+gold: 330, campHp: 5, seed: 51,
+allowed: ["archer", "cannon"],
+waves: [ { delay: 0, enemies: [ { kind: "hellhound", count: 4, gap: 0.5 },
+                                { kind: "harpy", count: 6, gap: 0.7 } ] } ],
+```
+
+Starter (the towers are already written; the rule is not):
 ```python
-line = "the sea shall claim what the sky has stolen"
-# print how many words, then print the longest word
-```
+place_tower("cannon", 4, 3)
+place_tower("archer", 6, 5)
+place_tower("archer", 8, 3)
+place_tower("cannon", 11, 3)
+place_tower("archer", 13, 5)
 
-Required output:
-```
-9
-stolen
+ORDER = "harpy>hellhound"
+
+# cut ORDER into a list of kinds,
+# then write choose_target so every tower shoots the first kind it can find,
+# in that order.
 ```
 
 Solution:
 ```python
-line = "the sea shall claim what the sky has stolen"
-words = line.split()
-print(len(words))
+place_tower("cannon", 4, 3)
+place_tower("archer", 6, 5)
+place_tower("archer", 8, 3)
+place_tower("cannon", 11, 3)
+place_tower("archer", 13, 5)
 
-longest = words[0]
-for word in words:
-    if len(word) > len(longest):
-        longest = word
-print(longest)
+ORDER = "harpy>hellhound"
+PRIORITY = ORDER.split(">")
+
+def choose_target(enemies):
+    for kind in PRIORITY:
+        for enemy in enemies:
+            if enemy["kind"] == kind:
+                return enemy
+    return enemies[0]
 ```
 
-- **check**: `{ kind: "output", mode: "normalized", expect: "9\nstolen" }`
-  plus `{ kind: "source", mustInclude: [".split"], message: { he: "המשימה הזו דורשת ‎.split()‎ — לא ספירה ידנית", en: "This one needs .split() — not counting by hand" } }`
-- This is the join point of the lesson: `.split()` hands her a list, and from
-  there it is the "find the maximum" pattern from lesson 10. Say that out loud in
-  the brief — she should notice that she already knew half of this.
-- hints:
-  1. `.split()` מחזיר לך משהו. מה הסוג שלו? ומה כבר את יודעת לעשות עם דבר
-     מהסוג הזה?
-  2. אחרי `line.split()` יש לך רשימה של מילים. `len()` על הרשימה נותן את מספר
-     המילים. בשביל הארוכה ביותר — זו אותה תבנית "מצא את המקסימום" משיעור 10,
-     רק שמשווים `len(word)` במקום את המילה עצמה.
-  3. שמרי `words = line.split()` והדפיסי `len(words)`. אחר כך התחילי מ
-     `longest = words[0]`, עברי בלולאה על כל מילה, ואם `len(word)` גדול מ
-     `len(longest)` — עדכני את `longest`. בסוף הלולאה תדפיסי אותה.
+```js
+check: { kind: "battle",
+  also: { kind: "source", mustInclude: [".split", "def choose_target"],
+          message: { he: "סדר הקדימויות חייב לצאת מהמחרוזת עם ‎.split()‎, ולהיכנס ל-choose_target",
+                     en: "The priority order must come out of the string with .split() and into choose_target" } } }
+```
 
-### e4 — The armory board · 35 XP, 9 🪙
+Verified, and this is the sharpest level in the lesson:
 
-Before a battle the Hephaestus cabin nails a board to the armory door: a title
-banner, and one line listing everything available, in capitals, separated by
-bars.
+| what she writes | outcome |
+| --- | --- |
+| the solution | **wins**, 5/5 HP, 10 kills |
+| the same towers, no `choose_target` | loses, 2 leaked |
+| the order reversed (`"hellhound>harpy"`) | loses, 3 leaked |
+| `return 0` | loses, 3 leaked |
+| `return enemies[0]` | loses, 3 leaked |
+| `return None` | loses, 6 leaked — the towers never fire |
+| empty program | loses, 6 leaked |
+
+Hints:
+1. הריצי בלי `choose_target` וצפי. מה עובר את השורה — מה שהולך על הקרקע, או מה
+   שעף? ואיזה מגדל אצלך בכלל יכול לפגוע במשהו שעף?
+2. `ORDER.split(">")` נותן רשימה של שמות לפי סדר חשיבות. בתוך `choose_target` את
+   צריכה לעבור על הסדר הזה, ולכל שם לחפש מפלצת מהסוג הזה ברשימת `enemies`.
+3. שתי לולאות, אחת בתוך השנייה: החיצונית עוברת על `PRIORITY`, הפנימית על
+   `enemies`. ברגע ש-`enemy["kind"]` שווה ל-`kind`, `return enemy` ויוצאים
+   משתיהן. אם עברת על כל הסדר ולא מצאת כלום — `return enemies[0]`, כדי שהמגדל
+   לא יישאר בלי מטרה. שימי לב שאותו כלל בדיוק עובד גם לתותח: הוא לא רואה הרפיות
+   ברשימה שלו, אז הוא נופל לשם השני מעצמו.
+
+---
+
+### b4 — The Bestiary Line · שורת הבסטיאריום · 35 XP, 9 🪙
+
+**Why this mechanic:** the Oracle sends the whole bestiary as **one line of
+`name=number` pairs**. To use it she has to split it twice — once on the commas
+to get the pairs, once on the `=` to get the two halves — and `int()` the second
+half, because everything that comes out of a string is a string. This is the
+step from "text" to "data she can compute with", and it is the most reusable
+thing in the lesson.
+
+A cyclops walks out front and stays out front: it is slow, it spawned first, and
+nothing behind it can overtake it before the gate. Towers that shoot whatever
+leads will pour everything into 5 armour while the swarm behind strolls past.
+
+```js
+map: { cols: 18, rows: 10,
+       path: [[0,1],[1,1],[2,1],[3,1],[4,1],[4,2],[4,3],[4,4],[4,5],[5,5],[6,5],
+              [7,5],[8,5],[9,5],[10,5],[10,6],[10,7],[10,8],[11,8],[12,8],[13,8],
+              [14,8],[15,8],[16,8],[17,8]] },
+gold: 370, campHp: 5, seed: 34,
+allowed: ["archer", "cannon"],
+waves: [
+  { delay: 0, enemies: [ { kind: "cyclops",   count: 2, gap: 2.0 } ] },
+  { delay: 4, enemies: [ { kind: "hellhound", count: 6, gap: 0.4 } ] },
+  { delay: 6, enemies: [ { kind: "satyr",     count: 7, gap: 0.7 },
+                         { kind: "harpy",     count: 4, gap: 0.8 } ] },
+],
+```
 
 Starter:
 ```python
-weapons = ["riptide", "bow", "shield"]
-# 1) a banner:  the word ARMORY centred in 30 characters, padded with "="
-# 2) one line:  the weapon names in CAPITALS, joined by " | "
-```
+place_tower("cannon", 2, 3)
+place_tower("archer", 6, 4)
+place_tower("cannon", 8, 6)
+place_tower("cannon", 12, 7)
+place_tower("archer", 15, 7)
 
-Required output:
-```
-=========== ARMORY ===========
-RIPTIDE | BOW | SHIELD
+SCROLL = "satyr=1,harpy=2,hellhound=3,cyclops=4"
+
+# turn SCROLL into a dict: {"satyr": 1, "harpy": 2, ...}
+# the LOWER the number, the sooner it should die.
+# then write choose_target that returns the enemy with the lowest number.
 ```
 
 Solution:
 ```python
-weapons = ["riptide", "bow", "shield"]
-print(" ARMORY ".center(30, "="))
+place_tower("cannon", 2, 3)
+place_tower("archer", 6, 4)
+place_tower("cannon", 8, 6)
+place_tower("cannon", 12, 7)
+place_tower("archer", 15, 7)
 
-loud = []
-for weapon in weapons:
-    loud.append(weapon.upper())
-print(" | ".join(loud))
+SCROLL = "satyr=1,harpy=2,hellhound=3,cyclops=4"
+
+RANK = {}
+for part in SCROLL.split(","):
+    pieces = part.split("=")
+    RANK[pieces[0]] = int(pieces[1])
+
+def choose_target(enemies):
+    best = enemies[0]
+    for enemy in enemies:
+        if RANK[enemy["kind"]] < RANK[best["kind"]]:
+            best = enemy
+    return best
 ```
 
-- **check**: `{ kind: "output", mode: "normalized", expect: "=========== ARMORY ===========\nRIPTIDE | BOW | SHIELD" }`
-- **Design note:** the banner is padded with `=`, not spaces, precisely so that
-  `normalized` cannot wash the formatting away. Any exercise in this course that
-  tests alignment must pad with a visible character, or it is untestable.
-- The gap between `ARMORY` and the `=` marks comes from the spaces inside
-  `" ARMORY "`. That is the whole trick, and hint 3 says so.
-- hints:
-  1. שתי שורות פלט, שתי משימות נפרדות. תתחילי מהשנייה — איך הופכים רשימה
-     לשורה אחת עם מפריד?
-  2. לשורה השנייה: לולאה שבונה רשימה חדשה של שמות ב-`upper()`, ואז
-     `" | ".join(...)`. לשורה הראשונה: ל-string יש method בשם `.center` שמקבל
-     רוחב ותו מילוי.
-   3. הבאנר הוא `" ARMORY ".center(30, "=")` — שימי לב לרווחים **בתוך**
-      הגרשיים, הם אלה שיוצרים את הרווח סביב המילה. לשורה השנייה: רשימה ריקה,
-      לולאה שעושה `loud.append(weapon.upper())`, ואז `print(" | ".join(loud))`.
+```js
+check: { kind: "battle",
+  also: { kind: "source", mustInclude: [".split", "int(", "RANK["],
+          message: { he: "הדירוג חייב להיבנות מהמחרוזת: ‎.split()‎ פעמיים ו-int על החצי השני",
+                     en: "The ranking must be built from the string: .split() twice, and int() on the second half" } } }
+```
 
-## Quest — "The Prophecy Inside the Prophecy" · 55 XP, 14 🪙
+Verified: solution wins 5/5 with 19 kills. The same five towers with no
+`choose_target` lose 3 monsters. `return 0` and `return enemies[0]` lose 5 — the
+camp falls. `return None` loses 5. Empty program loses 5.
 
-Annabeth has straightened the six lines out. They are still padded, and they
-still say nothing useful — until she notices that the Oracle hides one word
-where nobody reads: **down the first letters.**
+**Why `int()` is not decoration:** `part.split("=")[1]` is the string `"1"`, and
+`"1" < "10"` compares text, not size. With four ranks it happens to work; the
+moment a rank reaches 10 it stops working, silently. She converts once, at the
+edge, and never thinks about it again — which is the actual professional habit.
 
-Brief: clean every line, take its first letter, put the letters together into one
-word, and print a report card for the scroll.
+Hints:
+1. `SCROLL.split(",")` נותן לך ארבע חתיכות. הדפיסי אחת מהן. מה יש בתוך חתיכה
+   אחת, ואיך היו נראים שני החצאים שלה בנפרד?
+2. שני `split` בשני מקומות: אחד על הפסיקים, בחוץ, ואחד על ה-`=` בתוך הלולאה. את
+   השם שמים כמפתח במילון ואת המספר כערך — אבל המספר יוצא מה-split כ-string.
+3. `RANK = {}` לפני הלולאה. בתוכה: `pieces = part.split("=")` נותן שני איברים,
+   אז `RANK[pieces[0]] = int(pieces[1])`. אחר כך `choose_target` היא תבנית
+   "מצא את המינימום" משיעור 10, רק שמשווים `RANK[enemy["kind"]]` במקום את
+   המפלצת עצמה: מתחילים מ-`enemies[0]`, עוברים על כולן, ומחליפים כשמוצאים מספר
+   קטן יותר.
+
+---
+
+## The Great Battle — "הנבואה הגדולה" / "The Great Prophecy" · 55 XP, 14 🪙
+
+**Why this mechanic:** every string tool in the lesson at once, and none of them
+optional. Nine lines of prophecy whose **first letters spell the name of the
+tower she is allowed to build**. A battle plan written as `kind@x,y` items where
+one entry is sealed as `X` and has to be `replace`d with the decoded word. An
+order line she has to cut at the colon and then at the `>`. If any one of those
+steps is wrong she builds nothing, or builds the wrong thing, and Olympus takes
+the wave in the face.
+
+The Oracle's full text finally arrives. It is nine lines long, badly padded, and
+the ninth line tells her what she is looking at.
+
+```js
+map: { cols: 16, rows: 10,
+       path: [[0,2],[1,2],[2,2],[3,2],[4,2],[5,2],[6,2],[6,3],[6,4],[6,5],[6,6],
+              [6,7],[7,7],[8,7],[9,7],[10,7],[11,7],[12,7],[12,6],[12,5],[12,4],
+              [12,3],[13,3],[14,3],[15,3]] },
+gold: 540, campHp: 6, seed: 41,
+allowed: ["archer", "cannon", "lightning"],
+waves: [
+  { delay: 0,  enemies: [ { kind: "satyr",     count: 9, gap: 0.6 } ] },
+  { delay: 1,  enemies: [ { kind: "harpy",     count: 9, gap: 0.7 } ] },
+  { delay: 14, enemies: [ { kind: "hellhound", count: 9, gap: 0.5 } ] },
+  { delay: 14, enemies: [ { kind: "harpy",     count: 9, gap: 0.7 } ] },
+  { delay: 28, enemies: [ { kind: "cyclops",   count: 3, gap: 2.0 } ] },
+  { delay: 29, enemies: [ { kind: "harpy",     count: 9, gap: 0.6 } ] },
+  { delay: 30, enemies: [ { kind: "satyr",     count: 9, gap: 0.5 } ] },
+],
+```
 
 Starter:
 ```python
-lines = [
-    "  Rivers will rise  ",
-    "Every torch goes dark",
-    "  Six shall stand",
-    "Chains break at dawn  ",
-    "Under a broken sky",
-    "Even gods will kneel",
+GREAT_PROPHECY = [
+    "  Long shall the last Olympian wait  ",
+    "In the year the sky is torn open",
+    "  Gods will count their empty thrones",
+    "Half of the twelve shall not return  ",
+    "  The Titan climbs the mountain stair",
+    "Nine names are cut into the stone",
+    "  Iron and bronze will not be enough",
+    "No hero holds the gate alone  ",
+    "  Give the sky back its own weapon  ",
 ]
+BATTLE_PLAN = "cannon@4,4 archer@2,1 archer@5,1 cannon@8,5 archer@7,4 X@10,6 cannon@14,5"
+ORDER_LINE = "  the order of the kill: harpy > satyr > hellhound > cyclops  "
 
-# 1) a banner: THE PROPHECY, centred in 30, padded with "-"
-# 2) HIDDEN WORD: the first letter of every cleaned line, in capitals
-# 3) WORDS: the total number of words in all six lines
-# 4) AVERAGE PER LINE: words divided by lines, one digit after the point
-```
-
-Required output:
-```
--------- THE PROPHECY --------
-HIDDEN WORD: RESCUE
-WORDS: 22
-AVERAGE PER LINE: 3.7
+# 1) the sealed name: the first letter of every cleaned line, joined, lower case
+# 2) build BATTLE_PLAN: each item is kind@x,y — and "X" means the sealed name
+# 3) the order: cut ORDER_LINE at the colon, then at the >, and strip each piece
+# 4) choose_target: first kind in the order that is standing in front of you
 ```
 
 Solution:
 ```python
-lines = [
-    "  Rivers will rise  ",
-    "Every torch goes dark",
-    "  Six shall stand",
-    "Chains break at dawn  ",
-    "Under a broken sky",
-    "Even gods will kneel",
-]
+GREAT_PROPHECY = [ … as above … ]
+BATTLE_PLAN = "cannon@4,4 archer@2,1 archer@5,1 cannon@8,5 archer@7,4 X@10,6 cannon@14,5"
+ORDER_LINE = "  the order of the kill: harpy > satyr > hellhound > cyclops  "
 
 letters = []
-total_words = 0
-for line in lines:
-    clean = line.strip()
-    letters.append(clean[0])
-    total_words = total_words + len(clean.split())
+for line in GREAT_PROPHECY:
+    letters.append(line.strip()[0])
+secret = "".join(letters).lower()
+print("the sealed word is", secret)
 
-secret = "".join(letters).upper()
-average = total_words / len(lines)
+for item in BATTLE_PLAN.split():
+    parts = item.split("@")
+    kind = parts[0].replace("X", secret)
+    xy = parts[1].split(",")
+    place_tower(kind, int(xy[0]), int(xy[1]))
 
-print(" THE PROPHECY ".center(30, "-"))
-print(f"HIDDEN WORD: {secret}")
-print(f"WORDS: {total_words}")
-print(f"AVERAGE PER LINE: {average:.1f}")
+PRIORITY = []
+for piece in ORDER_LINE.split(":")[1].split(">"):
+    PRIORITY.append(piece.strip())
+
+def choose_target(enemies):
+    for kind in PRIORITY:
+        for enemy in enemies:
+            if enemy["kind"] == kind:
+                return enemy
+    return enemies[0]
 ```
 
-- **check**: `{ kind: "output", mode: "normalized", expect: "-------- THE PROPHECY --------\nHIDDEN WORD: RESCUE\nWORDS: 22\nAVERAGE PER LINE: 3.7" }`
-  plus `{ kind: "source", raw: true, mustInclude: [".join", ".strip"], mustExclude: ["RESCUE"], message: { he: "המילה חייבת להיבנות מהשורות, לא להיכתב ביד", en: "The word must be built from the lines, not typed in" } }`
-- Why `.strip()` is load-bearing and not busywork: `"  Six shall stand"[0]` is a
-  **space**, so the hidden word comes out as `RE CU E` without it. She will
-  probably hit that, and it is the best possible proof that cleaning input
-  matters. Hint 1 aims her straight at it.
-- Every part of the lesson appears here: `.strip`, indexing, `.split`, `len`,
-  `.join`, `.upper`, `.center`, and an f-string with `:.1f`.
-- hints:
-  1. הריצי גרסה שלוקחת `line[0]` בלי לנקות קודם. מה יצא במילה הנסתרת, ולמה
-     יש שם חורים?
-  2. בכל סיבוב של הלולאה את צריכה שלושה דברים מאותה שורה נקייה: את התו
-     הראשון (לרשימה), את מספר המילים (לסכום), וזהו. אחרי הלולאה: `"".join`
-     על הרשימה, ו-`total_words / len(lines)` לממוצע.
-  3. פתחי `letters = []` ו-`total_words = 0`. בלולאה: `clean = line.strip()`,
-     אחר כך `letters.append(clean[0])`, אחר כך
-     `total_words = total_words + len(clean.split())`. אחרי הלולאה
-     `secret = "".join(letters).upper()`. את הממוצע מדפיסים עם
-     `f"AVERAGE PER LINE: {average:.1f}"`.
+```js
+check: { kind: "battle",
+  also: { kind: "source", raw: true,
+          mustInclude: [".strip", ".join", ".split", ".replace"],
+          mustExclude: ["\"lightning\"", "'lightning'"],
+          message: { he: "המילה החתומה נבנית מהשורות ולא נכתבת ביד, והתוכנית והסדר נחתכים מהמחרוזות",
+                     en: "The sealed word is built from the lines, not typed, and the plan and the order are cut out of their strings" } } }
+```
+
+Verified: solution wins 6/6 HP with **57 kills** over seven waves and 51 seconds
+of battle. Build without the order line: loses, 3 leaked. `return 0` and
+`return enemies[0]`: lose, 1 leaked. `return None`: loses, 6 leaked. Empty
+program: loses, 6 leaked.
+
+**Why the `.strip()` before `[0]` is the whole quest.** Four of the nine lines
+start with two spaces. Without cleaning, `line[0]` is a space and the sealed word
+comes out as `" i h  n i n g"` — `place_tower` is handed nonsense and not one
+tower is built. She will hit that, and it is the best possible demonstration that
+cleaning input is not tidiness, it is the difference between a program and a
+crash. Hint 1 sends her straight at it.
+
+Hints:
+1. הדפיסי את המילה החתומה לפני שאת בונה משהו. אם יצאו בה חורים — תסתכלי על
+   השורות עצמן. איך מתחילות שורה 1, שורה 3 ושורה 5?
+2. שלושה חלקים נפרדים, וכל אחד עומד בפני עצמו: (א) אות ראשונה מכל שורה נקייה
+   לתוך רשימה, ואז `"".join` עליה. (ב) `BATTLE_PLAN.split()` נותן פריטים, וכל
+   פריט נחתך ב-`@` ואז ב-`,`. (ג) `ORDER_LINE.split(":")` נותן שני חצאים; החצי
+   השני נחתך ב-`>`.
+3. לפי הסדר: `letters.append(line.strip()[0])` בלולאה, ואז
+   `secret = "".join(letters).lower()`. לבנייה: לכל `item`, `parts = item.split("@")`
+   — `parts[0]` הוא הסוג ו-`parts[1]` הוא `"4,4"`. `parts[0].replace("X", secret)`
+   מחליף את החותם בשם האמיתי ולא נוגע בשמות האחרים. `xy = parts[1].split(",")`
+   ואז `place_tower(kind, int(xy[0]), int(xy[1]))` — בלי `int` המנוע מקבל
+   מחרוזות במקום מספרים. לסדר: `ORDER_LINE.split(":")[1]` הוא כל מה שאחרי
+   הנקודתיים, ועליו `.split(">")`, ועל כל חתיכה `.strip()` כי יש רווחים סביב
+   החיצים.
 
 ## Reward & Recap
 
@@ -472,8 +681,8 @@ print(f"AVERAGE PER LINE: {average:.1f}")
 
 Bead 17 is added to the necklace.
 
-**Achievements possible here**: *Wordsmith* (finished the quest with no hints),
-*Persistent* (solved any exercise after five failed runs).
+**Achievements possible here**: *Wordsmith* (won the great battle with no
+hints), *Persistent* (won a battle after five failed runs).
 
 **Recap bullets**:
 - string הוא רצף של תווים — אינדקסים ופרוסות עובדים עליו בדיוק כמו על רשימה
@@ -482,6 +691,7 @@ Bead 17 is added to the necklace.
 - `.split()` הופך מחרוזת לרשימה, `" ".join(list)` מחזיר רשימה למחרוזת
 - בתוך f-string, `{value:.1f}` שולט בכמה ספרות אחרי הנקודה, ו-`.center(n, "=")`
   ממרכז שורה
+- `int("4")` הופך מחרוזת למספר — כל מה שיוצא מ-`.split()` הוא טקסט, תמיד
 
 **Next teaser**: *"פענחת את הנבואה. עכשיו צריך לטוס איתה לאולימפוס — ומשהו בעל
 כנפיים מחכה בדרך, ואין לו סבלנות לטעויות."*
@@ -497,36 +707,58 @@ Bead 17 is added to the necklace.
 | `line[0]` on an unstripped line | a space instead of a letter | strip before you index |
 | `.split(" ")` on a double-spaced line | empty strings in the list | plain `.split()` handles runs of whitespace |
 | `f"{hp:.1}"` (missing the `f`) | `ValueError` / wrong output | the format spec for a float is `.1f` |
+| passes `"LIGHTNING"` to `place_tower` | the battle reports `unknownTower` and nothing is built | tower names are lower case; `.lower()` is part of the decode |
+| `place_tower(kind, xy[0], xy[1])` with no `int()` | the tower lands in a strange square or nowhere | coordinates out of a string are strings until you convert them |
+| takes `line[0]` before `.strip()` | the sealed word has holes and no tower appears | strip before you index — the first character of a padded line is a space |
+| writes the priority list by hand instead of splitting | the battle is won but the check refuses it | the `also` message names the requirement |
 
 ## Implementation notes
 
 - Every construct here is in the verified matrix in `01-architecture.md`. All
-  code in this file was executed against the vendored `skulpt.min.js` and the
-  outputs above are the real ones, character for character.
-- **The formatting-check rule.** `normalized` collapses runs of whitespace, so
-  space-based alignment (`f"{name:<10}"`) cannot be checked with it. Two legal
-  options: pad with a visible character (`.center(30, "=")`) — used in e4 and the
-  quest — or declare `mode: "exact"` with a written reason. Never use `exact`
-  merely to be strict.
-- **Two checks on one exercise use the `also` field**, the pattern established
-  in lesson 1 e1. Every "plus" written in this file is an `also`:
-  ```js
-  { kind: "output", mode: "normalized", expect: "9\nstolen",
-    also: { kind: "source", mustInclude: [".split"],
-            message: { he: "…", en: "…" } } }
-  ```
-- **`raw: true` is required on exactly two `source` checks here** — e2 and the
-  quest — because both name string literals (`"THE FURIES`, `RESCUE`) and a
-  comment-and-literal-stripped skeleton would never contain them. Without `raw`,
-  e2's `mustExclude` could never fire and the quest's could never fire either,
-  so both shortcuts would pass silently. e3's `.split` and the quest's `.join` /
-  `.strip` are syntax and survive stripping, so `raw: true` does not hurt them.
-- `mustExclude: ["RESCUE"]` with `raw: true` will also trip if she writes the
-  word in a Hebrew comment. That is acceptable; the `message` explains the
-  requirement, and the failure is self-evident.
+  teaching code in this file was executed against the vendored `skulpt.min.js`
+  and the outputs above are the real ones, character for character.
+- **Every one of the five levels was played through the real engine** with
+  `assets/js/battle/{sim,pyapi,play}.js` loaded into a Node VM, exactly the way
+  `tools/verify-python.mjs` does it. For each level three things were asserted:
+  the stated solution wins with a perfect defense, an empty program loses, and
+  (for b3, b4 and the great battle) `return 0`, `return enemies[0]` and
+  `return None` all lose. The measured leak counts are written under each level
+  and should be re-measured if any number in a level changes.
+- **b1's forcing device is `allowed: ["lightning"]`.** It is the only kind she
+  may place, and its name reaches her only inside a string. `place_tower("archer",
+  …)` comes back as a `notAllowed` build error with a sentence explaining it, and
+  `place_tower("LIGHTNING", …)` as `unknownTower` — so both near-misses teach
+  rather than confuse.
+- **b3 depends on the cannon being blind to flying enemies** (see
+  `spec/09-battle-game.md`). That rule is what makes one priority list behave
+  differently on two tower kinds without her writing a single `if` about it. If
+  that rule is ever changed, b3 has to be re-tuned.
+- **b4's cyclops leads on purpose.** It spawns first, moves at 0.8, and nothing
+  behind it can overtake it before the gate, so the engine's default "shoot
+  whatever is furthest along" pours archer fire into 5 armour. This is the one
+  reliable way to make the default targeting wrong, and both b4 and the great
+  battle use it.
+- **`raw: true` is required on exactly two `source` checks** — b1 and the great
+  battle — because both use `mustExclude` against a **string literal**
+  (`"lightning"`), and the default skeleton strips literals, so the exclusion
+  could never fire. b2's `.split`, b3's `def choose_target` and b4's `int(` are
+  syntax and survive stripping, so they must **not** set `raw`, or a word in a
+  Hebrew comment would satisfy them.
+- `mustExclude: ["\"lightning\"", "'lightning'"]` covers both quote styles. It
+  will also trip if she writes the quoted word in a comment; that is acceptable,
+  and the `message` explains the requirement.
+- **The formatting-check rule still applies to anything printed.** `normalized`
+  collapses runs of whitespace, so alignment can only be checked when it is
+  padded with a visible character (`.center(30, "=")`). No level here grades
+  printed output — the battle is the check — but the teaching blocks keep the
+  rule visible because lesson 20's victory scroll needs it.
+- `print()` inside `choose_target` reaches the live battle log in the browser
+  (the engine's `onStdout` keeps streaming while the simulation runs) but is
+  **not** part of the captured output string. No level may ever check text
+  produced from inside a strategy function.
 - No `input()` in this lesson, so nothing blocks on a prompt.
 - The `[::-1]` reverse trick in callout 5 is shown, not required by any check.
-  Keep it that way — step slicing is a nice thing to recognise and a poor thing
+  Keep it that way — step slicing is a good thing to recognise and a poor thing
   to be graded on.
 - Skulpt prints lists with single quotes (`['sea', 'sky']`), the same as CPython.
   The teach outputs above already reflect that.

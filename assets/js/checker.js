@@ -132,6 +132,24 @@ window.LC = window.LC || {};
   }
 
   /**
+   * Run the extra requirements attached to a level or exercise.
+   * Accepts a single rule or an array of them.
+   * @returns {object|null} the failing rule's reason, or null if all passed
+   */
+  function runAlso(also, source, output) {
+    var rules = Object.prototype.toString.call(also) === "[object Array]" ? also : [also];
+    for (var i = 0; i < rules.length; i++) {
+      var rule = rules[i];
+      if (!rule) continue;
+      var res = rule.kind === "source"
+        ? checkSource(source, rule)
+        : compareOutput(output, rule);
+      if (!res.pass) return res.reason;
+    }
+    return null;
+  }
+
+  /**
    * Validate one exercise.
    * @returns {Promise<{pass, reason, runs:[], error}>}
    */
@@ -143,7 +161,13 @@ window.LC = window.LC || {};
      * See spec/09-battle-game.md. */
     if (kind === "battle") {
       return LC.Battle.play(exercise, source, function (code) {
-        return LC.Engine.run(code, { execLimitMs: spec.execLimitMs || 5000 });
+        /* stdin must reach the build script: a level whose briefing asks her a
+         * question with input() would otherwise raise ValueError during
+         * grading and look broken to her. */
+        return LC.Engine.run(code, {
+          execLimitMs: spec.execLimitMs || 5000,
+          stdin: spec.stdin || []
+        });
       }).then(function (r) {
         if (!r.ok) {
           return {
@@ -154,13 +178,12 @@ window.LC = window.LC || {};
         }
         var verdict = LC.Battle.objective(r.sim, exercise);
 
-        /* A battle may also demand HOW she won — "yes, but with a loop". */
+        /* A battle may also demand HOW she won — "yes, but with a loop", and/or
+         * that she printed a report. `also` accepts one rule or a list. */
         if (verdict.pass && spec.also) {
-          var extra = spec.also.kind === "source"
-            ? checkSource(source, spec.also)
-            : compareOutput(r.output, spec.also);
-          if (!extra.pass) {
-            return { pass: false, sim: r.sim, runs: [r], reason: extra.reason, error: null, explanation: null };
+          var extra = runAlso(spec.also, source, r.output);
+          if (extra) {
+            return { pass: false, sim: r.sim, runs: [r], reason: extra, error: null, explanation: null };
           }
         }
 
@@ -242,10 +265,8 @@ window.LC = window.LC || {};
       /* An exercise may combine a source requirement with an output check —
        * used for open-ended tasks where she picks the text. */
       if (verdict.pass && spec.also) {
-        var extra = spec.also.kind === "source"
-          ? checkSource(source, spec.also)
-          : compareOutput(r.output, spec.also);
-        if (!extra.pass) verdict = extra;
+        var extraReason = runAlso(spec.also, source, r.output);
+        if (extraReason) verdict = { pass: false, reason: extraReason };
       }
 
       return {

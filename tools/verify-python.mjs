@@ -164,16 +164,32 @@ function sameValue(a, b) {
 /* Same runner shape LC.Battle.play expects in the browser.
  * MUST use the bare runner: LC.Battle.play has already installed the API for
  * this level, and installing the sandbox on top would swallow her placements. */
-function pyRunner(code) {
-  const r = runPythonBare(code);
-  return Promise.resolve({
-    ok: r.ok, output: r.out, error: r.ok ? null : { text: r.error },
-    explanation: null, module: r.mod,
-  });
+function makeRunner(stdin = []) {
+  return function pyRunner(code) {
+    const r = runPythonBare(code, stdin);
+    return Promise.resolve({
+      ok: r.ok, output: r.out, error: r.ok ? null : { text: r.error },
+      explanation: null, module: r.mod,
+    });
+  };
+}
+
+/* Mirrors LC.Checker.runAlso: one rule or a list, source or output. */
+function runAlso(also, source, output) {
+  const rules = Array.isArray(also) ? also : [also];
+  for (const rule of rules) {
+    if (!rule) continue;
+    const ok = rule.kind === "source"
+      ? checkSource(source, rule)
+      : compareOutput(output, rule);
+    if (!ok) return rule.kind === "source" ? "a source requirement" : "an output requirement";
+  }
+  return null;
 }
 
 async function runBattleCheck(level, source) {
-  const r = await LCB.Battle.play(level, source, pyRunner);
+  const spec = level.check || {};
+  const r = await LCB.Battle.play(level, source, makeRunner(spec.stdin || []));
   if (!r.ok) return { pass: false, why: "error before the battle: " + (r.error && r.error.text) };
 
   const verdict = LCB.Battle.objective(r.sim, level);
@@ -186,14 +202,11 @@ async function runBattleCheck(level, source) {
            (d ? `\n         → ${d.en}` : ""),
     };
   }
-  if (specAlso(level)) {
-    const ok = checkSource(source, level.check.also);
-    if (!ok) return { pass: false, why: "won, but the `also` source requirement failed" };
+  if (spec.also) {
+    const failed = runAlso(spec.also, source, r.output);
+    if (failed) return { pass: false, why: `won, but ${failed} failed` };
   }
   return { pass: true, sim: r.sim };
-}
-function specAlso(level) {
-  return level.check && level.check.also && level.check.also.kind === "source";
 }
 
 function runCheck(exercise, source) {
@@ -229,10 +242,8 @@ function runCheck(exercise, source) {
   }
 
   if (spec.also) {
-    const extra = spec.also.kind === "source"
-      ? checkSource(source, spec.also)
-      : compareOutput(r.out, spec.also);
-    if (!extra) return { pass: false, why: "the `also` check failed" };
+    const failed = runAlso(spec.also, source, r.out);
+    if (failed) return { pass: false, why: `the \`also\` check failed (${failed})` };
   }
   return { pass: true };
 }

@@ -246,9 +246,14 @@ levels: [
 
     check: {
       kind: "battle",
-      campHpAtLeast: 10,          // optional, default 1 (just survive)
+      campHpAtLeast: 10,          // optional; defaults to the level's campHp
       maxGoldSpent: 150,          // optional
-      also: { kind: "source", mustInclude: ["for"], message: {he,en} },
+      maxTowers: 4,               // optional
+      stdin: ["3"],               // answers for input() in her build script
+      also: [                     // one rule, or a list of them
+        { kind: "source", mustInclude: ["for"], message: {he,en} },
+        { kind: "output", mode: "contains", expect: "ready" },
+      ],
     },
   },
 ]

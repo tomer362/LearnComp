@@ -256,6 +256,37 @@ check(crash.pass === false, "a crashing strategy loses the battle");
 check(/IndexError/.test(crash.err || ""), "the real Python error is surfaced", crash.err);
 check(!!crash.why, "and it is explained in her language", crash.why);
 
+/* Lesson 3 asks her a question with input() before the battle, and several
+ * levels demand both a printed report and a source construct. */
+section("Battle stdin and multiple requirements");
+const battleExtras = await page.evaluate(async () => {
+  const base = {
+    map: { cols: 10, rows: 6, path: [[0,4],[1,4],[2,4],[3,4],[4,4],[5,4],[6,4],[7,4],[8,4],[9,4]] },
+    gold: 300, campHp: 3, seed: 1, allowed: ["archer"],
+    waves: [{ delay: 0, enemies: [{ kind: "satyr", count: 3, gap: 1.2 }] }],
+  };
+  const WIN = 'place_tower("archer", 2, 3)\nplace_tower("archer", 5, 3)\nplace_tower("archer", 7, 5)';
+  const SRC = { kind: "source", mustInclude: ["place_tower"], message: { he: "", en: "x" } };
+  const OUT = { kind: "output", mode: "contains", expect: "ready" };
+  const t = async (exercise, src) => (await LC.Checker.check(exercise, src)).pass;
+  return [
+    ["stdin reaches input() in a build script",
+      await t({ ...base, check: { kind: "battle", stdin: ["3"] } },
+        'row = int(input("row? "))\nplace_tower("archer", 2, row)\n' +
+        'place_tower("archer", 5, row)\nplace_tower("archer", 7, 5)') === true],
+    ["also accepts an array, all rules pass",
+      await t({ ...base, check: { kind: "battle", also: [SRC, OUT] } }, WIN + '\nprint("ready")') === true],
+    ["also array rejects a failing output rule",
+      await t({ ...base, check: { kind: "battle", also: [SRC, OUT] } }, WIN) === false],
+    ["also array rejects a failing source rule",
+      await t({ ...base, check: { kind: "battle",
+        also: [{ kind: "source", mustInclude: ["for"], message: { he: "", en: "need for" } }] } }, WIN) === false],
+    ["a single also object still works",
+      await t({ ...base, check: { kind: "battle", also: SRC } }, WIN) === true],
+  ];
+});
+for (const [name, ok] of battleExtras) check(ok, name);
+
 section("Beginner error diagnosis");
 const diagnoses = await page.evaluate(async () => {
   const cases = [

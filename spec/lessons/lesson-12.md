@@ -9,13 +9,15 @@
 | **id** | `12` |
 | **slug** | `the-hydra` |
 | **minutes** | 35 (the longest lesson in Act III — it closes the act) |
-| **concepts** | nested lists, dicts whose values are lists, dicts of dicts, iterating nested structures, counting, searching |
-| **new vocabulary** | `x[a][b]`, `d[k][k2]`, nesting |
-| **requires** | L9 lists, indexing, `len()`, `for`, `in` · L10 `.append`/`sorted`/`min`/`max`/`sum` · L11 dicts, `.get`, `.items()` · L6 `if`/`elif`/`else` · L3 `input()` and f-strings |
+| **concepts** | nested lists, `get_map()` as a list of lists, `grid[y][x]`, iterating nested structures, building nested data, counting, searching |
+| **new vocabulary** | `x[a][b]`, `grid[y][x]`, nesting |
+| **requires** | L9 lists, indexing, `len()`, `for`, `in` · L10 `.append`/`sorted`/slicing · L11 dicts, `.get`, `.items()` · L6 `if`/`elif`/`else` · L5 `and` · L3 f-strings |
 | **item** | 🐑 גיזת הזהב / The Golden Fleece |
-| **XP** | 20 + 25 + 30 + 30 (training) + 60 (boss) + 30 (bonus) = **195** · optional side quest +30 |
-| **drachmas** | 5 + 7 + 8 + 8 + 15 = **43** 🪙 · optional side quest +8 |
-| **boss** | `{ name: { he: "ההידרה", en: "The Hydra" }, icon: "🐉", hp: 5 }` — 5 heads, one per test case |
+| **XP** | 20 + 25 + 30 + 30 (training battles) + 60 (boss) = **165** · optional battle +30 |
+| **drachmas** | 5 + 7 + 8 + 8 + 15 = **43** 🪙 · optional battle +8 |
+| **boss** | `{ name: { he: "ההידרה", en: "The Hydra" }, icon: "🐲", hp: 5 }` — five heads, one per wave survived |
+| **battle API** | `place_tower`, `get_map`, `get_wave`, `tower_cost`, `get_gold`, `camp_hp` — build script only |
+| **towers** | `archer`, `cannon`, `ice` in training; **archer and ice only** in the boss |
 
 ## Teaching goal
 
@@ -24,16 +26,26 @@ domains. Lesson 12 says the quiet part out loud — **a value inside a list or a
 dict can itself be a list or a dict**, and nothing new is needed to read it.
 `heads[0][1]` is two lookups written next to each other, left to right.
 
-The boss then makes her build the thing the whole act was pointing at: a program
-that holds a structure, summarises it, takes input, searches inside it, and
-reports. It uses lists, dicts, nesting, loops, conditions, `in`, `.get`, `len`,
-`min`/`sum` and f-strings — every tool from lessons 9, 10 and 11 in one file,
-with nothing from lesson 13 needed.
+**And the board she has been fighting on turns out to be one of them.**
+`get_map()` returns a list of rows, each row a list of `"grass"` / `"path"` /
+`"rock"`. Until this lesson the brief told her which squares were legal; from b2
+on it stops, and she finds them herself — `grid[y][x] == "grass" and
+grid[y + 1][x] == "path"` is the definition of a good tower spot, written in
+Python, and it works on a map she has never seen. That is the payoff of the whole
+act: not "here is a nested list", but "here is the world, read it".
+
+The boss then makes her build the thing the act was pointing at: scan a
+seventeen-by-ten board, collect every legal square into a list of `[x, y]` pairs
+she assembles herself, read a nested roster of the brood, and spend a budget that
+is exactly right. Lists, nesting, loops, conditions, `.append`, `len` and
+f-strings — every tool from lessons 9, 10 and 11 in one program, with nothing
+from lesson 13 needed.
 
 Thematic payload: **you do not beat the Hydra by cutting.** Cut a head and two
-grow back — the boss's own arithmetic proves it, and one of the test cases makes
-the Hydra come out *stronger*. You beat it by knowing exactly what is in front
-of you. That is what a data structure is for.
+grow back — and the battle proves it, because the third wave is two more hydras
+coming out of the water behind the first. You beat it by knowing exactly what is
+in front of you and exactly where you may stand. That is what a data structure is
+for.
 
 ## Story beat
 
@@ -103,7 +115,7 @@ and reaches the same conclusion), Grover (counting heads, losing count).
    ```
    Real error (verified in Skulpt):
    ```
-   IndexError: list index out of range on line 2
+   IndexError: list index out of range (line 2)
    ```
    Explanation: השורה הזאת מבלבלת כי היא נראית כמו השגיאה משיעור 9, אבל הפעם יש
    **שני** מספרים שיכולים להיות אשמים. `heads[1]` קיים לגמרי — הוא
@@ -220,9 +232,75 @@ and reaches the same conclusion), Grover (counting heads, losing count).
     הרקולס נלחם בהידרה, וכל ראש שכרת הצמיח שניים. בסוף הוא ניצח רק כשהפסיק
     לכרות והתחיל לחשוב. אנבת' עושה את החשבון בקול: ראש שנופל מוריד את ה־hp שלו,
     ושני ראשים חדשים מוסיפים 10 כל אחד. אם תכרתי ראש עם 15 hp — המפלצת תצא
-    מהעסקה **חזקה יותר**. במשימת הבוס תראי את המספר הזה בעיניים.
+    מהעסקה **חזקה יותר**. בקרב הבוס תראי את זה בעיניים: מההידרה הראשונה יוצאות
+    שתיים, ואי אפשר לעצור אותן בכוח — רק בזה שאת יודעת בדיוק איפה מותר לעמוד.
+
+16. **code (runnable)** — the board itself. This is the block the whole act has
+    been walking towards: the map is a list of lists, and now she can read it.
+    ```python
+    grid = get_map()
+    print(len(grid))
+    print(len(grid[0]))
+    print(grid[3])
+    ```
+    Output on the practice field:
+    ```
+    7
+    10
+    ['grass', 'grass', 'grass', 'grass', 'grass', 'grass', 'grass', 'grass', 'grass', 'grass']
+    ```
+    Caption: `get_map מחזיר רשימה של שורות, וכל שורה היא רשימה של מחרוזות:
+    "grass", "path" או "rock". len על החיצונית זה כמה שורות; len על שורה אחת זה
+    כמה עמודות.`
+
+17. **callout · warn** — title: *קודם שורה, אחר כך עמודה* / *Row first, column
+    second*
+    זה המקום היחיד בקורס שבו הסדר מתהפך, ולכן הוא מקבל מסגרת משלו:
+    - `place_tower("archer", x, y)` — **עמודה ואז שורה**, כי ככה מדברים על מקום
+      על לוח: קודם לאן ללכת, ואז כמה למטה.
+    - `grid[y][x]` — **שורה ואז עמודה**, כי `get_map` מחזיר רשימה של **שורות**.
+      `grid[3]` הוא השורה הרביעית, ורק אחר כך `[5]` בוחר בה את העמודה השישית.
+    שתי הצורות נכונות, ושתיהן יישארו. הכלל שמציל: **קראי משמאל לימין ותשאלי מה
+    יש לך ביד.** `grid[3]` — רשימה של שורה שלמה. `grid[3][5]` — מחרוזת אחת.
+    ואם התהפך לך: `grid[11][3]` על לוח בן שבע שורות ייתן
+    `IndexError: list index out of range`, וזה סימן די ברור שהמספרים הוחלפו.
+
+18. **code (runnable)** — scanning one row and asking a question about each cell.
+    ```python
+    grid = get_map()
+    row = grid[3]
+    for x in range(len(row)):
+        if row[x] == "grass":
+            print(f"column {x} is free")
+    ```
+    Caption: `שימי לב לשוויון: "grass" הוא string, ולכן משווים אותו עם == בדיוק
+    כמו בשיעור 5. משבצת "rock" תיפול בבדיקה הזאת — וזה בדיוק מה שאת רוצה, כי על
+    סלע אין מה לבנות.`
+
+19. **code (runnable)** — collecting results into a list of lists she builds
+    herself. `.append` from lesson 10 meets nesting.
+    ```python
+    spots = []
+    spots.append([1, 2])
+    spots.append([3, 4])
+    print(spots)
+    print(spots[1])
+    print(spots[1][0])
+    ```
+    Output:
+    ```
+    [[1, 2], [3, 4]]
+    [3, 4]
+    3
+    ```
+    Caption: `זו התבנית של קרב הבוס: לסרוק את הלוח, ולאסוף כל משבצת חוקית כזוג
+    [x, y] לתוך רשימה אחת. אחר כך spots[i][0] הוא ה־x ו־spots[i][1] הוא ה־y —
+    שתי שליפות, משמאל לימין.`
 
 ## Try It (ungraded)
+
+The game words work here too, against a practice field, so `get_map()` answers
+with a real board.
 
 ```python
 hydra = {
@@ -233,486 +311,569 @@ print(hydra["fire"])
 print(hydra["fire"]["hp"])
 for name, head in hydra.items():
     print(f"{name}: {head['hp']} hp")
+
+grid = get_map()
+print(len(grid))
+print(grid[4])
+print(grid[4][0])
 ```
 
-Intro: *"המפלצת שלך. הוסיפי ראשים, שני hp, נסי `hydra["fire"][0]` ותראי מה
-קורה. פרקי שורה מקוננת לשתי שורות ותראי מה יש לך ביד באמצע — זה הכלי הכי שימושי
-בשיעור הזה."*
+Intro: *"המפלצת שלך, והלוח שלך. הוסיפי ראשים, שני hp, נסי `hydra["fire"][0]`
+ותראי מה קורה. הדפיסי שורה שלמה מהלוח ואז תא בודד מתוכה. פרקי שורה מקוננת לשתי
+שורות ותראי מה יש לך ביד באמצע — זה הכלי הכי שימושי בשיעור הזה."*
 
-## Training exercises
+## The battles
 
-### e1 — Reading the watch rota · 20 XP, 5 🪙
+Four training battles, the boss, and an optional one. Level schema:
+`spec/09-battle-game.md`.
 
-**brief** — `לוח המשמרות בנוי כרשימה של רשימות: בכל שורה שם ושעה. הדפיסי את השם
-הראשון, את השעה של השורה השנייה, ואת השורה השלישית כמשפט שלם.`
+All six levels were run headless against the vendored engine: **each stated
+solution wins its own battle, and an empty program loses every one of them.**
 
-**starter**
-```python
-watch = [["Annabeth", "midnight"], ["Grover", "dawn"], ["Tyson", "noon"]]
-# line 1: the name in the first row
-# line 2: the hour in the second row
-# line 3: NAME takes the HOUR watch     (from the third row)
-```
+The through-line, and the payoff of the whole act: **`get_map()` returns a list
+of lists — literally the board.** Until now the brief told her which squares were
+legal. From b2 on it stops telling her. She scans the grid, decides for herself
+where a tower may stand, and the gold in every level is exactly the number of
+legal squares — so a scan that misses one leaks, and a scan that counts a rock or
+a road square runs out of money mid-build.
 
-**solution**
-```python
-watch = [["Annabeth", "midnight"], ["Grover", "dawn"], ["Tyson", "noon"]]
-print(watch[0][0])
-print(watch[1][1])
-print(f"{watch[2][0]} takes the {watch[2][1]} watch")
-```
+**Row first.** Every level here depends on `grid[y][x]` while `place_tower` takes
+`(x, y)`. Teach block 17 says it out loud; b1 exists to make her feel it.
 
-Expected output:
-```
-Annabeth
-dawn
-Tyson takes the noon watch
-```
+### b1 — לקרוא את המפה · Reading the Map · 20 XP, 5 🪙
 
-**check**
+**Why this mechanic** — `grid[y][x]`: two lookups, left to right, on a structure
+she did not build. Nothing is asked of her except reading the board correctly,
+which is the one skill everything after this depends on.
+
+**level**
 ```js
-{ kind: "output", mode: "normalized",
-  expect: "Annabeth\ndawn\nTyson takes the noon watch" }
-```
-
-**hints**
-1. `כמה שורות יש בלוח, וכמה תאים יש בכל שורה? שתי שאלות שונות, שני מספרים
-   שונים.`
-2. `` `watch[1]` נותן לך שורה שלמה. כדי להיכנס לתוכה, הוסיפי סוגריים נוספים:
-   `watch[1][1]`. ``
-3. `` השם הראשון: שורה 0, תא 0 → watch[0][0]. השעה בשורה השנייה: שורה 1, תא 1 →
-   watch[1][1]. המשפט האחרון: שני חלקים מהשורה 2, בתוך f-string. אם התבלבלת בין
-   שני המספרים — הדפיסי קודם את watch[2] לבד ותראי מה יש שם. ``
-
-### e2 — Count the heads · 25 XP, 7 🪙
-
-**brief** — `ההידרה נספרת בפעם הראשונה. הדפיסי שורה לכל ראש עם ה־hp שלו, ואז
-כמה ראשים יש וכמה hp בסך הכול. חובה לולאה — הרשימה תגדל בהמשך.`
-
-**starter**
-```python
-heads = [["fire", 30], ["ice", 20], ["poison", 25], ["acid", 15]]
-# NAME: HP        for every head
-# Heads: ?
-# Total hp: ?
-```
-
-**solution**
-```python
-heads = [["fire", 30], ["ice", 20], ["poison", 25], ["acid", 15]]
-total = 0
-for head in heads:
-    print(f"{head[0]}: {head[1]}")
-    total = total + head[1]
-print(f"Heads: {len(heads)}")
-print(f"Total hp: {total}")
-```
-
-Expected output:
-```
-fire: 30
-ice: 20
-poison: 25
-acid: 15
-Heads: 4
-Total hp: 90
-```
-
-**check**
-```js
-{ kind: "output", mode: "normalized",
-  expect: "fire: 30\nice: 20\npoison: 25\nacid: 15\nHeads: 4\nTotal hp: 90" }
-```
-plus
-```js
-{ kind: "source", mustInclude: ["for"],
-  message: { he: "המשימה הזאת דורשת לולאת for — ההידרה מצמיחה ראשים, והקוד צריך לשרוד את זה",
-             en: "This one needs a for loop — the Hydra grows heads and the code must survive it" } }
-```
-
-**hints**
-1. `בתוך הלולאה, מה בדיוק יושב במשתנה בכל סיבוב — מחרוזת, מספר, או משהו אחר?`
-2. `` `for head in heads:` נותן לך בכל סיבוב רשימה קטנה של שניים. השם הוא
-   `head[0]` וה־hp הוא `head[1]`. הסכום הוא accumulator משיעור 7. ``
-3. `` total = 0 לפני הלולאה. בתוך הלולאה: print עם head[0] ו־head[1], ואז
-   total = total + head[1]. אחרי הלולאה, **מחוץ להזחה**: שתי שורות סיכום —
-   len(heads) ו־total. אם ה־print האחרונים חוזרים ארבע פעמים, ההזחה שלהם
-   שגויה. ``
-
-### e3 — The armoury below deck · 30 XP, 8 🪙
-
-**brief** — `לכל חבר צוות יש תיק עם ציוד. עברי על השמות בסדר שנתון ב־order,
-והדפיסי לכל אחד את השם עם מספר הפריטים בסוגריים, ואז שורה עם מקף לכל פריט.
-בסוף — כמה פריטים יש על הספינה בסך הכול.`
-
-**starter**
-```python
-packs = {"Annabeth": ["knife", "cap", "map"], "Grover": ["reed pipes"], "Tyson": ["hammer", "shield"]}
-order = ["Annabeth", "Grover", "Tyson"]
-# NAME (COUNT)
-# - item
-# - item
-# ...
-# Items on board: ?
-```
-
-**solution**
-```python
-packs = {"Annabeth": ["knife", "cap", "map"], "Grover": ["reed pipes"], "Tyson": ["hammer", "shield"]}
-order = ["Annabeth", "Grover", "Tyson"]
-total = 0
-for name in order:
-    pack = packs[name]
-    print(f"{name} ({len(pack)})")
-    for thing in pack:
-        print(f"- {thing}")
-    total = total + len(pack)
-print(f"Items on board: {total}")
-```
-
-Expected output:
-```
-Annabeth (3)
-- knife
-- cap
-- map
-Grover (1)
-- reed pipes
-Tyson (2)
-- hammer
-- shield
-Items on board: 6
-```
-
-**check**
-```js
-{ kind: "output", mode: "normalized",
-  expect: "Annabeth (3)\n- knife\n- cap\n- map\nGrover (1)\n- reed pipes\nTyson (2)\n- hammer\n- shield\nItems on board: 6" }
-```
-plus
-```js
-{ kind: "source", mustInclude: ["for", "packs["],
-  message: { he: "הפריטים צריכים לצאת מתוך packs בלולאה, לא להיכתב ביד",
-             en: "The items must come out of packs in a loop, not be typed by hand" } }
-```
-
-This is her first **nested loop**: a loop inside a loop, where the inner one runs
-a different number of times each round. Expect this to be the hardest training
-exercise in Act III, and let the hints carry it.
-
-**hints**
-1. `לכל שם יש מספר שונה של פריטים. כמה פעמים תרוץ הלולאה הפנימית עבור גרובר,
-   וכמה עבור אנבת'?`
-2. `` הלולאה החיצונית רצה על `order` ונותנת שם. `packs[name]` נותן את הרשימה
-   שלו. לולאה שנייה, **בתוך** הראשונה, רצה על הרשימה הזאת ומדפיסה מקף לכל
-   פריט. ``
-3. `` total = 0 לפני הכול. לולאה חיצונית על order: שמרי את `packs[name]` במשתנה
-   בשם pack, הדפיסי `{name} ({len(pack)})`, ואז לולאה פנימית
-   `for thing in pack:` שמדפיסה `- {thing}` — מוזחת עוד רמה פנימה. אחרי הלולאה
-   הפנימית, עדיין בתוך החיצונית: total = total + len(pack). ואחרי הכול, ללא
-   הזחה: שורת הסיכום. ``
-
-### e4 — Know the weakness · 30 XP, 8 🪙
-
-**brief** — `לפני הקרב, סקירת מודיעין. עברי על שמות התקיפה לפי הסדר: אם הראש
-קיים — הדפיסי אותו עם ה־hp והחולשה שלו; אם לא — הדפיסי שהוא לא קיים. בסוף,
-מצאי את הראש עם הכי מעט hp והדפיסי את שמו. התוכנית לא רשאית לקרוס על שם מומצא.`
-
-**starter**
-```python
-heads = {
-    "fire": {"hp": 30, "weakness": "water"},
-    "ice": {"hp": 20, "weakness": "torch"},
-    "poison": {"hp": 25, "weakness": "antidote"},
+{
+  map: {
+    cols: 12, rows: 7,
+    path: [[0,4],[1,4],[2,4],[3,4],[4,4],[4,3],[4,2],[5,2],[6,2],[7,2],[7,3],
+           [7,4],[8,4],[9,4],[10,4],[11,4]],
+    rock: [[2,2],[9,6]],
+  },
+  gold: 150, campHp: 3, seed: 40, allowed: ["archer"],
+  waves: [
+    { delay: 0, enemies: [{ kind: "satyr", count: 5, gap: 0.8 }] },
+    { delay: 8, enemies: [{ kind: "hellhound", count: 3, gap: 1.2 }] },
+  ],
 }
-attack = ["ice", "fire", "shadow"]
-# NAME (HP) - weakness: WEAKNESS
-# no such head: NAME
-# Weakest head: NAME
+```
+
+**brief** — `הפקודה get_map() נותנת לך את הלוח עצמו: רשימה של שורות, וכל שורה
+רשימה של מחרוזות.
+
+1. הדפיסי כמה שורות יש בלוח, וכמה עמודות יש בשורה הראשונה.
+2. הדפיסי מה יש ב־grid[4][0] — כלומר שורה 4, עמודה 0.
+3. הדפיסי מה יש ב־grid[3][5].
+4. עכשיו בני שלוש קשתות בשורה 3, בעמודות 3, 5 ו־9.
+
+שימי לב להיפוך: `grid[y][x]` אבל `place_tower("archer", x, y)`.`
+
+**starter**
+```python
+grid = get_map()
+print(len(grid))
+print(len(grid[0]))
+print(grid[3][5])
 ```
 
 **solution**
 ```python
-heads = {
-    "fire": {"hp": 30, "weakness": "water"},
-    "ice": {"hp": 20, "weakness": "torch"},
-    "poison": {"hp": 25, "weakness": "antidote"},
-}
-attack = ["ice", "fire", "shadow"]
+grid = get_map()
+print(len(grid))
+print(len(grid[0]))
+print(grid[4][0])
+print(grid[3][5])
+place_tower("archer", 3, 3)
+place_tower("archer", 5, 3)
+place_tower("archer", 9, 3)
+```
 
-for name in attack:
-    if name in heads:
-        head = heads[name]
-        print(f"{name} ({head['hp']}) - weakness: {head['weakness']}")
+**check**
+```js
+{ kind: "battle",
+  also: { kind: "source", mustInclude: ["get_map(", "grid["],
+          message: { he: "הקרב הזה דורש לקרוא את הלוח עם get_map ולגשת אליו עם grid[y][x]",
+                     en: "This one needs the board read with get_map and addressed as grid[y][x]" } } }
+```
+
+**hints**
+1. `` `grid[4][0]` הדפיס `path` ו־`grid[3][5]` הדפיס `grass`. איזה מהמספרים הוא
+   השורה ואיזה העמודה? ``
+2. `` `grid[4]` הוא רשימה שלמה — שורה 4. ה־`[0]` שאחריו בוחר עמודה בתוך השורה
+   הזאת. ב־`place_tower` הסדר הפוך: עמודה קודם. ``
+3. `` שלוש שורות בנייה: `place_tower("archer", 3, 3)`, אותו דבר עם 5, ואותו דבר
+   עם 9 — כולן בשורה 3. אם קיבלת שגיאת בנייה על הכביש, בדקי מה `grid[3][4]`
+   מחזיר, ותראי למה. ``
+
+### b2 — לסרוק שורה · Scanning a Row · 25 XP, 7 🪙
+
+**Why this mechanic** — in lesson 9 the brief handed her `crossings = [2, 4, 6, 8]`.
+Here nobody hands her anything: she loops over one row of the grid and asks each
+cell what it is. The map has both road crossings **and** boulders in that row, and
+the gold covers exactly the grass — so `== "grass"` is required, and "skip the
+road" is not enough.
+
+**level**
+```js
+{
+  map: {
+    cols: 12, rows: 7,
+    path: [[0,4],[1,4],[2,4],[2,3],[2,2],[3,2],[4,2],[4,3],[4,4],[5,4],[6,4],
+           [7,4],[7,3],[7,2],[8,2],[9,2],[9,3],[9,4],[10,4],[11,4]],
+    rock: [[0,3],[11,3]],
+  },
+  gold: 300, campHp: 3, seed: 41, allowed: ["archer"],
+  waves: [
+    { delay: 0,  enemies: [{ kind: "satyr", count: 10, gap: 0.5 }] },
+    { delay: 9,  enemies: [{ kind: "hellhound", count: 8, gap: 0.8 }] },
+    { delay: 22, enemies: [{ kind: "harpy", count: 8, gap: 0.6 }] },
+  ],
+}
+```
+
+Row 3 of this map reads
+`["rock", "grass", "path", "grass", "path", "grass", "grass", "path", "grass", "path", "grass", "rock"]`
+— six grass cells at columns 1, 3, 5, 6, 8, 10, which is exactly 300 gold of
+archers.
+
+**brief** — `שורה 3 היא הרכס, והדרך חוצה אותה כמה פעמים. יש עליה גם שני סלעים.
+
+אף אחד לא אומר לך הפעם איפה מה. קחי את השורה מהלוח, רוצי על כל העמודות שלה,
+ובני קשת בכל משבצת שהיא **"grass"** — לא כביש ולא סלע.
+
+הזהב מספיק בדיוק למשבצות הפנויות. אם תבני על סלע, הוא ייגמר לפני הסוף.`
+
+**starter**
+```python
+grid = get_map()
+row = grid[3]
+print(row)
+```
+
+**solution**
+```python
+grid = get_map()
+row = grid[3]
+print(row)
+for x in range(len(row)):
+    if row[x] == "grass":
+        place_tower("archer", x, 3)
+```
+
+**check**
+```js
+{ kind: "battle",
+  also: { kind: "source", mustInclude: ["get_map(", "range(len(", "if"],
+          message: { he: "המשבצות צריכות לצאת מסריקה של השורה בלוח, לא מרשימה שכתבת ביד",
+                     en: "The squares must come from scanning the row in the grid, not from a list typed by hand" } } }
+```
+
+**hints**
+1. `הדפיסי את `row` והסתכלי עליה. כמה ערכים יש בה, וכמה מהם `"grass"`?`
+2. `` `for x in range(len(row)):` נותן לך כל עמודה בתורה, ו־`row[x]` הוא מה שיש
+   שם. ההשוואה היא `row[x] == "grass"` — עם שני סימני שווה. ``
+3. `` שלוש שורות: `for x in range(len(row)):`, בתוכה `if row[x] == "grass":`,
+   ובתוכה `place_tower("archer", x, 3)`. שימי לב שה־`x` של הלולאה הוא בדיוק
+   ה־`x` של `place_tower` — כי שניהם עמודה. אם תבדקי רק `!= "path"`, תבני גם על
+   שני הסלעים והזהב ייגמר. ``
+
+### b3 — לסרוק את כל הלוח · Scanning the Whole Board · 30 XP, 8 🪙
+
+**Why this mechanic** — a loop inside a loop over a list of lists, plus a
+question that reaches into the *next row down*: `grid[y][x] == "grass" and
+grid[y + 1][x] == "path"`. That single condition is the definition of a good
+tower spot, written in code, and it finds all eight of them on a map she has
+never seen.
+
+**level**
+```js
+{
+  map: {
+    cols: 12, rows: 7,
+    path: [[0,5],[1,5],[2,5],[3,5],[3,4],[3,3],[4,3],[5,3],[6,3],[6,4],[6,5],
+           [7,5],[8,5],[9,5],[10,5],[11,5]],
+    rock: [[0,4],[1,4],[10,4],[11,4]],
+  },
+  gold: 400, campHp: 3, seed: 42, allowed: ["archer"],
+  waves: [
+    { delay: 0,  enemies: [{ kind: "satyr", count: 10, gap: 0.5 }] },
+    { delay: 9,  enemies: [{ kind: "hellhound", count: 8, gap: 0.7 }] },
+    { delay: 20, enemies: [{ kind: "harpy", count: 10, gap: 0.5 }] },
+    { delay: 32, enemies: [{ kind: "hellhound", count: 6, gap: 0.7 }] },
+  ],
+}
+```
+
+The scan finds exactly eight squares — `(3,2) (4,2) (5,2) (6,2) (2,4) (7,4)
+(8,4) (9,4)` — and eight archers is exactly 400 gold. The four boulders sit in
+row 4 beside the road on purpose: they are grass-shaped traps for a scan that
+forgets to check the cell it is standing on.
+
+**brief** — `הפעם לא נתונה לך שורה. סרקי את הלוח כולו.
+
+הכלל של כירון למקום טוב: **משבצת דשא שיושבת ישירות מעל משבצת דרך.** משם רואים את
+המפלצות עוברות מתחת.
+
+רוצי על כל שורה `y`, ובתוכה על כל עמודה `x`, ובני קשת כשמתקיימים שני התנאים
+יחד: `grid[y][x]` הוא `"grass"` **וגם** `grid[y + 1][x]` הוא `"path"`.
+
+שימי לב לגבול: אם `y` יגיע לשורה האחרונה, `y + 1` יחרוג מהלוח. לכן הלולאה
+החיצונית רצה עד `len(grid) - 1`.
+
+הזהב מספיק בדיוק למספר המשבצות שהסריקה תמצא.`
+
+**starter**
+```python
+grid = get_map()
+for y in range(len(grid) - 1):
+    print(grid[y])
+```
+
+**solution**
+```python
+grid = get_map()
+for y in range(len(grid) - 1):
+    row = grid[y]
+    for x in range(len(row)):
+        if row[x] == "grass" and grid[y + 1][x] == "path":
+            place_tower("archer", x, y)
+```
+
+**check**
+```js
+{ kind: "battle",
+  also: { kind: "source", mustInclude: ["get_map(", "grid[y + 1][x]", "for"],
+          message: { he: "צריך לסרוק את הלוח ולשאול גם על המשבצת שמתחת — grid[y + 1][x]",
+                     en: "The board must be scanned, and the cell below asked about too — grid[y + 1][x]" } } }
+```
+
+**hints**
+1. `מה ההבדל בין "המשבצת הזאת היא דשא" לבין "המשבצת הזאת שווה משהו"? מה עוד צריך
+   להיות נכון כדי שמגדל שם יירה?`
+2. `` שתי לולאות מקוננות: החיצונית על `range(len(grid) - 1)` נותנת `y`, הפנימית
+   על `range(len(row))` נותנת `x`. התנאי מחבר שתי שאלות עם `and` משיעור 5. ``
+3. `` `for y in range(len(grid) - 1):` → `row = grid[y]` → `for x in
+   range(len(row)):` → `if row[x] == "grass" and grid[y + 1][x] == "path":` →
+   `place_tower("archer", x, y)`. שימי לב שה־`y` של הבנייה הוא השורה של הדשא, לא
+   של הדרך. אם תרוצי עד `len(grid)` במקום `len(grid) - 1`, השורה האחרונה תבקש
+   את `grid[7]` על לוח בן שבע שורות — `IndexError`. ``
+
+### b4 — תוכנית בתוך תוכנית · A Plan Inside a Plan · 30 XP, 8 🪙
+
+**Why this mechanic** — the build plan itself becomes nested data: a list whose
+every entry is `[kind, x, y]`. She reads it with `entry[0]`, `entry[1]`,
+`entry[2]`, and checks each entry against the grid before trusting it. One entry
+in the plan is wrong — the scout marked a square the road has since taken — and
+without the check it is a build error and a lost battle.
+
+**level**
+```js
+{
+  map: {
+    cols: 13, rows: 8,
+    path: [[0,5],[1,5],[2,5],[3,5],[4,5],[4,4],[4,3],[5,3],[6,3],[7,3],[8,3],
+           [8,4],[8,5],[9,5],[10,5],[11,5],[12,5]],
+    rock: [[6,6],[1,2]],
+  },
+  gold: 350, campHp: 3, seed: 43, allowed: ["archer", "cannon", "ice"],
+  waves: [
+    { delay: 0,  enemies: [{ kind: "satyr", count: 6, gap: 0.7 }] },
+    { delay: 8,  enemies: [{ kind: "hellhound", count: 6, gap: 1.0 }] },
+    { delay: 20, enemies: [{ kind: "cyclops", count: 2, gap: 1.5 }] },
+  ],
+}
+```
+
+**brief** — `אנבת' שלחה תוכנית שלמה, ובתוכה שש שורות. כל שורה היא רשימה קטנה:
+סוג המגדל, עמודה, שורה.
+
+plan = [["cannon", 6, 4], ["archer", 2, 4], ["ice", 10, 4],
+        ["archer", 5, 2], ["cannon", 11, 4], ["archer", 4, 3]]
+
+אחת מהשש כבר לא תקפה — הדרך זזה מאז שהיא סימנה אותה. אל תחפשי אותה בעיניים:
+לפני כל בנייה, שאלי את הלוח אם המשבצת הזאת עדיין `"grass"`. אם כן — בני. אם לא —
+הדפיסי שורה שאומרת שדילגת עליה.
+
+הזהב מספיק בדיוק לחמש השורות התקפות.`
+
+**starter**
+```python
+plan = [["cannon", 6, 4], ["archer", 2, 4], ["ice", 10, 4], ["archer", 5, 2], ["cannon", 11, 4], ["archer", 4, 3]]
+print(plan[0])
+print(plan[0][0])
+print(len(plan))
+```
+
+**solution**
+```python
+grid = get_map()
+plan = [["cannon", 6, 4], ["archer", 2, 4], ["ice", 10, 4], ["archer", 5, 2], ["cannon", 11, 4], ["archer", 4, 3]]
+for entry in plan:
+    kind = entry[0]
+    x = entry[1]
+    y = entry[2]
+    if grid[y][x] == "grass":
+        place_tower(kind, x, y)
     else:
-        print(f"no such head: {name}")
-
-weakest = ""
-lowest = 1000
-for name, head in heads.items():
-    if head["hp"] < lowest:
-        lowest = head["hp"]
-        weakest = name
-print(f"Weakest head: {weakest}")
-```
-
-Expected output:
-```
-ice (20) - weakness: torch
-fire (30) - weakness: water
-no such head: shadow
-Weakest head: ice
+        print(f"{kind} at {x},{y} would stand on the road")
 ```
 
 **check**
 ```js
-{ kind: "output", mode: "normalized",
-  expect: "ice (20) - weakness: torch\nfire (30) - weakness: water\nno such head: shadow\nWeakest head: ice" }
+{ kind: "battle",
+  also: { kind: "source", mustInclude: ["get_map(", "entry[0]", "grid[y][x]"],
+          message: { he: "כל שורה בתוכנית נקראת עם entry[0], entry[1], entry[2], ונבדקת מול הלוח לפני הבנייה",
+                     en: "Each plan row is read with entry[0], entry[1], entry[2] and checked against the grid before building" } } }
 ```
 
 **hints**
-1. `` "shadow" לא נמצא במילון. מה יקרה לשורות שאחריו אם תשלפי אותו עם סוגריים
-   מרובעים? ``
-2. `` `if name in heads:` בודק מפתחות ומגן עלייך. לחיפוש החלש ביותר: שני
-   משתנים שזוכרים — שם ומספר — שמתעדכנים יחד כשמוצאים ערך קטן יותר. ``
-3. `` לולאה ראשונה על attack עם if/else. בתוך ה־if, שמרי את `heads[name]`
-   במשתנה head, ואז `head["hp"]` ו־`head["weakness"]`. לולאה שנייה נפרדת על
-   `heads.items()`: lowest מתחיל במספר גדול (1000), weakest במחרוזת ריקה, ושניהם
-   מתעדכנים יחד בתוך ה־if. ``
+1. `בכל סיבוב של הלולאה, מה בדיוק יושב במשתנה — מחרוזת, מספר, או רשימה של
+   שלושה?`
+2. `` `for entry in plan:` נותן בכל סיבוב רשימה קטנה. `entry[0]` הוא הסוג,
+   `entry[1]` העמודה, `entry[2]` השורה. הבדיקה היא `grid[entry[2]][entry[1]]` —
+   שורה קודם. ``
+3. `` שמרי את שלושת החלקים במשתנים בשם `kind`, `x` ו־`y` בשורות נפרדות — ואז
+   התנאי נקרא `grid[y][x] == "grass"`, וזה קריא הרבה יותר. `if` בונה, `else`
+   מדפיס. חמישה מגדלים ייבנו, אחד יידלג, והזהב יסתדר בדיוק. ``
 
-## BOSS — The Hydra · ההידרה · 60 XP, 15 🪙
+## BOSS — ההידרה · The Hydra · 60 XP, 15 🪙
 
-> `boss: { name: { he: "ההידרה", en: "The Hydra" }, icon: "🐉", hp: 5 }`
-> חמישה ראשים, מקרה בדיקה לכל ראש. כל מקרה שעובר מוריד ראש אחד מהמד.
-> אי אפשר להפסיד. אפשר רק עוד לא לסיים.
+> `boss: { name: { he: "ההידרה", en: "The Hydra" }, icon: "🐲", hp: 5 }`
+> חמישה גלים, ולכל גל שנעצר יורד ראש מהמד. אי אפשר להפסיד באמת — קרב שנכשל לא
+> עולה כלום, ואפשר לרוץ עליו שוב ושוב.
 
-**brief** — `ההידרה עולה מהמים. כתבי תוכנית שעושה שני דברים: קודם מדווחת בדיוק
-מה עומד מולך, ואז מבצעת מהלך תקיפה אחד לפי שתי שורות קלט.`
+**Why this mechanic** — everything nested, at once. The **map** is a list of
+lists she scans to build a list of lists of her own (`spots.append([x, y])`),
+which she then reads back with `spots[i][0]` and `spots[i][1]`. The **brood** is
+nested too — `[["hydra", 3], ["hellhound", 14], ...]` — because the Hydra splits:
+one comes out of the water, and two more grow behind it. She counts the brood
+with `entry[1]`, checks the total against `len(get_wave())`, and `brood[0][0]`
+decides whether the ford needs ice.
 
-**The rules, stated exactly** (this is the spec she reads):
+There is no version of this battle that can be won by typing coordinates. The
+scan finds thirteen legal squares on an eighteen-column map, and thirteen is
+exactly what it takes: **twelve archers plus both ice towers still lose.**
 
-**חלק א׳ — הדיווח.** מדפיסים תמיד, לפני הקלט:
-1. השורה `=== THE HYDRA ===`
-2. שורה לכל ראש, **בסדר של הרשימה `order`**, בצורה `name: HP hp, weak to WEAKNESS`
-3. `Heads: N` — כמה ראשים יש
-4. `Total hp: T` — סכום ה־hp של כולם
-5. `Weakest: NAME (HP)` — הראש עם הכי מעט hp
+**level**
+```js
+{
+  map: {
+    cols: 18, rows: 10,
+    path: [[0,5],[1,5],[2,5],[3,5],[4,5],[4,4],[4,3],[5,3],[6,3],[7,3],[7,4],
+           [7,5],[8,5],[9,5],[10,5],[10,6],[10,7],[11,7],[12,7],[13,7],[13,6],
+           [13,5],[14,5],[15,5],[16,5],[17,5]],
+    rock: [[0,4],[1,4],[2,4],[16,4],[17,4],[8,8]],
+  },
+  gold: 790, campHp: 5, seed: 44, allowed: ["archer", "ice"],
+  waves: [
+    { delay: 0,  enemies: [{ kind: "hydra", count: 1, gap: 1 }] },
+    { delay: 9,  enemies: [{ kind: "hellhound", count: 6, gap: 0.7 }] },
+    { delay: 18, enemies: [{ kind: "hydra", count: 2, gap: 2.5 }] },
+    { delay: 30, enemies: [{ kind: "harpy", count: 12, gap: 0.45 }] },
+    { delay: 40, enemies: [{ kind: "hellhound", count: 8, gap: 0.5 },
+                           { kind: "cyclops", count: 6, gap: 0.9 }] },
+  ],
+}
+```
 
-**חלק ב׳ — המהלך.** שתי קריאות `input()`: קודם שם הראש, אחריו הנשק.
-- אם שם הראש **לא** קיים בהידרה → `There is no NAME head.`
-- אחרת, אם הנשק **שווה** לחולשה של הראש → שתי שורות:
-  `The NAME head falls!` ואז `Two heads grow back, 10 hp each.`
-- אחרת → `The WEAPON does nothing. The NAME head needs WEAKNESS.`
+The scan finds `(4,2) (5,2) (6,2) (7,2) (3,4) (8,4) (9,4) (10,4) (13,4) (14,4)
+(15,4) (11,6) (12,6)` — thirteen squares. Thirteen archers is 650, the two ice
+towers are 140, and the level's gold is 790: exactly that build and not one
+tower more. **No cannons here** — twelve harpies come over the ridge in the
+fourth wave, and artillery cannot touch them.
 
-**חלק ג׳ — הסיכום.** תמיד שתי שורות אחרונות:
-- `Heads now: N` — 5 אם ראש נפל (אחד מת, שניים צמחו), אחרת 4
-- `Total hp now: T` — אם ראש נפל: הסכום פחות ה־hp שלו ועוד 20. אחרת: הסכום כמו שהיה.
+**brief** — `המים רותחים. מתוכם עולה ההידרה — ומאחוריה עוד שתיים, כי ראש שנכרת
+מצמיח שניים.
+
+הסיירת מסרה את ההרכב בצורה מקוננת, שורה לכל סוג:
+
+brood = [["hydra", 3], ["hellhound", 14], ["harpy", 12], ["cyclops", 6]]
+
+**חלק א׳ — הדיווח.** עברי על brood, הדפיסי שורה לכל סוג בצורה `NAME x N`, וחברי
+את כל הכמויות. הדפיסי את הסכום ואת `len(get_wave())` — שני המספרים חייבים לצאת
+זהים.
+
+**חלק ב׳ — הסריקה.** סרקי את הלוח כמו בקרב הקודם ואספי כל משבצת חוקית לתוך
+רשימה בשם spots, כל אחת כזוג [x, y]. הדפיסי כמה נמצאו.
+
+**חלק ג׳ — הבנייה.** בני קשת בכל משבצת ברשימה, לפי spots[i][0] ו־spots[i][1].
+ואם השורה הראשונה ב־brood היא של ההידרה, הוסיפי שני מגדלי קרח ב־(11, 8)
+וב־(12, 8) — הם לא עושים כמעט נזק, הם קונים לקשתות את הזמן שהן צריכות.
+
+הזהב מספיק בדיוק לזה. מגדל אחד פחות, וההידרה השלישית מגיעה לשער.`
 
 **starter**
 ```python
-hydra = {
-    "fire": {"hp": 30, "weakness": "water"},
-    "ice": {"hp": 20, "weakness": "torch"},
-    "poison": {"hp": 25, "weakness": "antidote"},
-    "acid": {"hp": 15, "weakness": "shield"},
-}
-order = ["fire", "ice", "poison", "acid"]
-
-# Part 1 - the report (always printed)
-# Part 2 - target = input(), then weapon = input()
-# Part 3 - Heads now / Total hp now
+brood = [["hydra", 3], ["hellhound", 14], ["harpy", 12], ["cyclops", 6]]
+grid = get_map()
+print(brood[0])
+print(brood[0][1])
+print(len(grid))
 ```
 
 **solution**
 ```python
-hydra = {
-    "fire": {"hp": 30, "weakness": "water"},
-    "ice": {"hp": 20, "weakness": "torch"},
-    "poison": {"hp": 25, "weakness": "antidote"},
-    "acid": {"hp": 15, "weakness": "shield"},
-}
-order = ["fire", "ice", "poison", "acid"]
+grid = get_map()
+brood = [["hydra", 3], ["hellhound", 14], ["harpy", 12], ["cyclops", 6]]
 
-print("=== THE HYDRA ===")
-total = 0
-weakest = ""
-lowest = 1000
-for name in order:
-    head = hydra[name]
-    print(f"{name}: {head['hp']} hp, weak to {head['weakness']}")
-    total = total + head["hp"]
-    if head["hp"] < lowest:
-        lowest = head["hp"]
-        weakest = name
-print(f"Heads: {len(hydra)}")
-print(f"Total hp: {total}")
-print(f"Weakest: {weakest} ({lowest})")
+counted = 0
+for entry in brood:
+    print(f"{entry[0]} x {entry[1]}")
+    counted = counted + entry[1]
+print(counted)
+print(len(get_wave()))
 
-target = input()
-weapon = input()
+spots = []
+for y in range(len(grid) - 1):
+    row = grid[y]
+    for x in range(len(row)):
+        if row[x] == "grass" and grid[y + 1][x] == "path":
+            spots.append([x, y])
+print(len(spots))
 
-heads_now = len(hydra)
-total_now = total
-if target not in hydra:
-    print(f"There is no {target} head.")
-else:
-    if weapon == hydra[target]["weakness"]:
-        print(f"The {target} head falls!")
-        print("Two heads grow back, 10 hp each.")
-        heads_now = heads_now - 1 + 2
-        total_now = total_now - hydra[target]["hp"] + 20
-    else:
-        needed = hydra[target]["weakness"]
-        print(f"The {weapon} does nothing. The {target} head needs {needed}.")
-print(f"Heads now: {heads_now}")
-print(f"Total hp now: {total_now}")
+for i in range(len(spots)):
+    place_tower("archer", spots[i][0], spots[i][1])
+
+if brood[0][0] == "hydra":
+    place_tower("ice", 11, 8)
+    place_tower("ice", 12, 8)
 ```
-
-### The report block
-
-Every test case begins with these seven identical lines. Call it **ROLL**:
-
-```
-=== THE HYDRA ===
-fire: 30 hp, weak to water
-ice: 20 hp, weak to torch
-poison: 25 hp, weak to antidote
-acid: 15 hp, weak to shield
-Heads: 4
-Total hp: 90
-Weakest: acid (15)
-```
-
-### The five heads — test cases
-
-Each case is ROLL followed by the lines in the third column. All five outputs
-below were produced by running the solution above in Skulpt with the listed
-stdin.
-
-| # | Head cut | `stdin` | Tail after ROLL | What it proves |
-| --- | --- | --- | --- | --- |
-| 1 | 🔥 fire | `["fire", "water"]` | `The fire head falls!` · `Two heads grow back, 10 hp each.` · `Heads now: 5` · `Total hp now: 80` | the happy path: matching weakness, arithmetic on a nested value |
-| 2 | 🧊 ice | `["ice", "torch"]` | `The ice head falls!` · `Two heads grow back, 10 hp each.` · `Heads now: 5` · `Total hp now: 90` | a kill that changes nothing — 20 out, 20 back in |
-| 3 | 🧪 acid | `["acid", "shield"]` | `The acid head falls!` · `Two heads grow back, 10 hp each.` · `Heads now: 5` · `Total hp now: 95` | **cutting the weakest head makes the Hydra stronger** |
-| 4 | ☠️ poison | `["poison", "torch"]` | `The torch does nothing. The poison head needs antidote.` · `Heads now: 4` · `Total hp now: 90` | the wrong weapon: the `else` branch, and the lookup that names the right one |
-| 5 | 👻 shadow | `["shadow", "water"]` | `There is no shadow head.` · `Heads now: 4` · `Total hp now: 90` | a key that does not exist must not crash the program |
 
 **check**
 ```js
-{ kind: "cases", cases: [
-  { stdin: ["fire", "water"],
-    expect: "=== THE HYDRA ===\nfire: 30 hp, weak to water\nice: 20 hp, weak to torch\npoison: 25 hp, weak to antidote\nacid: 15 hp, weak to shield\nHeads: 4\nTotal hp: 90\nWeakest: acid (15)\nThe fire head falls!\nTwo heads grow back, 10 hp each.\nHeads now: 5\nTotal hp now: 80" },
-  { stdin: ["ice", "torch"],
-    expect: "=== THE HYDRA ===\nfire: 30 hp, weak to water\nice: 20 hp, weak to torch\npoison: 25 hp, weak to antidote\nacid: 15 hp, weak to shield\nHeads: 4\nTotal hp: 90\nWeakest: acid (15)\nThe ice head falls!\nTwo heads grow back, 10 hp each.\nHeads now: 5\nTotal hp now: 90" },
-  { stdin: ["acid", "shield"],
-    expect: "=== THE HYDRA ===\nfire: 30 hp, weak to water\nice: 20 hp, weak to torch\npoison: 25 hp, weak to antidote\nacid: 15 hp, weak to shield\nHeads: 4\nTotal hp: 90\nWeakest: acid (15)\nThe acid head falls!\nTwo heads grow back, 10 hp each.\nHeads now: 5\nTotal hp now: 95" },
-  { stdin: ["poison", "torch"],
-    expect: "=== THE HYDRA ===\nfire: 30 hp, weak to water\nice: 20 hp, weak to torch\npoison: 25 hp, weak to antidote\nacid: 15 hp, weak to shield\nHeads: 4\nTotal hp: 90\nWeakest: acid (15)\nThe torch does nothing. The poison head needs antidote.\nHeads now: 4\nTotal hp now: 90" },
-  { stdin: ["shadow", "water"],
-    expect: "=== THE HYDRA ===\nfire: 30 hp, weak to water\nice: 20 hp, weak to torch\npoison: 25 hp, weak to antidote\nacid: 15 hp, weak to shield\nHeads: 4\nTotal hp: 90\nWeakest: acid (15)\nThere is no shadow head.\nHeads now: 4\nTotal hp now: 90" },
-] }
+{ kind: "battle",
+  also: { kind: "source",
+          mustInclude: ["get_map(", "spots.append(", "spots[i][0]", "brood[0][0]"],
+          message: { he: "הבוס דורש את המבנים המקוננים עצמם: סריקה שאוספת [x, y] לרשימה, וקריאה של brood לפי שני מספרים",
+                     en: "The boss needs the nested structures themselves: a scan collecting [x, y] into a list, and brood read by two indexes" } } }
 ```
-
-All five compare with `normalized` semantics, matching every other check in the
-course.
 
 ### Fight staging
 
-- The bar shows **five heads**. Each passing case removes one, with a short cut
-  animation and two smaller heads sprouting behind it — cosmetic only, and
-  disabled under `prefers-reduced-motion: reduce`.
-- On the fifth pass the necks are cauterised, the Hydra sinks, and the Act III
-  cutscene plays.
-- **Partial progress is saved.** Three of five passing is three heads down, kept
-  across a reload, shown on the map. There is no failure state and no timer.
-- Failure text is diagnostic and never scolding: *"ראש ה־acid עדיין עומד. הריצי
-  את הראש הזה לבד: הקלט הוא acid ואז shield. מה שונה בפלט שלך?"*
+- The bar shows **five heads**, one per wave. A wave that is cleared without a
+  leak takes a head down, with a short cut animation and two smaller heads
+  sprouting behind it — cosmetic only, and disabled under
+  `prefers-reduced-motion: reduce`.
+- The heads come down **during the replay**, because the whole battle is
+  simulated before the first frame is drawn: the outcome is already known and the
+  bar is reading a recording.
+- **Losing costs nothing.** There is no failure state beyond "the camp fell, run
+  it again", no timer, and the level's seed means the same build always plays out
+  the same way — so a change she makes is a change she can actually attribute.
+- Failure text is diagnostic and never scolding. The engine already distinguishes
+  the cases that matter: a tower that never saw a monster, a cannon that watched
+  flyers pass, gold that ran out mid-build, a tower on the road. The boss adds
+  one line of its own: *"הסריקה מצאה 12 משבצות. יש 13. איזו שורה בלוח לא נבדקה?"*
 
 **hints**
-1. `` חלק א׳ נבנה מלולאה אחת. שלוש התשובות שאחריה — Heads, Total hp, Weakest —
-   כולן יכולות לצאת מאותה נסיעה. כמה לולאות באמת צריך שם? ``
-2. `` חלק א׳: לולאה על `order` (לא על המילון — הסדר של השורות קבוע), ובתוכה
-   `hydra[name]` שנותן מילון קטן עם `"hp"` ו־`"weakness"`. חלק ב׳: `input()`
-   פעמיים, ואז `if target not in hydra:` בחוץ, ובתוך ה־else השוואה בין הנשק
-   ל־`hydra[target]["weakness"]`. חלק ג׳: שני משתנים, `heads_now` ו־`total_now`,
-   שמאותחלים למצב ההתחלתי ומשתנים **רק** בענף שבו ראש נפל. ``
-3. `` המבנה המלא: כותרת → total = 0, lowest = 1000, weakest = "" → לולאה על
-   order שמדפיסה שורת ראש, מוסיפה ל־total ומעדכנת את weakest → שלוש שורות
-   הסיכום → שתי שורות input → heads_now = len(hydra) ו־total_now = total →
-   if/else בשלושה ענפים → שתי שורות סיום, **מחוץ** לכל ה־if. שימי לב לחשבון של
-   הענף המנצח: `heads_now - 1 + 2` ראשים, ו־`total_now - hp + 20` נקודות. אם
-   מקרה 3 נכשל אצלך והשאר עוברים — כנראה הפחתת קבוע במקום את ה־hp האמיתי של
-   הראש. ``
+1. `` שלושה חלקים, ורק אחד מהם חדש. איזה מהם את כבר כתבת בקרב הקודם, כמעט מילה
+   במילה? ``
+2. `` הסריקה זהה ל־b3 עם שינוי אחד: במקום `place_tower` בתוך ה־`if`, כתבי
+   `spots.append([x, y])`. הבנייה נעשית אחר כך, בלולאה שנייה, על הרשימה שנאספה:
+   `place_tower("archer", spots[i][0], spots[i][1])`. ``
+3. `` סדר העבודה: `grid = get_map()` → `brood` → לולאה על `brood` שמדפיסה
+   `{entry[0]} x {entry[1]}` ומחברת ל־`counted` → הדפסת `counted` ו־
+   `len(get_wave())` → `spots = []` ואז הסריקה המקוננת עם `spots.append([x, y])`
+   → הדפסת `len(spots)` → לולאה `for i in range(len(spots)):` שבונה קשת →
+   `if brood[0][0] == "hydra":` עם שני מגדלי הקרח ב־(11, 8) וב־(12, 8).
+   אם הסריקה מצאה 12 במקום 13, בדקי את הגבול של הלולאה החיצונית: `len(grid) - 1`,
+   לא `len(grid) - 2`. ``
 
-## Optional side quest — "Watch It Sort Itself" · לראות רשימה מסתדרת · 30 XP, 8 🪙
+## Optional battle — לראות רשימה מסתדרת · Watch It Sort Itself · 30 XP, 8 🪙
 
 > **אופציונלי.** לא חוסם את סוף המערכה, לא נדרש לגיזה, ואפשר לחזור אליו מהמפה
 > מתי שבא לך. הוא כאן כי זה יפה.
 
-**brief** — `בשיעור 10 קיבלת את sorted() בחינם. עכשיו תראי מה הוא עושה בפנים.
-עברי על הרשימה שוב ושוב, ובכל מעבר החליפי כל שני שכנים שיושבים בסדר הפוך.
-הדפיסי את הרשימה אחרי כל מעבר — ותראי את המספרים הגדולים נודדים ימינה כמו
-בועות. אסור להשתמש ב־sorted או ב־.sort.`
+**Why this mechanic** — `sorted()` came free in lesson 10; here she writes what
+it does inside. Two parallel lists have to move together on every swap, which is
+the whole reason a swap needs a temporary variable — and the reward is not a
+printed list, it is which three columns get the only three towers she can afford.
+
+**level** — the doubled bay from lesson 10, a season later.
+```js
+{
+  map: {
+    cols: 14, rows: 9,
+    path: [[0,6],[1,6],[2,6],[3,6],[4,6],[4,5],[4,4],[3,4],[2,4],[1,4],[1,3],
+           [1,2],[2,2],[3,2],[4,2],[5,2],[6,2],[7,2],[8,2],[9,2],[10,2],[11,2],
+           [12,2],[13,2]],
+    rock: [[12,6]],
+  },
+  gold: 150, campHp: 3, seed: 45, allowed: ["archer"],
+  waves: [
+    { delay: 0,  enemies: [{ kind: "satyr", count: 5, gap: 0.8 }] },
+    { delay: 10, enemies: [{ kind: "hellhound", count: 3, gap: 1.1 }] },
+  ],
+}
+```
+
+**brief** — `אסור sorted, אסור .sort, אסור max ואסור min.
+
+spots = [9, 2, 11, 5, 7]
+coverage = [1, 5, 1, 4, 3]
+
+סדרי את spots לפי coverage, מהכיסוי הגדול לקטן, בעצמך: עברי על הרשימה שוב ושוב,
+ובכל מעבר החליפי כל שני שכנים שיושבים בסדר הפוך — **ותחליפי גם ב־spots, באותו
+מקום.** הדפיסי את spots אחרי כל מעבר.
+
+בסוף, קחי את שלוש הראשונות ובני עליהן. יש זהב לשלוש בדיוק.`
 
 **starter**
 ```python
-strength = [31, 12, 44, 27, 5]
-# Start: the list as it is
-# Pass 1: after one full sweep of neighbour swaps
-# ... one line per pass, len - 1 passes in total
-# Sorted: the finished list
+spots = [9, 2, 11, 5, 7]
+coverage = [1, 5, 1, 4, 3]
+print(spots)
+print(coverage)
 ```
 
 **solution**
 ```python
-strength = [31, 12, 44, 27, 5]
-print(f"Start: {strength}")
-for p in range(len(strength) - 1):
-    for i in range(len(strength) - 1):
-        if strength[i] > strength[i + 1]:
-            bigger = strength[i]
-            strength[i] = strength[i + 1]
-            strength[i + 1] = bigger
-    print(f"Pass {p + 1}: {strength}")
-print(f"Sorted: {strength}")
-```
+spots = [9, 2, 11, 5, 7]
+coverage = [1, 5, 1, 4, 3]
+print(f"start: {spots}")
 
-Expected output (verified in Skulpt):
-```
-Start: [31, 12, 44, 27, 5]
-Pass 1: [12, 31, 27, 5, 44]
-Pass 2: [12, 27, 5, 31, 44]
-Pass 3: [12, 5, 27, 31, 44]
-Pass 4: [5, 12, 27, 31, 44]
-```
-followed by:
-```
-Sorted: [5, 12, 27, 31, 44]
+for p in range(len(coverage) - 1):
+    for i in range(len(coverage) - 1):
+        if coverage[i] < coverage[i + 1]:
+            bigger = coverage[i]
+            coverage[i] = coverage[i + 1]
+            coverage[i + 1] = bigger
+            moved = spots[i]
+            spots[i] = spots[i + 1]
+            spots[i + 1] = moved
+    print(f"pass {p + 1}: {spots}")
+
+best_three = spots[0:3]
+print(best_three)
+for x in best_three:
+    place_tower("archer", x, 3)
 ```
 
 **check**
 ```js
-{ kind: "output", mode: "normalized",
-  expect: "Start: [31, 12, 44, 27, 5]\nPass 1: [12, 31, 27, 5, 44]\nPass 2: [12, 27, 5, 31, 44]\nPass 3: [12, 5, 27, 31, 44]\nPass 4: [5, 12, 27, 31, 44]\nSorted: [5, 12, 27, 31, 44]" }
-```
-plus
-```js
-{ kind: "source", mustExclude: ["sorted(", ".sort("],
-  message: { he: "כל העניין פה הוא לכתוב את המיון בעצמך — sorted ו־.sort מחוץ למשחק",
-             en: "The whole point is writing the sort yourself — no sorted, no .sort" } }
+{ kind: "battle",
+  also: { kind: "source", mustExclude: ["sorted(", ".sort(", "max(", "min("],
+          message: { he: "כל העניין פה הוא לכתוב את המיון בעצמך — sorted, .sort, max ו־min מחוץ למשחק",
+                     en: "The whole point is writing the sort yourself — no sorted, no .sort, no max, no min" } } }
 ```
 
 **hints**
-1. `` להחליף בין שני משתנים דורש מקום זמני. אם תכתבי `a = b` ואז `b = a` — מה
-   קרה לערך המקורי של a? ``
-2. `` ההחלפה היא שלוש שורות: לשמור את `strength[i]` במשתנה עזר, להעתיק את
-   `strength[i + 1]` למקומו, ולשים את משתנה העזר במקום השני. הלולאה הפנימית
-   רצה על `range(len(strength) - 1)` — כי `i + 1` צריך להישאר בתוך הרשימה. ``
-3. `` לולאה חיצונית: `for p in range(len(strength) - 1)` — ארבעה מעברים לרשימה
-   של חמישה. לולאה פנימית: `for i in range(len(strength) - 1)` עם ה־if וההחלפה.
-   שורת ה־print של המעבר יושבת **בתוך** הלולאה החיצונית ו**מחוץ** לפנימית, אחרת
-   תקבלי שורה לכל השוואה. אם הלולאה הפנימית רצה עד `len(strength)` — תקבלי
-   IndexError בדיוק כמו בשיעור 9, כי `i + 1` יחרוג. ``
+1. `` אם תכתבי `a = b` ואז `b = a` — מה קרה לערך המקורי של `a`? ומה קורה
+   ל־`spots` אם החלפת רק ב־`coverage`? ``
+2. `` ההחלפה היא שלוש שורות לכל רשימה: משתנה עזר, העתקה, והחזרה. שתי הרשימות
+   חייבות להתחלף **יחד** ובאותם שני מקומות, אחרת המספר של משבצת אחת יישב על
+   משבצת אחרת. הלולאה הפנימית רצה על `range(len(coverage) - 1)`, כי `i + 1` צריך
+   להישאר בתוך הרשימה. ``
+3. `` לולאה חיצונית `for p in range(len(coverage) - 1)` — ארבעה מעברים לרשימה של
+   חמישה. בתוכה הלולאה הפנימית עם `if coverage[i] < coverage[i + 1]:` ושש שורות
+   ההחלפה. ה־`print` של המעבר יושב בתוך החיצונית ומחוץ לפנימית. בסוף
+   `spots[0:3]` ולולאת בנייה בשורה 3. הסימן `<` ולא `>` — כי הפעם מסדרים מהגדול
+   לקטן. ``
 
 ## Reward & Recap
 
@@ -726,11 +887,11 @@ next — the same three lines she has now written four times are about to get a
 name.
 
 **Achievements possible here**:
-- *Hydra Slayer* — all five test cases passing.
-- *Cartographer of Monsters* — pass case 3 on the first attempt, having worked
-  out that the weakest head is the wrong one to cut.
-- *Bubble Watcher* — finish the optional side quest.
-- *Completionist* — every exercise in Act III, lessons 9 through 12.
+- *Hydra Slayer* — win the boss battle: all five waves, not one leak.
+- *Cartographer of Monsters* — win the boss on the first run in which the scan
+  reports 13 spots, having worked out the `len(grid) - 1` boundary alone.
+- *Bubble Watcher* — win the optional battle without the gods' tools.
+- *Completionist* — every battle in Act III, lessons 9 through 12.
 
 **Recap bullets**:
 - ערך בתוך רשימה או מילון יכול להיות **רשימה או מילון בעצמו** — בלי חוקים חדשים
@@ -739,6 +900,8 @@ name.
 - לולאה בתוך לולאה עוברת על מבנה מקונן; ההזחה היא מה שקובע מי בתוך מי
 - ספירה וחיפוש הן אותן שתי תבניות מלולאות רגילות — accumulator, ו"הכי טוב עד עכשיו"
 - רשימה עונה למספרים, מילון עונה לשמות; בחירת המבנה היא החלטה, לא טעם
+- `get_map()` מחזיר רשימה של שורות — הלוח עצמו. `grid[y][x]`: **שורה קודם**
+- `place_tower(kind, x, y)` הוא עמודה קודם. שתי הצורות נכונות, ושתיהן יישארו
 
 **Next teaser**: *"שמת לב שכתבת את אותה לולאת סיכום ארבע פעמים היום? בשיעור הבא
 דדלוס יראה לך איך לכתוב אותה פעם אחת ולתת לה שם — ומשם, כל תוכנית שתכתבי תיראה
@@ -748,44 +911,61 @@ name.
 
 | She does | She sees | Hint must cover |
 | --- | --- | --- |
-| `heads[1][2]` on `["ice", 20]` | `IndexError: list index out of range on line 2` | the *inner* index is the guilty one — split the line to find out |
-| `hydra["fire"][0]` on a dict of dicts | `KeyError: 0 on line 2` | a dict has no positions; ask it by name |
-| `head["HP"]` | `KeyError: HP on line 2` | keys are case-sensitive, at every level |
-| `heads[0][0][0]` on a plain string/number | `TypeError: 'int' does not support indexing on line 2` | one `[ ]` too many — check what you had in hand |
+| `heads[1][2]` on `["ice", 20]` | `IndexError: list index out of range (line 2)` | the *inner* index is the guilty one — split the line to find out |
+| `hydra["fire"][0]` on a dict of dicts | `KeyError: 0 (line 2)` | a dict has no positions; ask it by name |
+| `head["HP"]` | `KeyError: HP (line 2)` | keys are case-sensitive, at every level |
+| `heads[0][0][0]` on a plain string/number | `TypeError: 'int' does not support indexing (line 2)` | one `[ ]` too many — check what you had in hand |
 | inner `print` outside the inner loop | one item per person instead of all of them | indentation decides which loop a line belongs to |
 | summary `print` inside the loop | the summary repeats every round | de-indent it to the outer level |
-| `for name, head in hydra:` | `ValueError: too many values to unpack (expected 2) on line 2` | `.items()` yields pairs; a bare dict yields keys |
-| swapping with `a = b` then `b = a` | both slots end up with the same value | a temporary variable is required (side quest) |
+| `for name, head in hydra:` | `ValueError: too many values to unpack (expected 2) (line 2)` | `.items()` yields pairs; a bare dict yields keys |
+| swapping with `a = b` then `b = a` | both slots end up with the same value | a temporary variable is required (optional battle) |
 | inner loop to `range(len(x))` in bubble sort | `IndexError` on the last `i + 1` | stop at `len(x) - 1` |
-| `input("Which head? ")` | boss cases fail on the prompt text | the boss reads bare `input()`; the prompt is drawn by the page |
+| `grid[x][y]` instead of `grid[y][x]` | usually `IndexError`, sometimes a silently wrong square | `get_map` returns **rows**; `place_tower` takes **columns** first |
+| loop to `range(len(grid))` in b3 | `IndexError` on the very last row's `y + 1` | stop at `len(grid) - 1`, exactly as with `i + 1` in a list |
+| `!= "path"` instead of `== "grass"` | towers on boulders, then *"Not enough gold"* | a cell has three possible values, not two |
+| builds inside the scan in the boss instead of collecting | it works, and then nothing can be counted or reported | `spots.append([x, y])` first, build second — that is what makes 13 a number she can print |
+| `spots[i]` where `spots[i][0]` was meant | `TypeError` from `place_tower`, or a tower in a strange place | `spots[i]` is a pair; the coordinates are one level deeper |
 
 ## Implementation notes
 
-- Every code sample, every solution, all five boss cases and the side quest were
-  executed against the vendored `skulpt.min.js` with the listed stdin, and the
-  outputs in this file are copied from those runs.
-- **The boss uses bare `input()` with no prompt argument, deliberately.** Skulpt
-  is configured with `inputfunTakesPrompt: true`, so a prompt string is handed to
-  the page's Iris-message UI rather than written to stdout — meaning a prompt
-  would render on screen but never appear in the captured output. Bare `input()`
-  removes the ambiguity entirely. The brief tells her the two values arrive in
-  order, head first and weapon second, and the UI labels the two prompts itself.
-- `kind: "cases"` queues `stdin` per run, exactly as described in
-  `01-architecture.md`. The five cases run independently; a failure in one does
-  not affect the others, and per-case results persist so partial progress
-  survives a reload.
-- Verified nested access in Skulpt: `x[a][b]`, `d[k][k2]`, `d[k][index]`,
-  `len()` at both levels, `.items()` over a dict of dicts, and nested quotes
-  inside an f-string (`f"{head['hp']}"`).
-- Dict iteration order is preserved in this Skulpt build, but the boss does not
-  rely on it: part 1 iterates the explicit `order` list, so the report lines have
-  a fixed sequence no matter what. This follows the rule set in lesson 11 —
-  never let a graded check depend on dict ordering.
-- `hp: 5` on the boss object means five bar segments, one per case — it is not a
-  Python value and has nothing to do with the Hydra's in-fiction hit points,
-  which live in the `hydra` dict. Keep the two apart in the UI copy.
-- The side quest never blocks the Act III cutscene, the Golden Fleece, or the
-  unlock of lesson 13. Its XP is a bonus on top of the lesson budget.
-- Nothing in this lesson uses `def`, `return`, `import`, tuple unpacking outside
-  `.items()`, list comprehensions, or `while` — the swap in the side quest is
-  written with an explicit temporary variable for exactly that reason.
+- Every code sample and every solution here was executed against the vendored
+  `skulpt.min.js`, and **every level was simulated headless**: each solution wins
+  its own battle and an empty program loses all six. Verified nested access:
+  `x[a][b]`, `d[k][k2]`, `d[k][index]`, `len()` at both levels, `.items()` over a
+  dict of dicts, `list.append([x, y])` followed by `spots[i][0]`, and nested
+  quotes inside an f-string (`f"{head['hp']}"`).
+- **`get_map()` returns exactly `level.map.rows` rows of `level.map.cols`
+  strings**, values `"grass"` / `"path"` / `"rock"`, indexed `grid[y][x]`. The
+  practice field behind the teach blocks and the Try It editor is 7×10 with the
+  road on row 4, so any sample here stays inside those bounds — a starter that
+  reads `grid[4][11]` would raise on the training ground even though it is
+  correct in its own level. Keep starters inside 7 rows and 10 columns.
+- **The simulation does not reject a tower on a `rock` cell** — it only rejects
+  the path, an occupied cell, an off-map cell and one it cannot afford. Rocks are
+  enforced by *gold*: b2 and b3 give exactly the grass count, so a scan that
+  accepts a boulder runs out mid-build and fails with a `tooPoor` build error.
+  Never write a level that depends on a rock refusing a tower.
+- `hp: 5` on the boss object means five bar segments, one per **wave** — it is
+  not a Python value and has nothing to do with the Hydra's 300 hit points in the
+  simulation. Keep the two apart in the UI copy.
+- The boss's `campHp: 5` is deliberately the largest in the act, and the
+  objective is still perfect: `check.campHpAtLeast` defaults to the full value,
+  so five hearts means five heads, not five free leaks.
+- **The boss allows no cannon.** Twelve harpies arrive in wave four, artillery
+  cannot hit anything flying, and a cannon in that budget would be 90 gold spent
+  on a spectator. This is also why the level's gold is exactly 13 archers plus 2
+  ice: there is one correct build, and the map is what tells her where it goes.
+- Dict iteration order is preserved in this Skulpt build, but nothing here relies
+  on it: every build order comes from an explicit list (`plan`, `brood`, `spots`,
+  and the grid itself). The rule from lesson 11 stands — never let a graded check
+  depend on dict ordering, and in the battle model, never let the *outcome*
+  depend on it either.
+- **A `source` check reads a skeleton with comments and string literals
+  stripped**, so a required construct must appear outside a string. The boss's
+  `spots.append(`, `spots[i][0]` and `brood[0][0]` all do.
+- The optional battle never blocks the Act III cutscene, the Golden Fleece, or
+  the unlock of lesson 13. Its XP is a bonus on top of the lesson budget.
+- Nothing in this lesson uses `def`, `return`, `import`, `input()`, tuple
+  unpacking outside `.items()`, list comprehensions, or `while` — the swap in the
+  optional battle is written with an explicit temporary variable for exactly that
+  reason.

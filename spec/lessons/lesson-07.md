@@ -2,6 +2,9 @@
 
 > **Act II — The Lightning Thief · גנב הברק** · Stop 7 of 20
 > Structure follows `spec/lessons/lesson-01.md`. Schema: `spec/04-lesson-template.md`.
+> **The game is the course**: the graded work is five battle levels.
+> Level schema and API: `spec/09-battle-game.md`. Control model: **build script**
+> (`place_tower`, `get_gold`, `tower_cost`, `get_wave`, `get_map`, `camp_hp`).
 
 | | |
 | --- | --- |
@@ -12,8 +15,10 @@
 | **new vocabulary** | `while`, `break`, לולאה / loop, צובר / accumulator |
 | **requires** | L1–L4 · L5 booleans (the loop condition) · **L6 indentation and `if`** (the loop body is a block; `break` lives inside an `if`) |
 | **item** | 🕯️ שעוות הסירנות / The Sirens' Wax |
-| **XP** | 20 + 25 + 30 + 30 (training) + 55 (quest) + 30 (bonus) = **190** |
+| **XP** | 20 + 25 + 30 + 30 (training battles) + 55 (great battle) + 30 (bonus) = **190** |
 | **drachmas** | 5 + 6 + 8 + 9 + 15 = **43** 🪙 |
+| **towers** | 🏹 archer (50) · 💣 cannon (90) |
+| **mechanic** | `get_gold()` falls as she builds — the loop condition is the treasury |
 
 ## Teaching goal
 
@@ -29,6 +34,15 @@ in this lesson, on purpose, in a safe moment, and learn that nothing broke. A
 learner who has never seen the 5-second message will one day hit it alone and
 conclude she destroyed her computer. Here, Chiron does it to her first, with a
 warning and a joke.
+
+**Why the battles are about money.** `get_gold()` is not a constant — it drops by
+the tower's price every time `place_tower` runs, inside her own script, before the
+wave starts. So the loop she writes today has a condition that the loop body
+actually changes, which is the whole idea of `while` and is usually taught with a
+counter that means nothing. Here the counter is her purse, and the loop stops
+because she is broke. She also never has to be told how many towers she can
+afford: the loop works it out, which is the first time in the course that the
+program knows something she does not.
 
 ## Story beat
 
@@ -265,258 +279,391 @@ single most valuable thirty seconds in Act II. Award the *Loop Survivor*
 achievement the first time the engine stops a run — with a friendly toast, never
 a warning tone.
 
-## Training exercises
+## Training battles
 
-### e1 — Ten strokes · 20 XP, 5 🪙
+Four battles and a great battle, all on the **build-script** model, and all of
+them built on one fact about the API:
 
-**brief (he)**: הדפיסי `Row.` בדיוק עשר פעמים — עם לולאה, לא עם עשר שורות
-`print`. גרובר סופר בקול והוא לא יסכים ל־11.
+> **`get_gold()` goes down every time she places a tower.** It is not a constant
+> she reads once — it is the state of her treasury, right now, in the middle of
+> her own script. So `while get_gold() >= tower_cost("archer"):` is a condition
+> that genuinely changes underneath the loop, and the loop genuinely stops.
+
+That is why the battle mechanic for `while` is *spending*. She does not know how
+many towers 250 gold buys — the loop finds out. And the third part of every loop,
+the line that moves the value, is here a `place_tower` call: **the thing that
+makes progress and the thing that does the work are the same line.** A loop with
+no `place_tower` inside it never spends, never ends, and hits the five-second
+limit — which this lesson wants her to see.
+
+Each level is `check.kind: "battle"` with an `also` `source` rule requiring the
+loop, so a hand-typed row of towers does not pass.
+
+### b1 — כל עוד יש זהב / While There Is Gold · 20 XP, 5 🪙
+
+**Why this mechanic**: the loop condition is a real question about the world
+(`get_gold() >= tower_cost("archer")`), and the loop body is what changes the
+answer. She never counts the towers — she cannot, because she does not know the
+price by heart. Five towers get built and she wrote one.
+
+The starter is the lesson's second gift: the loop is there, the counter move is
+missing, so every tower lands on the same square. The engine says so —
+*"כבר יש מגדל במשבצת הזאת. כל מגדל צריך משבצת משלו."* — and that is a much
+kinder first loop bug than an infinite one.
+
+```js
+map: { cols: 12, rows: 7, path: [[0,4],[1,4],[2,4],[3,4],[4,4],[5,4],[6,4],[7,4],[8,4],[9,4],[10,4],[11,4]] },
+gold: 250, campHp: 3, seed: 31, allowed: ["archer"],
+waves: [
+  { delay: 0,  enemies: [ { kind: "satyr", count: 10, gap: 0.35 } ] },
+  { delay: 7,  enemies: [ { kind: "hellhound", count: 5, gap: 1.0 } ] },
+  { delay: 16, enemies: [ { kind: "harpy", count: 8, gap: 0.6 } ] },
+],
+```
+
+**brief (he)**: המצר צר והכביש ישר. שלושה גלים, 250 זהב, וקשתות בלבד.
+
+הלולאה כבר כתובה: **כל עוד יש מספיק זהב לקשת — בני קשת.** אבל כל המגדלים נבנים
+בדיוק באותה משבצת, כי `x` לא זז אף פעם. הוסיפי בתוך הבלוק שורה שמזיזה את `x`
+שתי משבצות ימינה, והריצי.
+
+ארבעה מגדלים לא יספיקו כאן. אל תספרי — תני ללולאה לספור.
 
 **starter**
 ```python
-strokes = 0
+x = 1
 
-# the loop goes here
+while get_gold() >= tower_cost("archer"):
+    place_tower("archer", x, 3)
+```
+Verified behaviour: it terminates (gold drops with every placement) and loses —
+one tower is built and four `occupied` build errors are reported.
+
+**solution**
+```python
+x = 1
+
+while get_gold() >= tower_cost("archer"):
+    place_tower("archer", x, 3)
+    x = x + 2
+```
+Verified: five archers at x = 1, 3, 5, 7, 9, 250 of 250 gold spent, 3/3,
+twenty-three kills. Four archers placed by hand leak two.
+
+**check**
+```js
+check: {
+  kind: "battle",
+  also: { kind: "source", mustInclude: ["while", "get_gold"],
+          message: { he: "המשימה הזאת דורשת לולאת while שבודקת את הזהב — לא חמש שורות place_tower",
+                     en: "This one needs a while loop that asks about the gold — not five place_tower lines" } }
+}
+```
+
+**hints**
+1. (he) "הריצי כמו שזה. כמה מגדלים את רואה על הלוח, וכמה פעמים הלולאה רצה? מה
+   המנוע אומר על המשבצת?"
+2. (he) "בכל לולאה שלושה חלקים: ערך התחלתי (`x = 1`), שאלה (`while ...`), ושורה
+   **בתוך הבלוק** שמזיזה את הערך. החלק השלישי חסר."
+3. (he) "הוסיפי `x = x + 2` בתוך הבלוק, מיושר עם ה־`place_tower`. קוראים את זה
+   מימין לשמאל: קחי את `x`, הוסיפי 2, שימי בחזרה ב־`x`. עכשיו כל סיבוב בונה
+   שתי משבצות ימינה, והזהב יורד ב־50 בכל סיבוב — עד ש־`get_gold()` קטן מ־50
+   והשאלה נהיית `False`. חמישה מגדלים, ולא כתבת אף מספר."
+
+### b2 — מהשער אחורה / Back from the Gate · 25 XP, 6 🪙
+
+**Why this mechanic**: the same loop, counting **down**. `x = x - 2` and a
+condition that looks at the position instead of the purse — so she meets the
+second shape of the same three parts, and learns that the loop variable can be
+whatever the job needs. Building from the gate backwards is also how a real
+defense gets planned: the last line of towers is the one that must never be thin.
+
+```js
+map: { cols: 12, rows: 7, path: [[0,2],[1,2],[2,2],[3,2],[4,2],[5,2],[6,2],[7,2],[8,2],[9,2],[10,2],[11,2]] },
+gold: 250, campHp: 3, seed: 32, allowed: ["archer"],
+waves: <the same three waves as b1>
+```
+
+**brief (he)**: אותם שלושה גלים, כביש חדש, ואותם 250 זהב — אבל הפעם בונים
+מהשער אחורה. התחילי ב־`x = 10`, שזו המשבצת הכי קרובה לשער, וחזרי אחורה שתי
+משבצות בכל סיבוב, **כל עוד `x` גדול מ־0**. המגדלים יושבים בשורה 3.
+
+**starter**
+```python
+x = 10
+
+# while there is still road behind you
 ```
 
 **solution**
 ```python
-strokes = 0
-while strokes < 10:
-    print("Row.")
-    strokes = strokes + 1
+x = 10
+
+while x > 0:
+    place_tower("archer", x, 3)
+    x = x - 2
 ```
-Verified: exactly ten lines of `Row.`
+Verified: five archers at x = 10, 8, 6, 4, 2, 250 of 250 spent, 3/3,
+twenty-three kills. Three towers at the gate end are overrun.
 
 **check**
 ```js
-{ kind: "output", mode: "normalized",
-  expect: "Row.\nRow.\nRow.\nRow.\nRow.\nRow.\nRow.\nRow.\nRow.\nRow." }
-```
-plus
-```js
-{ kind: "source", mustInclude: ["while"],
-  message: { he: "המשימה הזו דורשת לולאת while — לא עשר שורות print",
-             en: "This one needs a while loop, not ten print lines" } }
+check: {
+  kind: "battle",
+  also: { kind: "source", mustInclude: ["while"],
+          message: { he: "פה צריך לולאה — היא זו שיודעת כמה מגדלים נכנסים",
+                     en: "This one needs a loop — it is what works out how many towers fit" } }
+}
 ```
 
 **hints**
-1. (he) "יש לך משתנה שמתחיל ב־0. איזו שאלה תשאלי עליו כדי שהלולאה תרוץ בדיוק
-   עשר פעמים — ואיזו שורה בתוך הבלוק תדאג שהיא תיעצר?"
-2. (he) "`while strokes < 10:` ואז בלוק מוזח עם שתי שורות: ה־`print`, ושורה
-   שמעלה את `strokes` באחד."
-3. (he) "`strokes` מתחיל ב־0. `while strokes < 10:` נכון לערכים 0 עד 9 — עשרה
-   סיבובים. בתוך הבלוק: `print(\"Row.\")` ואז `strokes = strokes + 1`. אם תשכחי
-   את השורה השנייה תקבלי את ההודעה של חמש השניות — ועכשיו את כבר יודעת למה."
+1. (he) "המספר יורד הפעם. איזה סימן השוואה מתאים ל'כל עוד נשאר כביש'? ומה קורה
+   אם תשאלי `while x != 0` ותורידי 3 בכל פעם?"
+2. (he) "`while x > 0:` ובתוך הבלוק `x = x - 2`. שימי לב ש־`>` סולח לקפיצה מעל
+   המספר ו־`!=` לא — 10, 8, 6, 4, 2, ואז 0 עוצר את הלולאה."
+3. (he) "`x` מתחיל ב־10. הלולאה בונה ב־10, 8, 6, 4, 2 — חמישה מגדלים, בדיוק 250
+   זהב. אחרי הסיבוב החמישי `x` הוא 0, השאלה `0 > 0` נותנת `False`, והלולאה
+   נעצרת לבד. אם תשני ל־`x = x - 3` תקבלי פחות מגדלים ותראי מפלצות עוברות — נסי."
 
-### e2 — Countdown to the rocks · 25 XP, 6 🪙
+### b3 — קודם התותחים / Cannons First, Then the Rest · 30 XP, 8 🪙
 
-**brief (he)**: אנאבת' סופרת בקול את המרחק לסלעים. הדפיסי חמש שורות בצורה
-`Distance: 5`, `Distance: 4`, וכן הלאה עד `Distance: 1` — ואז, אחרי הלולאה,
-שורה אחת: `The strait.`
+**Why this mechanic**: **two loops, one purse.** The first spends down to a
+reserve, the second spends what is left. The second loop's condition depends on
+what the first loop did, which is impossible to write with hand-counted towers
+and trivial with a loop. The ridge has room for six towers only (`maxTowers: 6`),
+so buying well matters: against armour 5 a cannon is worth nearly two archers per
+slot, and the harpies at the end mean the cannons cannot be the whole answer.
+
+```js
+map: { cols: 12, rows: 7, path: <the straight road from b1> },
+gold: 400, campHp: 3, seed: 33, allowed: ["archer", "cannon"],
+waves: [
+  { delay: 0,  enemies: [ { kind: "hellhound", count: 6, gap: 1.0 } ] },
+  { delay: 12, enemies: [ { kind: "cyclops", count: 4, gap: 3.0 } ] },
+  { delay: 30, enemies: [ { kind: "harpy", count: 8, gap: 0.6 } ] },
+],
+check: { kind: "battle", maxTowers: 6, also: … },
+```
+
+**brief (he)**: על הרכס יש מקום לשישה מגדלים בלבד — לא שבעה. ארבעה קיקלופים
+מגיעים בגל השני, ולכל אחד מהם שריון 5: חץ מוריד לו 5 נקודות, פגז מוריד 23.
+ובגל השלישי מגיעות הרפיות, ופגז לא פוגע במשהו שעף.
+
+יש 400 זהב. כתבי **שתי לולאות**:
+
+1. כל עוד נשארו לפחות 250 זהב — בני תותח, וזוזי ארבע משבצות ימינה. (זה משאיר
+   רזרבה בכוונה. תותח עולה 90, אז הלולאה תבנה שניים ותעצור.)
+2. כל עוד אפשר לקנות קשת — בני קשת בשורה 5, וזוזי שלוש משבצות ימינה.
+
+שתים־עשרה קשתות היו מנצחות את הגל הזה, אבל אין מקום לשתים־עשרה.
 
 **starter**
 ```python
-distance = 5
+x = 3
 
-# count down, then one line after the loop
+while get_gold() >= 250:
+    place_tower("cannon", x, 3)
+    x = x + 4
 ```
 
 **solution**
 ```python
-distance = 5
-while distance > 0:
-    print(f"Distance: {distance}")
-    distance = distance - 1
-print("The strait.")
+x = 3
+
+while get_gold() >= 250:
+    place_tower("cannon", x, 3)
+    x = x + 4
+
+y = 1
+while get_gold() >= tower_cost("archer"):
+    place_tower("archer", y, 5)
+    y = y + 3
 ```
+Verified: cannons at (3,3) and (7,3), archers at (1,5), (4,5), (7,5), (10,5) —
+six towers, 380 of 400 gold spent, 3/3, sixteen kills. Two cannons alone are
+overrun by the harpies. Eight hand-placed archers hold the wave and still fail
+the level, on `maxTowers`. Six archers leak one.
 
 **check**
 ```js
-{ kind: "output", mode: "normalized",
-  expect: "Distance: 5\nDistance: 4\nDistance: 3\nDistance: 2\nDistance: 1\nThe strait." }
+check: {
+  kind: "battle",
+  maxTowers: 6,
+  also: { kind: "source", mustInclude: ["while", "get_gold"],
+          message: { he: "שתי לולאות while שמסתכלות על הזהב — הראשונה על התותחים, השנייה על מה שנשאר",
+                     en: "Two while loops that watch the gold — the first for cannons, the second for what is left" } }
+}
 ```
 
 **hints**
-1. (he) "הפעם המספר יורד. איזה סימן השוואה מתאים ל'כל עוד נשאר מרחק'? ושימי לב
-   איפה השורה האחרונה צריכה לשבת — בתוך הבלוק או צמודה לשוליים?"
-2. (he) "`while distance > 0:` ובתוך הבלוק `distance = distance - 1`. את המספר
-   עצמו הכניסי לתוך f-string כמו בשיעור 3: `f\"Distance: {distance}\"`."
-3. (he) "הלולאה רצה כל עוד `distance` גדול מ־0, כלומר על 5,4,3,2,1 — ונעצרת כשהוא
-   מגיע ל־0. `print(\"The strait.\")` נכתב **צמוד לשוליים**, בלי הזחה, כי הוא
-   שייך לתוכנית ולא ללולאה. אם תזיחי אותו בטעות תקבלי אותו חמש פעמים."
+1. (he) "הריצי את הלולאה שכבר כתובה. כמה תותחים נבנו, וכמה זהב נשאר אחריה?
+   ומה השאלה הנכונה ללולאה השנייה — אותה שאלה, או שאלה אחרת?"
+2. (he) "הלולאה השנייה נראית כמו זו של b1: `while get_gold() >= tower_cost(\"archer\"):`
+   עם משתנה מיקום משלה. שני משתנים נפרדים, `x` ו־`y`, כי שתי הלולאות בונות בשתי
+   שורות שונות."
+3. (he) "אחרי הלולאה הראשונה נשארו 220 זהב — 400 פחות שני תותחים. הלולאה השנייה
+   מתחילה ב־`y = 1`, בונה ב־1, 4, 7, 10, ונעצרת כשנשארים 20. ביחד: שישה מגדלים
+   בדיוק, וזה כל מה שהרכס נותן. אם תעלי את הרזרבה מ־250 ל־150 תקבלי שלושה
+   תותחים ופחות קשתות — נסי, וראי מי עובר."
 
-### e3 — Rowing on empty · 30 XP, 8 🪙 — **accumulator + reasoning**
+### b4 — עד שהשעווה נגמרת / Until the Wax Runs Out · 30 XP, 9 🪙
 
-**brief (he)**: לצוות יש 25 יחידות כוח. כל חתירה עולה 2 יחידות, ואי אפשר לחתור
-בלי לפחות 2. חתרו כל עוד אפשר, וספרי כמה חתירות יצאו וכמה כוח נשאר. הדפיסי שורה
-אחת בלבד, בסוף, בצורה:
+**Why this mechanic**: `while True:` with the exit **inside an `if`, inside the
+loop** — eight spaces of indentation carrying real meaning. The starter hands her
+a `break` that is not inside an `if`, so the loop runs exactly once, one tower
+gets built, and the camp falls. Seeing "a `break` that always fires is a loop that
+never loops" is worth more than any explanation of it.
 
+```js
+map: { cols: 12, rows: 7, path: <the row-2 road from b2> },
+gold: 250, campHp: 3, seed: 34, allowed: ["archer"],
+waves: <the same three waves as b1>
 ```
-12 strokes, 1 strength left
-```
 
-חשבי לפני שאת מריצה: כמה חתירות זה יוצא ולמה נשארת יחידה אחת.
+**brief (he)**: השעווה באוזניים מספיקה בדיוק לכמה שהיא מספיקה, ואף אחד לא סופר.
+כתבי לולאה **בלי מספר בתנאי** — `while True:` — שבונה קשת, זזה שתי משבצות,
+ויוצאת ב־`break` ברגע שאי אפשר לקנות עוד קשת.
+
+השורה שתבדוק את זה היא בדיוק זו שהדפסת בשיעור 5: `get_gold() < tower_cost("archer")`.
+היום היא לא מודפסת — היא מחליטה.
 
 **starter**
 ```python
-strength = 25
-strokes = 0
-
-# row while there is strength for another stroke
-```
-
-**solution**
-```python
-strength = 25
-strokes = 0
-while strength >= 2:
-    strength = strength - 2
-    strokes = strokes + 1
-print(f"{strokes} strokes, {strength} strength left")
-```
-Verified output: `12 strokes, 1 strength left`
-
-**check**
-```js
-{ kind: "output", mode: "normalized", expect: "12 strokes, 1 strength left" }
-```
-plus
-```js
-{ kind: "source", mustInclude: ["while"],
-  message: { he: "פה צריך לולאה — התשובה נבנית סיבוב אחרי סיבוב",
-             en: "This one needs a loop — the answer is built round by round" } }
-```
-
-**hints**
-1. (he) "יש פה שני משתנים ושני תפקידים: אחד יורד ואחד עולה. איזה מהם התנאי של
-   הלולאה מסתכל עליו? ולמה `>= 2` ולא `> 0`?"
-2. (he) "`while strength >= 2:` — כי חתירה דורשת שתי יחידות שלמות. בתוך הבלוק:
-   שורה שמורידה 2 מ־`strength`, ושורה שמעלה את `strokes` באחד. ה־`print` אחרי
-   הלולאה, צמוד לשוליים."
-3. (he) "25 פחות 2, שתים־עשרה פעמים, זה 1 — ועם יחידה אחת כבר אי אפשר לחתור,
-   אז התנאי `1 >= 2` נותן `False` והלולאה נעצרת. לכן 12 חתירות ויחידה אחת
-   נשארת. את שתי המספרים הדפיסי בשורה אחת עם f-string:
-   `f\"{strokes} strokes, {strength} strength left\"`."
-
-### e4 — The wax runs out · 30 XP, 9 🪙 — **`break`**
-
-**brief (he)**: השעווה באוזניים מספיקה לשמונה חתירות בדיוק. כתבי לולאה **בלי
-מספר בתנאי** — כלומר `while True:` — שמדפיסה `Stroke 1` עד `Stroke 8`, ובחתירה
-השמינית מדפיסה `The wax is gone.` ויוצאת עם `break`.
-
-**starter**
-```python
-strokes = 0
+x = 1
 
 while True:
-    # count, print, and get out at 8
+    place_tower("archer", x, 3)
+    x = x + 2
+    # what gets you out of here?
+    break
 ```
+Verified: runs, builds one tower, camp overrun. The `break` fires on the first
+lap because nothing guards it.
 
 **solution**
 ```python
-strokes = 0
+x = 1
+
 while True:
-    strokes = strokes + 1
-    print(f"Stroke {strokes}")
-    if strokes == 8:
-        print("The wax is gone.")
+    place_tower("archer", x, 3)
+    x = x + 2
+    if get_gold() < tower_cost("archer"):
         break
 ```
-Verified output: `Stroke 1` … `Stroke 8`, then `The wax is gone.`
+Verified: five archers at 1, 3, 5, 7, 9 — the same wall as b1, reached from the
+other direction — 250 of 250 spent, 3/3, twenty-three kills.
 
 **check**
 ```js
-{ kind: "output", mode: "normalized",
-  expect: "Stroke 1\nStroke 2\nStroke 3\nStroke 4\nStroke 5\nStroke 6\nStroke 7\nStroke 8\nThe wax is gone." }
-```
-plus
-```js
-{ kind: "source", mustInclude: ["while True", "break"],
-  message: { he: "המשימה הזו דורשת while True ויציאה עם break",
-             en: "This one needs while True and a break to get out" } }
+check: {
+  kind: "battle",
+  also: { kind: "source", mustInclude: ["while True", "break"],
+          message: { he: "המשימה הזאת דורשת while True ויציאה עם break",
+                     en: "This one needs while True and a break to get out" } }
+}
 ```
 
 **hints**
-1. (he) "`while True:` לעולם לא נעצר מעצמו. אז מה חייב להיות בתוך הבלוק כדי
-   שהתוכנית הזו תסתיים בכלל? ומתי בדיוק הוא צריך לרוץ?"
-2. (he) "`break` יוצא מהלולאה מיד. הוא צריך לשבת בתוך `if` שבודק אם `strokes`
-   הגיע ל־8 — כלומר מוזח שמונה רווחים: ארבעה בגלל הלולאה, ארבעה בגלל ה־`if`."
-3. (he) "סדר השורות בבלוק חשוב: קודם `strokes = strokes + 1`, אחר כך
-   `print(f\"Stroke {strokes}\")`, ורק אז `if strokes == 8:` עם שתי שורות בתוכו
-   — ההודעה ו־`break`. אם תעלי את המונה אחרי ה־`print` תקבלי `Stroke 0` בהתחלה."
+1. (he) "הריצי כמו שזה. כמה מגדלים נבנו? `while True` אמור לרוץ לנצח — למה הוא
+   רץ פעם אחת?"
+2. (he) "`break` שלא יושב בתוך `if` רץ תמיד, ולכן הלולאה מסתיימת בסיבוב הראשון.
+   הוא צריך שאלה מעליו: `if get_gold() < tower_cost(\"archer\"):`, וה־`break`
+   מוזח בתוכה — שמונה רווחים: ארבעה בגלל הלולאה, ארבעה בגלל ה־`if`."
+3. (he) "סדר השורות בבלוק: קודם `place_tower`, אחר כך `x = x + 2`, ורק אז ה־`if`
+   עם ה־`break` בתוכו. ככה הבדיקה מתבצעת אחרי שהזהב כבר ירד. אם תבדקי לפני
+   הבנייה תקבלי מגדל אחד פחות. ואם תמחקי את ה־`break` לגמרי — תקבלי את הודעת
+   חמש השניות, וזה בסדר גמור, זה רק אומר שהלולאה לא נגמרת."
 
-## Quest — "מעבר לסירנות / Past the Sirens" · 55 XP, 15 🪙
+## The great battle — "מעבר לסירנות / Past the Sirens" · 55 XP, 15 🪙
 
-**brief (he)**: המצר באורך 40 מטר. כל חותרת מזיזה את הסירה 3 מטרים בכל חתירה.
-כתבי את התוכנית של המעבר:
+```js
+map: { cols: 13, rows: 8, path: [[0,4],[1,4],[2,4],[3,4],[4,4],[5,4],[6,4],
+                                 [7,4],[8,4],[9,4],[10,4],[11,4],[12,4]] },
+gold: 520, campHp: 3, seed: 37, allowed: ["archer", "cannon"],
+waves: [
+  { delay: 0,  enemies: [ { kind: "satyr", count: 22, gap: 0.22 } ] },
+  { delay: 8,  enemies: [ { kind: "hellhound", count: 12, gap: 0.6 } ] },
+  { delay: 20, enemies: [ { kind: "harpy", count: 20, gap: 0.3 } ] },
+  { delay: 32, enemies: [ { kind: "cyclops", count: 4, gap: 2.6 } ] },
+],
+```
 
-1. קלטי כמה חותרות יש: `rowers = int(input("How many rowers? "))`
-2. חתרו כל עוד לא עברתם 40 מטר. בכל חתירה: העלי את מונה החתירות, הוסיפי למרחק
-   `rowers * 3`, והדפיסי `Stroke 1: 12 m` (המספרים לפי המצב).
-3. **הסירנות**: אם הגעתם לחתירה 15 ועדיין לא עברתם, הדפיסי
-   `The song wins. Turn back.` וצאו מהלולאה עם `break`.
-4. אחרי הלולאה: אם המרחק הוא 40 מטר או יותר, הדפיסי
-   `Past the Sirens in 4 strokes.` (המספר לפי מספר החתירות בפועל). אם לא עברתם,
-   אל תדפיסי כלום נוסף.
+**Why this mechanic**: fifty-eight monsters and ten towers. Ten `place_tower`
+lines would be a chore; two loops are four lines. And the second loop cannot be
+written without the first having finished spending — she has no way to know how
+much gold reaches it. This is the first battle in the course that would be
+genuinely unpleasant to solve by hand, which is the honest argument for loops.
+
+The `break` earns its place too: the first loop has to stop at the edge of the
+board, not when the purse empties, or it walks off the map and the build fails.
+
+**brief (he)**: המצר, ארבעה גלים, ושמונים־וכמה שניות של קרב. יש 520 זהב וכביש
+באורך שלוש־עשרה משבצות, עם שורת דשא מעליו (שורה 3) ושורה מתחתיו (שורה 5).
+
+1. לולאה ראשונה: בני קשתות בשורה 3 במשבצות אי־זוגיות — 1, 3, 5… — כל עוד יש
+   זהב. **צאי ממנה ב־`break` כשעברת את קצה הלוח**, אחרת תנסי לבנות מחוץ למפה
+   והבנייה תיכשל.
+2. לולאה שנייה: עם מה שנשאר, בני קשתות בשורה 5 במשבצות זוגיות — 2, 4, 6…
+
+שש קשתות בשורה אחת לא מחזיקות את הגל הזה. גם שמונה לא.
+
+**starter**
+```python
+x = 1
+
+while get_gold() >= tower_cost("archer"):
+    place_tower("archer", x, 3)
+    x = x + 2
+```
 
 **solution**
 ```python
-rowers = int(input("How many rowers? "))
-metres = 0
-strokes = 0
-
-while metres < 40:
-    strokes = strokes + 1
-    metres = metres + rowers * 3
-    print(f"Stroke {strokes}: {metres} m")
-    if strokes == 15:
-        print("The song wins. Turn back.")
+x = 1
+while get_gold() >= tower_cost("archer"):
+    place_tower("archer", x, 3)
+    x = x + 2
+    if x > 11:
         break
 
-if metres >= 40:
-    print(f"Past the Sirens in {strokes} strokes.")
+y = 2
+while get_gold() >= tower_cost("archer"):
+    place_tower("archer", y, 5)
+    y = y + 2
 ```
+Verified: six archers on row 3 (x = 1…11) and four on row 5 (y = 2, 4, 6, 8) —
+ten towers, 500 of 520 gold spent, 3/3, thirty-five kills. Six towers in one row
+are overrun; eight are overrun. The `break` is load-bearing: without it the first
+loop keeps going to x = 13 and beyond, and an off-map placement fails the level
+even if the defense holds.
 
-**check** (all four verified against the runtime)
+**check**
 ```js
-{ kind: "cases", cases: [
-  { stdin: ["4"], expect:
-    "Stroke 1: 12 m\nStroke 2: 24 m\nStroke 3: 36 m\nStroke 4: 48 m\nPast the Sirens in 4 strokes." },
-  { stdin: ["7"], expect:
-    "Stroke 1: 21 m\nStroke 2: 42 m\nPast the Sirens in 2 strokes." },
-  { stdin: ["2"], expect:
-    "Stroke 1: 6 m\nStroke 2: 12 m\nStroke 3: 18 m\nStroke 4: 24 m\nStroke 5: 30 m\nStroke 6: 36 m\nStroke 7: 42 m\nPast the Sirens in 7 strokes." },
-  { stdin: ["0"], expect:
-    "Stroke 1: 0 m\nStroke 2: 0 m\nStroke 3: 0 m\nStroke 4: 0 m\nStroke 5: 0 m\nStroke 6: 0 m\nStroke 7: 0 m\nStroke 8: 0 m\nStroke 9: 0 m\nStroke 10: 0 m\nStroke 11: 0 m\nStroke 12: 0 m\nStroke 13: 0 m\nStroke 14: 0 m\nStroke 15: 0 m\nThe song wins. Turn back." } ] }
+check: {
+  kind: "battle",
+  also: { kind: "source", mustInclude: ["while", "break"],
+          message: { he: "הקרב הזה דורש לולאות שמוציאות את כל הזהב, ו־break שעוצר את הראשונה בקצה הלוח",
+                     en: "This one needs loops that spend the whole purse, and a break that stops the first one at the edge of the board" } }
+}
 ```
-
-**The fourth case is the point of the whole lesson.** With zero rowers the boat
-never moves and `metres < 40` stays `True` forever — this is a genuinely
-infinite loop, and the `break` at stroke 15 is the only reason the program ends
-at all. Say so in the completion text: *"עם אפס חותרות התנאי שלך לעולם לא היה
-נהיה `False`. ה־`break` הוא מה שהציל את התוכנית — ובדיוק בשביל זה הוא קיים."*
 
 **hints**
-1. (he) "שלושה משתנים לפני הלולאה: מה שקלטת, המרחק, ומונה החתירות. מה מהם צריך
-   להתחיל ב־0? ואיזה מהם התנאי של ה־`while` בודק?"
-2. (he) "`while metres < 40:` ובתוך הבלוק ארבעה דברים לפי הסדר: מונה, מרחק,
-   הדפסה, ואז `if strokes == 15:` עם ההודעה ו־`break`. השורה האחרונה של התוכנית
-   היא `if metres >= 40:` — צמוד לשוליים, מחוץ ללולאה."
+1. (he) "הריצי את הלולאה שבסטארטר וצפי. איפה היא מנסה לבנות בסוף, ומה המנוע
+   אומר? ואיזה חלק של הלוח נשאר בלי אף מגדל?"
+2. (he) "ללולאה הראשונה יש שני תנאי עצירה: הזהב (בשאלה של ה־`while`) והקצה
+   (ב־`if` עם `break` בתוך הבלוק). הלולאה השנייה צריכה משתנה מיקום משלה, `y`,
+   שמתחיל ב־2."
 3. (he) "כך זה מתחיל:
    ```python
-   rowers = int(input(\"How many rowers? \"))
-   metres = 0
-   strokes = 0
-
-   while metres < 40:
-       strokes = strokes + 1
-       metres = metres + rowers * 3
+   x = 1
+   while get_gold() >= tower_cost(\"archer\"):
+       place_tower(\"archer\", x, 3)
+       x = x + 2
+       if x > 11:
+           break
    ```
-   אחרי שתי השורות האלה הוסיפי את ה־`print` עם ה־f-string, ואז את ה־`if` של
-   הסירנות. בסוף, מחוץ ללולאה לגמרי, ה־`if metres >= 40:` — הוא נחוץ כי אחרי
-   `break` המרחק עדיין קטן מ־40, ואז אין הודעת ניצחון. נסי להריץ עם 0 חותרות
-   כשסיימת."
+   שימי לב לשלוש רמות ההזחה: 0 ללולאה, 4 לגוף שלה, 8 ל־`break`. אחרי הלולאה
+   הזאת נשארו 220 זהב, והלולאה השנייה — צמודה לשוליים, עם `y = 2` לפניה —
+   מוציאה מהם ארבע קשתות בשורה 5. עשרה מגדלים, ואת כתבת שמונה שורות."
 
 ## Reward & Recap
 
@@ -529,7 +676,9 @@ desc (he): "גוש שעווה קטן וחם מהמצר. כל עוד הוא בא�
   again afterwards. Awarded with a warm toast, never a scolding one.
 - *Accumulator* — first program with both a counter and a running total.
 - *Escape Artist* — first working `break`.
-- *Persistent* — solved an exercise after five failed runs.
+- *Quartermaster* — won a battle with the treasury emptied by a loop rather than
+  by hand (b1, b2, b4).
+- *Persistent* — won a battle here after five failed runs.
 
 **Recap bullets**
 - `while` מריץ את הבלוק שוב ושוב **כל עוד** התנאי `True`, ואז ממשיך הלאה
@@ -537,6 +686,7 @@ desc (he): "גוש שעווה קטן וחם מהמצר. כל עוד הוא בא�
 - לולאה אינסופית לא שוברת כלום — המנוע עוצר אחרי 5 שניות ואומר לך מה קרה
 - **צובר** הוא משתנה שגדל בכל סיבוב: `total = total + x`, ומאותחל לפני הלולאה
 - `break` יוצא מהלולאה מיד, גם כשהתנאי עדיין `True`; כשסופרים, `<` בטוח מ־`!=`
+- `get_gold()` יורד בכל `place_tower` — ולכן הוא תנאי לולאה אמיתי, לא מספר קבוע
 
 **Next teaser (he)**: *"`while` מצוינת כשאת לא יודעת כמה סיבובים יהיו. מחר
 תפגשי לולאה שסופרת לבד — ותצטרכי אותה, כי בגן שמעבר לחוף עומדים פסלים בשורות,
@@ -550,13 +700,18 @@ desc (he): "גוש שעווה קטן וחם מהמצר. כל עוד הוא בא�
 | `strokes + 1` without `strokes =` | same infinite loop | החישוב נעשה ונזרק. צריך `strokes = strokes + 1` כדי לשמור אותו |
 | counter line outside the block | same infinite loop | הרווחים קובעים מה בתוך הלולאה. השורה חייבת להיות מוזחת |
 | `while strokes != 5:` stepping by 2 | `TimeLimitError` | 0,2,4,6 — אף פעם לא 5 בדיוק. `<` סולח, `!=` לא |
-| `while strokes < 10` (no colon) | `SyntaxError: bad input on line N` | נקודתיים בסוף שורת ה־`while` |
-| body not indented | `SyntaxError: bad input on line N` (CPython: `IndentationError: expected an indented block`) | אחרי `:` חייב לבוא בלוק מוזח — כמו בשיעור 6 |
-| `while strokes = 10:` | `SyntaxError: bad input on line N` | `=` נותן, `==` שואל — ובתנאי משתמשים בשאלה |
+| `while strokes < 10` (no colon) | `SyntaxError: bad input (line N)` | נקודתיים בסוף שורת ה־`while` |
+| body not indented | `SyntaxError: bad input (line N)` (CPython: `IndentationError: expected an indented block`) | אחרי `:` חייב לבוא בלוק מוזח — כמו בשיעור 6 |
+| `while strokes = 10:` | `SyntaxError: bad input (line N)` | `=` נותן, `==` שואל — ובתנאי משתמשים בשאלה |
 | `print(strokes)` before `strokes` exists | `NameError: name 'strokes' is not defined` | הערך ההתחלתי נכתב **לפני** הלולאה |
 | `break` outside any loop | `SyntaxError: 'break' outside loop on line N` | `break` חי רק בתוך בלוק של לולאה |
 | `break` not inside an `if` | הלולאה רצה סיבוב אחד ונעצרת | `break` צריך להיות מוזח בתוך ה־`if` שקובע מתי לצאת |
 | final `print` indented into the loop | הודעת הסיום מודפסת בכל סיבוב | הרווחים קובעים; צמוד לשוליים = אחרי הלולאה |
+| no `place_tower` inside a `get_gold()` loop | הודעת חמש השניות | הזהב יורד רק כשבונים; בלי בנייה התנאי לא משתנה לעולם |
+| the position variable never moves | "כבר יש מגדל במשבצת הזאת" והשלב נכשל | הלולאה רצה, אבל כל הסיבובים בונים באותו מקום |
+| the loop walks off the board | "המשבצת (x, y) נמצאת מחוץ למפה" | לולאה שרצה על הזהב צריכה גם גבול מיקום — `break` או תנאי שני |
+| the loop builds onto the path | "אי אפשר לבנות על השביל עצמו" | הרצף של הלולאה חייב להתאים לצורת השביל |
+| more towers than the level allows | ההגנה מחזיקה והשלב עדיין נכשל | `maxTowers` ב־b3: הרכס נותן שישה מקומות, לא שמונה |
 
 ## Implementation notes
 
@@ -572,8 +727,14 @@ desc (he): "גוש שעווה קטן וחם מהמצר. כל עוד הוא בא�
     the engine, not on her.
   - It must fire the *Loop Survivor* achievement, not a warning.
 - **`execLimitMs: 5000` is the right number for this lesson** and must not be
-  raised for it. The quest's 4th case (`rowers = 0`) completes in well under a
-  second because `break` fires at stroke 15 — it is not near the limit. Verified.
+  raised for it. Every level's solution finishes its build script in a few
+  milliseconds; the limit exists for the loops that never end, and hitting it is
+  a designed experience, not a failure of the level.
+- **Only one loop shape in this lesson can hang.** A loop whose condition is
+  `get_gold() >= …` and whose body places a tower always terminates, because
+  every lap costs gold. Take the `place_tower` out and it hangs immediately —
+  which is exactly what a learner does when she comments a line out to "test
+  something". Say so in the b1 hint text.
 - **The Try It block deliberately invites the learner to trigger the limit.** Do
   not add a guard that refuses to run code with a suspicious loop. Detecting the
   problem statically and blocking it would remove exactly the experience this
@@ -583,21 +744,34 @@ desc (he): "גוש שעווה קטן וחם מהמצר. כל עוד הוא בא�
   block 5 (reading `=` right to left) land. Introduce `+=` no earlier than
   lesson 10, and when you do, introduce it as shorthand for something she
   already writes fluently.
-- **e1, e3 and e4 each carry two checks** — write them with the `also` field, as
-  in lesson 1 and as required by `.claude/rules/lesson-authoring.md`:
-  ```js
-  check: { kind: "source", mustInclude: ["while True", "break"],
-           message: { he: "המשימה הזו דורשת while True ויציאה עם break",
-                      en: "This one needs while True and a break to get out" },
-           also: { kind: "output", mode: "normalized", expect: "Stroke 1\n…\nThe wax is gone." } }
-  ```
-- **`source` checks read a stripped skeleton** (comments and string literals
-  removed). `while`, `while True` and `break` are all keywords outside literals,
-  so they survive stripping — no check here needs `raw: true`.
-- `mustInclude: ["while True", "break"]` in e4 matches `while True:` since the
+- **Every level here was simulated headlessly** through
+  `assets/js/battle/{sim,pyapi,play}.js` in a Node VM, the way
+  `tools/verify-python.mjs` loads them. For all five: the stated `solution` wins,
+  an empty program loses, the solution satisfies its own `also` `source` rule, and
+  every starter runs (none of them hangs, and none of them wins).
+- **The near-miss builds were simulated too, and they lose.** b1 by hand with four
+  archers: 2 leaks. b1's starter with no counter move: one tower and four
+  `occupied` errors. b2 with three towers at the gate: overrun. b3 with cannons
+  only: overrun by the harpies; with eight archers: the wave is held and the level
+  still fails on `maxTowers`; with six archers: 1 leak. b4's starter (a `break`
+  outside any `if`): one tower, overrun. The great battle with six towers in one
+  row: overrun; with eight: overrun.
+- **`maxTowers` needs a diagnose message.** `LC.Battle.objective` already returns
+  `reason: "tooManyTowers"`, but `LC.Battle.diagnose` has no branch for it and
+  falls through to the generic *"ההגנה החזיקה, אבל לא עמדת בדרישות השלב"*. b3 is
+  the first level in the course to use the cap, so add a line to `diagnose`:
+  *"בנית N מגדלים, ולרכס הזה יש מקום ל־M בלבד."* Until that exists, b3's brief
+  and hints have to carry the whole explanation — which they do, but it is the
+  one place in these four lessons where the engine is quieter than it should be.
+- **`mustInclude: ["while True", "break"]`** matches `while True:` because the
   colon follows the matched substring. It does not match `while  True` with two
-  spaces; the hint text and starter both use the single-space form, and the
-  failure `message` names the requirement, so this is acceptable.
-- Every code block, solution and expected output in this file was executed
-  through the shipped `assets/js/vendor/skulpt.min.js` with
+  spaces. The starter and every hint use the single-space form, and the failure
+  `message` names the requirement, so this is acceptable.
+- **`source` checks read a stripped skeleton** (comments and string literals
+  removed). `while`, `while True`, `break` and `get_gold` all sit outside
+  literals, so they survive stripping — no check here needs `raw: true`.
+- **No `input()` in a battle level**: the script runs once before the wave with
+  nothing queued on stdin.
+- Every teach-block code sample and every expected output in this file was
+  executed through the shipped `assets/js/vendor/skulpt.min.js` with
   `__future__: Sk.python3` and a 5000 ms `execLimit`.

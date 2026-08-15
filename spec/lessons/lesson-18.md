@@ -12,7 +12,7 @@
 | **new vocabulary** | `try`, `except`, `ValueError`, `ZeroDivisionError`, `NameError`, `TypeError`, `IndexError`, `KeyError`, `AttributeError` |
 | **requires** | L1 reading an error · L3 `input`/`int` · L6 `if` · L7 `while`/`break` · L8 `for`/`continue` · L9–11 lists and dicts · L13–14 functions and `return` · L17 `.strip()` |
 | **item** | 🔎 עדשת הפוריות / The Furies' Lens |
-| **XP** | 25 + 25 + 30 + 35 (training) + 55 (quest) + 30 (bonus) = **200** |
+| **XP** | 25 + 25 + 30 + 35 (battles) + 55 (great battle) + 30 (bonus) = **200** |
 
 ## Teaching goal
 
@@ -30,8 +30,16 @@ By the end she can:
 2. State a hypothesis in one sentence and test it with a single `print()`.
 3. Know that the line in the error is **where Python gave up**, not always where
    she went wrong.
-4. Use `try`/`except` for the errors she *expects* — bad input, mostly — and know
-   that using it to silence errors she does not expect is worse than the error.
+4. Use `try`/`except` for the errors she *expects* — data she did not write,
+   mostly — and know that using it to silence errors she does not expect is
+   worse than the error.
+
+The battles are what make this stick rather than sound sensible. In this engine
+her strategy function is called by the simulation dozens of times a second, and
+**when it raises, the battle stops and she loses** with the camp still at full
+health. She will watch a defense that was winning die of one unhandled
+`KeyError` twenty-eight seconds in. Nothing a paragraph could say about
+robustness lands as hard as that.
 
 ## Story beat
 
@@ -43,6 +51,10 @@ Furies, who have spent three thousand years punishing people for being imprecise
 They will let a demigod pass on one condition. Something in her code is broken,
 and she has to say exactly what. Not "it doesn't work". Not "something's wrong
 with the list". Exactly.
+
+And they are not patient about it. Below her the road to the camp is open, and
+every one of these battles is fought with a defense that stops the moment her
+function does.
 
 The Prophecy panel (3–6 lines, no code):
 
@@ -267,254 +279,522 @@ Intro: *"ארבעה באגים, ארבעה סוגים שונים. פייתון �
 `IndexError` — index 2 in a list of 2; `AttributeError` — `uper`;
 `ZeroDivisionError` — `2 - 2`.)
 
-## Training exercises
+## Battle levels
 
-### e1 — Name the Fury · 25 XP, 6 🪙
+Five battles, and the thing that makes this lesson different from every other
+lesson in the course:
 
-Two lines. One error. Read it, fix it, move on. Deliberately near-free — the
-point is to run the four steps once while the stakes are zero.
+> **If her code raises, the battle ends and she loses.**
 
-Starter (given broken):
+That is not a rule invented for the lesson — it is how the engine already works.
+`choose_target` is called by the simulation many times a second; when it throws,
+the simulation stops, the towers stop firing, and the outcome is a loss with the
+camp still at full health and the real Python traceback printed underneath. So
+`try`/`except` is not a tidy-code exercise here. It is the difference between a
+defense that survives a monster it did not expect and one that dies of surprise.
+
+Four of the five levels hand her **code that is already broken**. Her job is the
+four steps: read the type, find the line, form one hypothesis, test it.
+
+Every level was played through the real engine. For each: the stated solution
+wins with a perfect defense, the broken starter loses with the named error, an
+empty program loses, and the degenerate answers (`return 0`, `return enemies[0]`,
+`return None`) all lose.
+
+---
+
+### b1 — The Empty List · הרשימה הריקה · 25 XP, 6 🪙
+
+**Why this mechanic:** `IndexError` in its natural habitat. She writes the most
+obvious version of "shoot the flyers first" — collect them into a list, return
+the first one — and it works for as long as there is a flyer in range. The
+instant a tower can see only hellhounds, `flyers` is empty, `flyers[0]` raises,
+and the whole defense goes silent. **A list you built yourself can still be
+empty**, and that is the lesson.
+
+The starter is given broken and the level is the same stretch of road she fought
+on in lesson 17, so nothing about the battlefield is new — only the failure.
+
+```js
+map: { cols: 18, rows: 9, path: [[0,4],[1,4], … ,[17,4]] },
+gold: 330, campHp: 5, seed: 51,
+allowed: ["archer", "cannon"],
+waves: [ { delay: 0, enemies: [ { kind: "hellhound", count: 4, gap: 0.5 },
+                                { kind: "harpy", count: 6, gap: 0.7 } ] } ],
+```
+
+Starter (broken on purpose — `brokenStarter: true`):
 ```python
-hero_name = "Annabeth"
-print("Welcome, " + hero_nome)
+place_tower("cannon", 4, 3)
+place_tower("archer", 6, 5)
+place_tower("archer", 8, 3)
+place_tower("cannon", 11, 3)
+place_tower("archer", 13, 5)
+
+
+def choose_target(enemies):
+    flyers = []
+    for enemy in enemies:
+        if enemy["flying"]:
+            flyers.append(enemy)
+    return flyers[0]
 ```
 
-Required output:
-```
-Welcome, Annabeth
-```
+What she sees when she presses **Fight!**: the battle stops at 1.4 seconds, the
+camp is untouched at 5/5, nothing has been killed, and underneath:
+`IndexError: list index out of range`.
 
 Solution:
 ```python
-hero_name = "Annabeth"
-print("Welcome, " + hero_name)
+place_tower("cannon", 4, 3)
+place_tower("archer", 6, 5)
+place_tower("archer", 8, 3)
+place_tower("cannon", 11, 3)
+place_tower("archer", 13, 5)
+
+
+def choose_target(enemies):
+    flyers = []
+    for enemy in enemies:
+        if enemy["flying"]:
+            flyers.append(enemy)
+    if len(flyers) > 0:
+        return flyers[0]
+    return enemies[0]
 ```
 
-- **check**: `{ kind: "output", mode: "normalized", expect: "Welcome, Annabeth" }`
-- hints:
-  1. הריצי. מה המילה הראשונה בשגיאה, ואיזו שורה היא מציינת?
-  2. `NameError` אומר שפייתון פגש שם שהוא לא מכיר. השווי את השם בשורה 2 לשם
-     בשורה 1, אות אות.
-  3. בשורה 1 המשתנה נקרא `hero_name`. בשורה 2 כתוב `hero_nome`, עם `o`.
-     פייתון לא מנחש מה התכוונת — בשבילו אלה שני שמות שונים לגמרי.
+```js
+check: { kind: "battle" }
+```
 
-### e2 — The Fury's arithmetic · 25 XP, 6 🪙
+No `also` here. This level is about reading an error and fixing it, and a source
+requirement would put a second thing in front of her at the moment she is
+learning the first. A `try` / `except IndexError` around the return is an equally
+correct fix and passes — hint 3 says so, and says which one is better and why.
 
-Alecto wants the toll. The number came in as text, the way numbers always do when
-they come from outside.
+Verified: solution wins 5/5 with 10 kills. Broken starter: strategy error at
+1.4s, 0 kills. `return 0` and `return enemies[0]`: lose, 3 leaked. `return None`:
+loses, 6 leaked. Empty program: loses, 6 leaked.
 
-Starter (given broken):
+Hints:
+1. הריצי. איזה **סוג** שגיאה, ובאיזו שורה? ואז השאלה האמיתית: מה היה בתוך
+   `flyers` באותו רגע?
+2. `flyers` נבנית מחדש בכל קריאה, והיא ריקה בכל פעם שאין משהו מעופף בטווח של
+   המגדל הזה. `flyers[0]` על רשימה ריקה זורק `IndexError`. את צריכה לבדוק
+   **לפני** שאת ניגשת לאיבר.
+3. `if len(flyers) > 0:` ובתוכו `return flyers[0]`. אחרי ה-`if`, בלי הזחה,
+   `return enemies[0]` — כלומר "אין מעופפים, ירי במי שבראש". גם
+   `try: return flyers[0]` עם `except IndexError:` עובד ועובר את הבדיקה, אבל
+   כאן ה-`if` עדיף: המצב הזה **צפוי** וקורה בכל שנייה של הקרב, ו-`try` שמור
+   למשהו שלא אמור לקרות.
+
+---
+
+### b2 — The Missing Key · המפתח החסר · 25 XP, 6 🪙
+
+**Why this mechanic:** `KeyError`, and the reason it is the scariest of the
+common errors: **it fires on data, not on code**. Her bestiary dict is correct,
+her loop is correct, her comparison is correct — and thirteen seconds into the
+battle a cyclops walks into range, a kind she never wrote down, and everything
+stops. Nothing she can read in her own code tells her that in advance.
+
+```js
+map: { cols: 18, rows: 10,
+       path: [[0,8],[1,8],[2,8],[3,8],[4,8],[4,7],[4,6],[4,5],[4,4],[5,4],[6,4],
+              [7,4],[8,4],[9,4],[10,4],[10,3],[10,2],[10,1],[11,1],[12,1],[13,1],
+              [14,1],[15,1],[16,1],[17,1]] },
+gold: 370, campHp: 5, seed: 62,
+allowed: ["archer", "cannon"],
+waves: [
+  { delay: 0, enemies: [ { kind: "cyclops",   count: 2, gap: 2.0 } ] },
+  { delay: 4, enemies: [ { kind: "hellhound", count: 6, gap: 0.4 } ] },
+  { delay: 6, enemies: [ { kind: "satyr",     count: 7, gap: 0.7 },
+                         { kind: "harpy",     count: 4, gap: 0.8 } ] },
+],
+```
+
+Starter (broken on purpose):
 ```python
-drachmas = "12"
-toll = 3
-print("You owe: " + (drachmas + toll))
+place_tower("cannon", 2, 6)
+place_tower("archer", 6, 5)
+place_tower("cannon", 8, 3)
+place_tower("cannon", 12, 2)
+place_tower("archer", 15, 2)
+
+
+DANGER = {"satyr": 4, "harpy": 3, "hellhound": 2}
+
+
+def choose_target(enemies):
+    best = enemies[0]
+    for enemy in enemies:
+        if DANGER[enemy["kind"]] > DANGER[best["kind"]]:
+            best = enemy
+    return best
 ```
 
-Required output:
-```
-You owe: 15
-```
+Real error, exactly as Skulpt renders it: **`KeyError: cyclops`** — no quotes
+around the name. CPython would print `KeyError: 'cyclops'`. The lesson's
+honesty callout has already warned her about this precise difference, and this
+is where she meets it for real.
 
 Solution:
 ```python
-drachmas = "12"
-toll = 3
-print("You owe: " + str(int(drachmas) + toll))
+DANGER = {"satyr": 4, "harpy": 3, "hellhound": 2, "cyclops": 1}
+```
+(the rest unchanged)
+
+```js
+check: { kind: "battle" }
 ```
 
-- **check**: `{ kind: "output", mode: "normalized", expect: "You owe: 15" }`
-- This is `TypeError` in its natural habitat, and it requires two conversions in
-  opposite directions in one line — `int()` going in, `str()` coming out. That is
-  the actual difficulty and hint 3 walks it.
-- An f-string solution (`print(f"You owe: {int(drachmas) + toll}")`) is equally
-  correct and passes the same check. Hint 3 mentions it.
-- hints:
-  1. `TypeError` מדבר על שני סוגים. איזה שני סוגים נפגשים בשורה 3? הדפיסי
-     `type(drachmas)` ו-`type(toll)` ותראי.
-  2. `drachmas` הוא string, למרות שכתוב בו מספר. חיבור של string ומספר לא מוגדר
-     בפייתון. את צריכה להפוך אותו למספר לפני החיבור.
-  3. שני שינויים באותה שורה: `int(drachmas) + toll` נותן `15` כמספר, ואז
-     `"You owe: " + str(...)` כי אי אפשר לחבר טקסט למספר גם בכיוון הזה.
-     בקיצור: `print("You owe: " + str(int(drachmas) + toll))`. אותו דבר עם
-     f-string: `print(f"You owe: {int(drachmas) + toll}")`.
+Verified: solution wins 5/5 with 19 kills. Broken starter: `KeyError: cyclops` at
+1.3s. `return 0`, `return enemies[0]` and `return None`: all lose 5, camp
+destroyed. Empty program: loses 5.
 
-### e3 — The gate of the Underworld · 30 XP, 8 🪙
+**The teaching point that outlives the game:** the fix she reaches for first is
+"add cyclops to the dict", and that is the right fix *today*. The next lesson
+level is what happens when a kind arrives that she could not have added. Say that
+in the brief so b4 lands as a promotion rather than a repeat.
 
-Charon checks the tokens at the gate. Some are real, some are somebody's excuse.
-Real tokens pass with their number; anything else is turned back — and the queue
-keeps moving either way.
+Hints:
+1. השגיאה היא `KeyError` והמילה שאחריה היא **המפתח שביקשת ולא היה שם**. איזו
+   מילה זו? חפשי אותה במילון שלך.
+2. `DANGER` מכיל שלושה סוגים. כמה סוגי מפלצות יש בגל הזה? הדפיסי
+   `print(enemy["kind"])` בתוך הלולאה והריצי שוב — הלוג של הקרב יראה לך מה עבר
+   שם לפני הקריסה.
+3. הקיקלופ לא נמצא ב-`DANGER`, ו-`DANGER["cyclops"]` על מפתח שלא קיים זורק
+   `KeyError`. הוסיפי `"cyclops": 1` למילון — מספר נמוך, כי הוא איטי וכבד ולא
+   הוא זה שיברח לך. שימי לב שפייתון כתב `KeyError: cyclops` בלי גרשיים; על
+   המחשב בבית זה ייראה `KeyError: 'cyclops'`. הסוג זהה, הניסוח לא.
 
-Starter:
+---
+
+### b3 — Divided by a Satyr · חלוקה בסאטיר · 30 XP, 8 🪙
+
+**Why this mechanic:** `ZeroDivisionError`, and the first place in the course
+where `try`/`except` is the **right** tool rather than a heavier `if`. She wants
+a real number for "how much work is this monster" — hit points per point of
+armour. It is a good idea. It divides by zero the first time an unarmoured satyr
+walks into range.
+
+```js
+same map, gold and waves as b2; seed: 63
+```
+
+Starter (broken on purpose):
 ```python
-answers = ["12", "seven", "3", "-", "40"]
-# print one line per token:
-#   "12 -> 12"        if it is a number
-#   "seven -> REJECTED"  if it is not
-# the loop must never crash
+… the same five towers …
+
+
+def choose_target(enemies):
+    best = enemies[0]
+    for enemy in enemies:
+        if enemy["hp"] / enemy["armour"] < best["hp"] / best["armour"]:
+            best = enemy
+    return best
 ```
 
-Required output:
-```
-12 -> 12
-seven -> REJECTED
-3 -> 3
-- -> REJECTED
-40 -> 40
-```
+Real error: **`ZeroDivisionError: integer division or modulo by zero`**. CPython
+says `division by zero`. Same type, different sentence — the second row of the
+honesty table, met in the wild.
 
 Solution:
 ```python
-answers = ["12", "seven", "3", "-", "40"]
-for answer in answers:
+… the same five towers …
+
+
+def effort(enemy):
     try:
-        number = int(answer)
-        print(answer + " -> " + str(number))
-    except ValueError:
-        print(answer + " -> REJECTED")
+        return enemy["hp"] / enemy["armour"]
+    except ZeroDivisionError:
+        return 0
+
+
+def choose_target(enemies):
+    best = enemies[0]
+    for enemy in enemies:
+        if effort(enemy) < effort(best):
+            best = enemy
+    return best
 ```
 
-- **check**: `{ kind: "output", mode: "normalized", expect: "12 -> 12\nseven -> REJECTED\n3 -> 3\n- -> REJECTED\n40 -> 40" }`
-  plus `{ kind: "source", mustInclude: ["try", "except"], message: { he: "המשימה הזו דורשת try/except — לא בדיקה מראש", en: "This one needs try/except, not a pre-check" } }`
-- The `source` check exists because `.isdigit()` would also work and would teach
-  the wrong lesson today. Say so in the brief: there is more than one way, and
-  today we practise this one.
-- The important structural point, which hint 3 makes: the `print` of a successful
-  token belongs **inside** the `try`, after the conversion. Putting it after the
-  whole `try`/`except` prints a line for rejected tokens too.
-- hints:
-  1. מה קורה כרגע כשהלולאה מגיעה ל-`"seven"`? איזה סוג שגיאה, ומה זה עושה לשאר
-     הרשימה?
-  2. `int("seven")` זורק `ValueError`. עטפי את ההמרה ב-`try`, ותני ל-`except
-     ValueError` להדפיס את שורת ה-REJECTED.
-  3. בתוך הלולאה: `try:` ואז `number = int(answer)` ואז ההדפסה המוצלחת —
-     שתיהן בפנים. אחר כך `except ValueError:` ובתוכו ההדפסה של REJECTED. אם
-     ההמרה נכשלת, פייתון קופץ ישר ל-`except` ולא מריץ את ההדפסה הראשונה בכלל.
+```js
+check: { kind: "battle",
+  also: { kind: "source", mustInclude: ["try", "except ZeroDivisionError"],
+          message: { he: "היום מתאמנים על try/except עם הסוג המדויק — לא על בדיקה מראש",
+                     en: "Today the drill is try/except with the exact type, not a pre-check" } } }
+```
 
-### e4 — The toll booth · 35 XP, 9 🪙
+Verified: solution wins 5/5 with 19 kills. Broken starter: strategy error at
+8.1s — note that it survives eight seconds before the first unarmoured monster
+reaches a tower, which is a small lesson in itself. Degenerates and empty
+program: all lose 5.
 
-Now the number comes from a person, in real time, and people type whatever they
-like. The booth does not open until it gets a number, and it does not crash and
-it does not give up.
+**About the `also`.** `if enemy["armour"] == 0:` also works and is not wrong.
+The brief says so out loud: *"there is more than one way here, and today we are
+practising this one."* That honesty is the price of a source requirement, and
+the reason `except ZeroDivisionError` is spelled out in `mustInclude` rather than
+a bare `except` is the lesson's own rule — catch the type you expect and nothing
+else.
 
-Starter:
+**Why returning `0` is the tactically right fallback:** armour zero means every
+point of damage lands, so an unarmoured monster is the cheapest thing on the
+board to kill. Returning the lowest possible score puts it first in line. She
+should be able to say why the fallback value is `0` and not `999`; hint 3 walks
+it.
+
+Hints:
+1. איזה סוג שגיאה, ובאיזו שורה? ואז: מה בדיוק היה `enemy["armour"]` באותו רגע?
+   הסתכלי בטבלת המפלצות — למי יש שריון 0?
+2. סאטירים והרפיות עם שריון 0 מפילים את החלוקה. את החישוב המסוכן מוציאים
+   לפונקציה משלו, ובתוכה עוטפים ב-`try` עם `except ZeroDivisionError` שמחזיר
+   ערך ברירת מחדל.
+3. `def effort(enemy):` ובתוכה `try:` עם `return enemy["hp"] / enemy["armour"]`,
+   ואז `except ZeroDivisionError:` עם `return 0`. אחר כך `choose_target` קוראת
+   ל-`effort(enemy)` במקום לחשב בעצמה. למה `0` ולא מספר גדול? כי הציון הזה הוא
+   "כמה עבודה זה", ואת רוצה את הקלים ביותר קודם — ומשהו בלי שריון הוא הכי קל
+   שיש. אם תחזירי `999`, הסאטירים יהיו אחרונים בתור והם המהירים ביותר בגל.
+
+---
+
+### b4 — Two Kinds of Failure · שני סוגים של כישלון · 35 XP, 9 🪙
+
+**Why this mechanic:** two different exceptions in one strategy, each needing its
+own `except`, and the moment she is asked to write code for a monster **she has
+not been told about**. The bestiary is deliberately left incomplete this time.
+She is not allowed to fix it by adding the missing key; she has to make the
+function survive a key that is not there.
+
+This is the level where `try`/`except` stops being a repair and becomes a design
+decision, and where the lesson's discipline callout earns its place: a bare
+`except:` here would also swallow the `KeyError` she caused with a typo.
+
+```js
+same map and waves as b2 / b3; gold: 370, campHp: 5, seed: 64
+```
+
+Starter (broken on purpose — two bugs, and Python reveals one at a time):
 ```python
-# keep asking until the answer converts to a number,
-# then print the toll
-# prompt text: "How many drachmas? "
+… the same five towers …
+
+
+DANGER = {"satyr": 4, "harpy": 3, "hellhound": 2}
+
+
+def danger_of(enemy):
+    return DANGER[enemy["kind"]]
+
+
+def effort(enemy):
+    return enemy["hp"] / enemy["armour"]
+
+
+def choose_target(enemies):
+    best = enemies[0]
+    for enemy in enemies:
+        if danger_of(enemy) > danger_of(best):
+            best = enemy
+        elif danger_of(enemy) == danger_of(best) and effort(enemy) < effort(best):
+            best = enemy
+    return best
 ```
 
 Solution:
 ```python
-while True:
-    answer = input("How many drachmas? ")
+DANGER = {"satyr": 4, "harpy": 3, "hellhound": 2}
+
+
+def danger_of(enemy):
     try:
-        amount = int(answer)
-        break
-    except ValueError:
-        print("The Fury hisses. Numbers only.")
-print("Toll paid: " + str(amount))
+        return DANGER[enemy["kind"]]
+    except KeyError:
+        return 0
+
+
+def effort(enemy):
+    try:
+        return enemy["hp"] / enemy["armour"]
+    except ZeroDivisionError:
+        return 0
+
+
+def choose_target(enemies):
+    …unchanged…
 ```
 
-- **check**:
-  ```js
-  { kind: "cases", cases: [
-      { stdin: ["three", "3"], expect: "The Fury hisses. Numbers only.\nToll paid: 3" },
-      { stdin: ["10"],         expect: "Toll paid: 10" } ] }
-  ```
-- Verified: Skulpt passes the prompt string to `inputfun` and does **not** write
-  it to stdout, so the prompt text never appears in the compared output. The UI
-  renders it as an Iris-message.
-- The whole difficulty is the placement of `break`: inside the `try`, after the
-  conversion. Anywhere else and the loop either never ends or ends too early.
-  This is the hardest structural idea in the lesson.
-- hints:
-  1. איזו לולאה רצה "עד שמשהו מצליח", כשאת לא יודעת מראש כמה פעמים? ואיפה
-     בקוד את יודעת שהמרה **הצליחה**?
-  2. `while True` עם `break`, כמו בשיעור 7. את ה-`int()` עוטפים ב-`try`, ואת
-     ההודעה למשתמשת שמים ב-`except ValueError`.
-  3. סדר הפעולות: `while True:` → `answer = input(...)` → `try:` → בפנים
-     `amount = int(answer)` ואז `break`. ה-`break` חייב להיות **בתוך** ה-`try`
-     ואחרי ההמרה — ככה הוא רץ רק אם ההמרה עברה. ב-`except ValueError` מדפיסים
-     הודעה ולא עושים כלום נוסף, והלולאה מסתובבת ושואלת שוב. ההדפסה האחרונה
-     יושבת אחרי הלולאה, בלי הזחה.
+```js
+check: { kind: "battle",
+  also: { kind: "source",
+          mustInclude: ["except KeyError", "except ZeroDivisionError"],
+          mustExclude: ["except:"],
+          message: { he: "כל סכנה והחריגה שלה: except KeyError ו-except ZeroDivisionError, בלי except ריק",
+                     en: "Each hazard with its own clause: except KeyError and except ZeroDivisionError — no bare except" } } }
+```
 
-## Quest — "The Interrogation" · 55 XP, 14 🪙
+Verified: solution wins 5/5 with 19 kills. Broken starter: `KeyError: cyclops` at
+1.3s. Degenerates and empty program: all lose 5.
 
-Alecto lands on the rail and reads over her shoulder. The party's treasury report
-has three separate bugs in it, of three different types. She fixes all three —
-and then Alecto asks the question that turns a fix into engineering: *"and what
-happens when the party is empty?"*
+`mustExclude: ["except:"]` is the mechanical form of the discipline callout, and
+it is worth the strictness: a bare `except` would pass the battle while quietly
+hiding the next mistake she makes. The message says exactly that.
 
-Brief:
-1. Fix the three bugs so the report prints correctly.
-2. Then armour the division: if the party were empty, the report must print
-   `SHARE: none` instead of crashing. It will not happen today. Armour it anyway.
+Hints:
+1. שני חישובים מסוכנים, שני סוגי שגיאה שונים. איזה מהם קורה **מיד** ואיזה מחכה
+   עד שמשהו מסוים נכנס לטווח?
+2. `danger_of` יכולה ליפול על מפתח שאין במילון, `effort` יכולה ליפול על חלוקה
+   באפס. כל אחת מהן מקבלת `try` משלה עם ה-`except` **המדויק** שלה. הפעם אסור
+   להוסיף את הקיקלופ למילון — התרגיל הוא לשרוד בלעדיו.
+3. ב-`danger_of`: `try: return DANGER[enemy["kind"]]` ואז
+   `except KeyError: return 0` — משמעות: "סוג שלא הכרתי, לא בעדיפות". ב-`effort`:
+   אותו מבנה עם `except ZeroDivisionError: return 0`. `choose_target` לא משתנה
+   בכלל, כי היא כבר קוראת לשתי הפונקציות. ואל תכתבי `except:` לבד — הוא היה
+   בולע גם שגיאת כתיב שלך, ואז הקרב היה נגמר בתשובה שגויה בשקט במקום בהודעה.
 
-Starter (given broken — the comments are part of the starter):
+---
+
+## The Great Battle — "החקירה" / "The Interrogation" · 55 XP, 14 🪙
+
+**Why this mechanic:** the whole method, under load. Alecto reads over her
+shoulder while a strategy with **three bugs of three different types** meets a
+seven-wave assault. Python shows her exactly one at a time, and the third one
+does not appear until twenty-eight seconds into the battle — long after the first
+two are fixed and the defense looks like it is working. That delay is the point:
+a bug can hide until the data changes, and the only thing that finds it is
+running the thing and reading what comes back.
+
+```js
+map: { cols: 16, rows: 10,
+       path: [[0,2],[1,2],[2,2],[3,2],[4,2],[5,2],[6,2],[6,3],[6,4],[6,5],[6,6],
+              [6,7],[7,7],[8,7],[9,7],[10,7],[11,7],[12,7],[12,6],[12,5],[12,4],
+              [12,3],[13,3],[14,3],[15,3]] },
+gold: 540, campHp: 6, seed: 71,
+allowed: ["archer", "cannon", "lightning"],
+waves: [
+  { delay: 0,  enemies: [ { kind: "satyr",     count: 9, gap: 0.6 } ] },
+  { delay: 1,  enemies: [ { kind: "harpy",     count: 9, gap: 0.7 } ] },
+  { delay: 14, enemies: [ { kind: "hellhound", count: 9, gap: 0.5 } ] },
+  { delay: 14, enemies: [ { kind: "harpy",     count: 9, gap: 0.7 } ] },
+  { delay: 28, enemies: [ { kind: "cyclops",   count: 3, gap: 2.0 } ] },
+  { delay: 29, enemies: [ { kind: "harpy",     count: 9, gap: 0.6 } ] },
+  { delay: 30, enemies: [ { kind: "satyr",     count: 9, gap: 0.5 } ] },
+],
+```
+
+Starter (broken on purpose; the towers are correct and must not be touched):
 ```python
-heroes = ["Percy", "Annabeth", "Grover"]
-loot = 90
+place_tower("cannon", 4, 4)
+place_tower("archer", 2, 1)
+place_tower("archer", 5, 1)
+place_tower("cannon", 8, 5)
+place_tower("archer", 7, 4)
+place_tower("lightning", 10, 6)
+place_tower("cannon", 14, 5)
 
-print("HEROES: " + str(len(heroes)))
-print("LOOT: " + loot)
-share = loot / len(heros)
-print("SHARE: " + str(share))
-print("LAST HERO: " + heroes[3])
+DANGER = {"harpy": 4, "satyr": 3, "hellhound": 2}
+
+
+def choose_target(enemies):
+    flyers = []
+    for enemy in enemis:
+        if enemy["flying"]:
+            flyers.append(enemy)
+    if len(flyers) > 0:
+        return flyers[0]
+
+    best = enemies[0]
+    for enemy in enemies:
+        if DANGER[enemy["kind"]] > DANGER[best["kind"]]:
+            best = enemy
+        elif enemy["hp"] / enemy["armour"] < best["hp"] / best["armour"]:
+            best = enemy
+    return best
 ```
 
-Required output:
-```
-HEROES: 3
-LOOT: 90
-SHARE: 30.0
-LAST HERO: Grover
-```
+**The three bugs, in the order the engine reveals them.** This ordering was
+measured, not guessed, and the brief promises her three:
+
+| # | She sees | At | The bug |
+| --- | --- | --- | --- |
+| 1 | `NameError: name 'enemis' is not defined` | 0.0s | `enemis` — a typo for `enemies` |
+| 2 | `ZeroDivisionError: integer division or modulo by zero` | 0.0s | `enemy["armour"]` is 0 for satyrs and harpies |
+| 3 | `KeyError: cyclops` | **28.0s**, after 32 kills | `DANGER` has no cyclops, and none arrives until wave 5 |
+
+Then the second half of the task, which is not a bug fix at all: **armour it.**
+Alecto's question is *"and the next thing the Titan sends — what happens then?"*
+The finished function must be unable to end the battle by raising, whatever
+walks up the path.
 
 Solution:
 ```python
-heroes = ["Percy", "Annabeth", "Grover"]
-loot = 90
+…the seven towers, unchanged…
 
-print("HEROES: " + str(len(heroes)))
-print("LOOT: " + str(loot))
+DANGER = {"harpy": 4, "satyr": 3, "hellhound": 2}
 
-try:
-    share = loot / len(heroes)
-    print("SHARE: " + str(share))
-except ZeroDivisionError:
-    print("SHARE: none")
 
-print("LAST HERO: " + heroes[2])
+def danger_of(enemy):
+    try:
+        return DANGER[enemy["kind"]]
+    except KeyError:
+        return 0
+
+
+def effort(enemy):
+    try:
+        return enemy["hp"] / enemy["armour"]
+    except ZeroDivisionError:
+        return 0
+
+
+def choose_target(enemies):
+    flyers = []
+    for enemy in enemies:
+        if enemy["flying"]:
+            flyers.append(enemy)
+    if len(flyers) > 0:
+        return flyers[0]
+
+    best = enemies[0]
+    for enemy in enemies:
+        if danger_of(enemy) > danger_of(best):
+            best = enemy
+        elif danger_of(enemy) == danger_of(best) and effort(enemy) < effort(best):
+            best = enemy
+    return best
 ```
 
-- **check**: `{ kind: "output", mode: "normalized", expect: "HEROES: 3\nLOOT: 90\nSHARE: 30.0\nLAST HERO: Grover" }`
-  plus `{ kind: "source", mustInclude: ["try", "except", "ZeroDivisionError"], message: { he: "אלקטו דורשת שהחלוקה תהיה מוגנת — גם אם החבורה ריקה", en: "Alecto requires the division to be armoured against an empty party" } }`
-- **The three bugs, and the order Python reveals them** — this matters, because
-  she meets them one at a time and each fix uncovers the next:
-  1. Line 5 · `TypeError: cannot concatenate 'str' and 'int' objects` — `loot` is
-     an `int`, needs `str(loot)`.
-  2. Line 6 · `NameError: name 'heros' is not defined` — a typo for `heroes`.
-  3. Line 8 · `IndexError: list index out of range` — three heroes live at
-     0, 1, 2. `heroes[3]` is the fourth. `heroes[-1]` also passes.
-- `SHARE: 30.0` and not `30` — `/` always produces a `float` in Python 3, which
-  she met in lesson 4. If she "fixes" it to `30` the check will fail and the
-  reason is worth reading.
-- The armouring never fires with three heroes in the list, and that is the point:
-  she is writing code for a case that has not happened yet. Say that in the
-  brief. It is the first genuinely professional habit in the course.
-- hints:
-  1. אל תקראי את כל התוכנית. הריצי אותה. פייתון יראה לך באג אחד — תעברי עליו
-     בארבעת הצעדים, תתקני, ותריצי שוב. שלוש פעמים.
-  2. שלושת הסוגים שיופיעו הם `TypeError` (משהו צריך `str()` סביבו),
-     `NameError` (שם כתוב לא נכון) ו-`IndexError` (מקום שלא קיים ברשימה —
-     כמה איברים יש, ומה המספר של האחרון?). לחלק האחרון: איזו שגיאה תיפול אם
-     `len(heroes)` הוא 0?
-  3. שורה 5: `loot` הוא מספר, אז `"LOOT: " + str(loot)`. שורה 6: `heros` חסר
-     `e`. שורה 8: לשלושה גיבורים יש מקומות 0, 1, 2 — האחרון הוא `heroes[2]`
-     (או `heroes[-1]`). לשריון: עטפי את חישוב ה-`share` ואת ההדפסה שלו ב-`try`,
-     ותוסיפי `except ZeroDivisionError:` שמדפיס `"SHARE: none"`. היום הוא לא
-     ירוץ. ביום שהחבורה תהיה ריקה, הוא יציל את הדוח.
+```js
+check: { kind: "battle",
+  also: { kind: "source",
+          mustInclude: ["except KeyError", "except ZeroDivisionError"],
+          mustExclude: ["except:"],
+          message: { he: "אלקטו דורשת שהפונקציה תשרוד גם סוג מפלצת שלא ראית — כל סכנה עם ה-except המדויק שלה",
+                     en: "Alecto requires the function to survive a monster kind you have never seen — each hazard with its own exact except" } } }
+```
+
+Verified: solution wins 6/6 HP with **57 kills** across seven waves and 51
+seconds. Every partial fix was measured and loses. The towers with no
+`choose_target` at all lose 3. `return 0` and `return enemies[0]` lose 1.
+`return None` and the empty program lose 6.
+
+**A quiet detail worth putting in the brief:** the seven towers are already
+correct, and she is told so. Lesson 18 is the one lesson where the temptation is
+to change everything at once, and removing the build from the search space is how
+the level enforces "one change, one run".
+
+Hints:
+1. אל תקראי את כל הפונקציה. לחצי **לקרב!** ותראי מה קורה. פייתון יראה לך באג
+   אחד — עברי עליו בארבעת הצעדים, תקני, ותריצי שוב. שלוש פעמים. שימי לב מתי
+   בקרב כל אחד קרה; זה חלק מהמידע.
+2. הראשון הוא שגיאת כתיב בשם משתנה. השני הוא חלוקה, ויש בגל מפלצות עם שריון 0.
+   השלישי לא יופיע בכלל עד שמשהו כבד ייכנס לטווח בשנייה ה-28 — ואז השאלה היא
+   איזה מפתח ביקשת ולא היה.
+3. באג 1: `enemis` צריך להיות `enemies`. באג 2 ובאג 3: תוציאי את שני החישובים
+   המסוכנים לשתי פונקציות, `danger_of` ו-`effort`, ותעטפי כל אחת ב-`try` עם
+   ה-`except` המדויק שלה — `except KeyError` ו-`except ZeroDivisionError`,
+   שתיהן מחזירות `0`. ככה גם תיקנת את שני הבאגים וגם ענית לאלקטו: מפלצת מסוג
+   שלא ראית מעולם תקבל דירוג 0 במקום להפיל לך את הקרב. ואת `except:` לבד אל
+   תכתבי — הוא היה מסתיר גם את הבאג הבא שלך.
 
 ## Reward & Recap
 
@@ -524,9 +804,10 @@ print("LAST HERO: " + heroes[2])
 Bead 18 is added to the necklace.
 
 **Achievements possible here**: *Debugger* (fixed an error and re-ran
-successfully — most learners already hold this from lesson 1, but the quest is
-where it starts meaning something), *Exterminator* (all three quest bugs fixed
-without opening a hint), *Persistent* (solved an exercise after five failed runs).
+successfully — most learners already hold this from lesson 1, but the great
+battle is where it starts meaning something), *Exterminator* (all three bugs in
+the great battle fixed without opening a hint), *Persistent* (won a battle after
+five failed runs).
 
 **Recap bullets**:
 - שגיאה מספרת שלושה דברים: **סוג**, **תיאור**, **שורה** — קראי את שלושתם
@@ -535,6 +816,7 @@ without opening a hint), *Persistent* (solved an exercise after five failed runs
 - `try` / `except ValueError` מטפל בשגיאה שאת **מצפה** לה, בעיקר קלט מבחוץ
 - `except` בלי סוג בולע גם באגים שלך — תפסי סוג מסוים בלבד
 - הניסוח של הודעות שגיאה משתנה בין גרסאות פייתון; הסוג כמעט תמיד נשאר
+- קוד שקורס באמצע קרב עוצר את כל המגדלים — פונקציה שמוגנת היא הגנה שמחזיקה
 
 **Next teaser**: *"עברת את הפוריות. באולימפוס יש מפלס אחד שלא נכנסים אליו סתם —
 הנפחייה. הפייסטוס בונה שם דברים שזזים לבד, ואת עומדת ללמוד לבנות אחד."*
@@ -550,40 +832,63 @@ without opening a hint), *Persistent* (solved an exercise after five failed runs
 | `print` of the success case after the `except` | success text printed for rejected items too | it belongs inside the `try` |
 | `except ValueError` for a `ZeroDivisionError` | still crashes | the type in `except` has to match the type thrown |
 | assumes the error text matches a tutorial word for word | confusion | wording varies between Pythons; the type does not |
+| indexes a list she filtered herself | `IndexError` the moment the filter matches nothing | a list you built can still be empty |
+| adds the missing key instead of handling the missing key | b4 and the great battle refuse it | some data you do not control; handle the absence |
+| wraps the whole `choose_target` in one `try` | it wins, but hides the next mistake | wrap the risky line, not the function |
+| `except:` with no type in a strategy function | a silently wrong target every tick | the `mustExclude` says so, and so does the message |
 
 ## Implementation notes
 
 - Every snippet and every error message in this file was executed against the
-  vendored `skulpt.min.js`. The error strings are quoted verbatim from that run.
-- **Fidelity gaps deliberately surfaced to her** (callout 7) and verified here:
+  vendored `skulpt.min.js`. The error strings are quoted verbatim from that run,
+  including the times at which each one fires inside its battle.
+- **All five levels were played through the real engine** with
+  `assets/js/battle/{sim,pyapi,play}.js` in a Node VM. Asserted for each: the
+  solution wins with a perfect defense; the broken starter loses with the named
+  error at the named moment; an empty program loses; and `return 0`,
+  `return enemies[0]` and `return None` all lose. Re-measure if any number in a
+  level changes.
+- **The mechanic this lesson rests on is `sim.strategyError`.** When her Python
+  raises inside `choose_target`, `sim.js` captures it, stops the loop, and
+  `Battle.objective` returns `pass: false, reason: "strategyError"`. `play.js`
+  then hands back the real traceback and a Hebrew line saying the towers stopped
+  because her function did. Without that surfacing, four of these five levels
+  would show "you lost" with 5/5 health and nothing to read — which is why it
+  matters that it was fixed before this lesson was written.
+- **Fidelity gaps deliberately surfaced to her** (callout 7) and re-verified
+  against the vendored build:
   - `1/0` → Skulpt `ZeroDivisionError: integer division or modulo by zero`;
-    CPython 3 `ZeroDivisionError: division by zero`.
+    CPython 3 `ZeroDivisionError: division by zero`. **b3 shows her this one.**
   - `d["b"]` on a missing key → Skulpt `KeyError: b`; CPython `KeyError: 'b'`.
-  - a missing indented block → Skulpt `SyntaxError: bad input on line N`;
+    **b2 shows her this one**, as `KeyError: cyclops`.
+  - `a[1]` past the end → `IndexError: list index out of range` in both. **b1.**
+  - a missing indented block → Skulpt `SyntaxError: bad input (line N)`;
     CPython `IndentationError: expected an indented block after 'if' …`.
-  - an unclosed bracket → Skulpt `SyntaxError: EOF in multi-line statement` and
+  - runaway recursion → Skulpt `RecursionError: Maximum call stack size
+    exceeded`.
+  - an unclosed bracket → Skulpt `SyntaxError: EOF in multi-line statement`, and
     the reported line can be **past the end of the file**. Worth knowing when
-    triaging her support questions; not worth putting in front of her.
+    triaging her questions; not worth putting in front of her.
+- **`brokenStarter: true` on b1, b2, b3, b4 and the great battle.** That flag
+  already exists (lesson 1 b3 uses it) and tells `verify-python.mjs` not to
+  assert the starter runs cleanly. Without it, five of this lesson's levels
+  would be reported as build failures.
+- **No `source` check in this lesson sets `raw: true`.** Every requirement here
+  targets syntax — `try`, `except KeyError`, `except ZeroDivisionError` — which
+  survives comment and literal stripping. Adding `raw` would let the words
+  inside a Hebrew comment satisfy the check.
+- `mustExclude: ["except:"]` on b4 and the great battle is deliberate strictness
+  and needs its `message` to carry the reason, because a bare `except` **wins the
+  battle** and would otherwise look like an arbitrary refusal.
+- **`print()` from inside `choose_target` reaches the live battle log** in the
+  browser — the engine keeps streaming stdout while the simulation runs — so
+  step 4 of the method (print and look) genuinely works mid-battle. It is
+  **not** part of the captured output string, so no level may check it. Hint 2
+  of b2 relies on the live behaviour and is correct.
+- The Try It block ships **broken on purpose** and is ungraded, so nothing about
+  it can fail. This is the only place in the course where the free-play editor
+  starts in an error state; it is intentional and matches the lesson's subject.
 - `engine.js` already normalises errors to `{type, message, line}`. This lesson
   is the reason that shape exists — the UI should display the type visually
   separated from the message so that step 1 of the method is a glance, not a
   parse.
-- The engine's Hebrew explainer should have an entry per error type in the block-6
-  list. Never replace the English text — show both, English first, exactly as
-  lesson 1 established.
-- **Two checks on one exercise use the `also` field**, the pattern established
-  in lesson 1 e1. Both "plus" checks in this file (e3, the quest) are `also`:
-  ```js
-  { kind: "output", mode: "normalized", expect: "…",
-    also: { kind: "source", mustInclude: ["try", "except"],
-            message: { he: "…", en: "…" } } }
-  ```
-- **No check in this lesson needs `raw: true`.** Every `source` requirement here
-  targets syntax — `try`, `except`, `ZeroDivisionError` — which survives comment
-  and literal stripping. Do not add `raw` out of caution; it would let a matching
-  word inside a Hebrew comment satisfy the check.
-- e4 is the only exercise here that uses `input()`, so it is the only one using
-  `kind: "cases"`. Its two cases cover the retry path and the first-try path.
-- The Try It block ships **broken on purpose** and is ungraded, so nothing about
-  it can fail. This is the only place in the course where the free-play editor
-  starts in an error state; it is intentional and matches the lesson's subject.

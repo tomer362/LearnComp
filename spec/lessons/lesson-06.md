@@ -2,6 +2,9 @@
 
 > **Act II — The Lightning Thief · גנב הברק** · Stop 6 of 20
 > Structure follows `spec/lessons/lesson-01.md`. Schema: `spec/04-lesson-template.md`.
+> **The game is the course**: the graded work is five battle levels.
+> Level schema and API: `spec/09-battle-game.md`. Control model: **build script**
+> (`place_tower`, `get_gold`, `tower_cost`, `get_wave`, `get_map`, `camp_hp`).
 
 | | |
 | --- | --- |
@@ -12,8 +15,10 @@
 | **new vocabulary** | `if`, `elif`, `else`, `:`, block, הזחה / indentation |
 | **requires** | L1–L4 · **L5 booleans and comparisons** (every condition here is a lesson-5 expression) |
 | **item** | 👟 נעלי הכנף / The Winged Shoes |
-| **XP** | 20 + 25 + 30 + 30 (training) + 55 (quest) + 30 (bonus) = **190** |
+| **XP** | 20 + 25 + 30 + 30 (training battles) + 55 (great battle) + 30 (bonus) = **190** |
 | **drachmas** | 5 + 6 + 8 + 8 + 15 = **42** 🪙 |
+| **towers** | 🏹 archer (50) · 💣 cannon (90) · ❄️ ice (70) |
+| **mechanic** | **the cannon cannot hit anything flying** — that is what makes the branch matter |
 
 ## Teaching goal
 
@@ -31,6 +36,15 @@ alternative is that she meets it alone at 11pm inside a `while` loop.
 **One new idea, stated honestly**: `if` and indentation are one idea here, not
 two — the colon opens a block and the indentation *is* the block. Teaching them
 apart would be the mistake.
+
+**What makes the decision real.** `spec/09-battle-game.md`: the cannon is
+artillery and **cannot hit anything that flies**; archer, ice and lightning can
+hit both. Harpies fly. On top of that, damage per hit is `max(1, damage - armour)`,
+so a cyclops with armour 5 takes 5 from an arrow and 23 from a shell. Air and
+armour pull in opposite directions, which is why every battle in this lesson has
+a right branch and a wrong one, and why the wrong one loses monsters-through-the-gate
+rather than style points. The engine even names the mistake: *"המגדל במשבצת
+(x, y) הוא תותח, והוא לא מסוגל לפגוע במפלצות מעופפות."*
 
 ## Story beat
 
@@ -129,10 +143,12 @@ a decision tree), Hermes in the myth callout.
    if 3 > 2:
    print("The Oracle was right")
    ```
-   What the engine shows (verified):
+   What the engine shows (verified, exact):
    ```
-   SyntaxError: bad input on line 2
+   SyntaxError: bad input (line 2)
    ```
+   plus the Hebrew explainer `SYNTAX_HELP.missingIndent` from `engine.js`, which
+   fires because the previous line ends in `:`.
    What real CPython 3 shows for the same code:
    ```
    IndentationError: expected an indented block after 'if' statement on line 1
@@ -151,7 +167,9 @@ a decision tree), Hermes in the myth callout.
    print("We reached the crossroads")
        print("Grover sat down")
    ```
-   Engine: `SyntaxError: bad input on line 2`
+   Engine (verified, exact): `SyntaxError: bad input (line 2)`, with
+   `SYNTAX_HELP.unexpectedIndent` attached — *"השורה הזאת מוזחת פנימה, אבל השורה
+   שלפניה לא פותחת בלוק."*
    CPython 3: `IndentationError: unexpected indent`
    explain (he): הפעם הבעיה הפוכה. שום דבר לא פתח בלוק — אין `if` ואין נקודתיים
    — ולכן אין למי שהרווחים בשורה 2 יהיו שייכים. פייתון לא מנחש. **בלוק נפתח רק
@@ -164,10 +182,11 @@ a decision tree), Hermes in the myth callout.
        print("The road is clear")
      print("We keep walking")
    ```
-   Engine (verified, identical wording to CPython):
+   Engine (verified, exact — and this one Skulpt words like CPython):
    ```
-   SyntaxError: unindent does not match any outer indentation level
+   SyntaxError: unindent does not match any outer indentation level (line 3)
    ```
+   with `SYNTAX_HELP.raggedIndent` attached.
    explain (he): שורה 2 מוזחת בארבעה רווחים ושורה 3 בשניים. פייתון מחפש למה
    שני הרווחים האלה מתאימים — לא לבלוק של ה־`if` ולא לשוליים החיצוניים — ומודיע
    שאין רמה כזו. **בתוך בלוק, כל השורות חייבות אותה כמות רווחים בדיוק.** התיקון:
@@ -196,9 +215,10 @@ a decision tree), Hermes in the myth callout.
 
 11. **callout · warn** — title: הנקודתיים.
     text: השגיאה הכי שקטה בשיעור הזה היא נקודתיים חסרות. `if x > 3` בלי `:`
-    ייתן `SyntaxError: bad input`, והשורה שיצוינה היא שורת ה־`if` עצמה. כשאת
-    רואה `SyntaxError` על שורה שמתחילה ב־`if`, בדקי קודם את הסוף שלה, לא את
-    ההתחלה.
+    ייתן `SyntaxError: bad input (line N)`, והשורה שיצוינה היא שורת ה־`if`
+    עצמה. כשאת רואה `SyntaxError` על שורה שמתחילה ב־`if`, בדקי קודם את הסוף
+    שלה, לא את ההתחלה. (המנוע מזהה את המקרה הזה ומוסיף הסבר בעברית — אבל ההודעה
+    האנגלית האמיתית תמיד מוצגת לצידו.)
 
 12. **prose + code · runnable** — `else`. שני מסלולים, ותמיד רץ בדיוק אחד.
     ```python
@@ -315,285 +335,450 @@ Draw your sword.
 The second `if` is separate from the chain on purpose — she can discover that a
 program can hold more than one decision.
 
-## Training exercises
+## Training battles
 
-### e1 — The first fork · 20 XP, 5 🪙
+Four battles and a great battle, all on the **build-script** model. Every one of
+them is decided by a real matchup, not by flavour text:
 
-**brief (he)**: נשארו `12` קילומטרים לעיירה הבאה, ואור היום נגמר. אם המרחק גדול
-מ־10, הדפיסי `We camp here tonight.` — ואם לא, אל תדפיסי כלום. שורת ה־`print`
-חייבת להיות בתוך בלוק.
+> **💣 The cannon cannot hit anything that flies.** Archer, ice and lightning can
+> hit both ground and air. Harpies fly. That single rule is why lesson 6 needs
+> `if`/`elif`/`else`: choosing the wrong tower is not "less good", it is a tower
+> that stands there and watches monsters go past.
 
-**starter**
-```python
-distance = 12
+And the second lever, from `spec/09-battle-game.md`: damage per hit is
+`max(1, damage - armour)`. A cyclops has armour 5, so an archer's arrow lands for
+5 instead of 10 while a cannon shell lands for 23. Air and armour together are
+enough to make a three-way chain a real decision — verified by simulating every
+branch of every level.
 
-# only sometimes
+Each level is `check.kind: "battle"` with an `also` `source` rule naming the
+construct. The battle punishes the wrong branch; the `source` rule stops her from
+deleting the chain and hard-coding the answer she already saw.
+
+### b1 — השורה שרצה רק לפעמים / The Line That Runs Only Sometimes · 20 XP, 5 🪙
+
+**Why this mechanic**: her first `if` block is the tower that decides the battle,
+and the level begins **broken** — the block is not indented, so nothing runs at
+all. She meets `SyntaxError: bad input (line 7)` in the first minute, fixes it
+with one Tab, and watches four harpies die that would otherwise have walked in.
+Indentation stops being a rule and becomes a thing that saves the camp.
+
+```js
+map: { cols: 12, rows: 7,
+       path: [[0,3],[1,3],[2,3],[3,3],[4,3],[5,3],[5,4],[5,5],
+              [6,5],[7,5],[8,5],[9,5],[10,5],[11,5]] },
+gold: 230, campHp: 3, seed: 21, allowed: ["archer", "cannon"],
+waves: [
+  { delay: 0,  enemies: [ { kind: "hellhound", count: 3, gap: 1.3 } ] },
+  { delay: 11, enemies: [ { kind: "harpy", count: 4, gap: 0.9 } ] },
+],
 ```
+
+**brief (he)**: שלושה כלבי גיהינום בשביל, ואחריהם ארבע הרפיות **באוויר**. התותח
+שלך יטפל בכלבים — אבל תותח יורה פגזים, ופגז לא פוגע במשהו שעף.
+
+השורות הראשונות כבר כתובות. השורה האחרונה, זו שמציבה את הקשת, לא מוזחת — ולכן
+התוכנית לא רצה בכלל. הריצי, קראי את השגיאה, ודחפי אותה פנימה עם Tab.
+
+**starter** (deliberately broken — `brokenStarter: true`)
+```python
+they_fly = True
+
+place_tower("cannon", 3, 4)
+place_tower("archer", 2, 2)
+
+if they_fly:
+place_tower("archer", 6, 4)
+```
+What the engine shows, verified: `SyntaxError: bad input (line 7)`, and because
+line 6 ends with `:` the explainer attached is `SYNTAX_HELP.missingIndent` —
+*"השורה שלפני נגמרת ב־`:`, ולכן השורה הזאת צריכה להיות מוזחת פנימה."*
 
 **solution**
 ```python
-distance = 12
-if distance > 10:
-    print("We camp here tonight.")
+they_fly = True
+
+place_tower("cannon", 3, 4)
+place_tower("archer", 2, 2)
+
+if they_fly:
+    place_tower("archer", 6, 4)
 ```
-Verified output: `We camp here tonight.`
+Verified: 3/3, seven kills, 190 of 230 gold spent. Without that one archer the
+camp is overrun (3 leaks). Replacing it with a second cannon also loses — the
+cannons see the harpies and cannot fire.
 
 **check**
 ```js
-{ kind: "output", mode: "normalized", expect: "We camp here tonight." }
-```
-plus
-```js
-{ kind: "source", mustInclude: ["if "],
-  message: { he: "השורה צריכה לרוץ רק לפעמים — זה מה ש־if עושה",
-             en: "The line must run only sometimes — that is what if is for" } }
+check: {
+  kind: "battle",
+  also: { kind: "source", mustInclude: ["if"],
+          message: { he: "המגדל האחרון צריך לעמוד בתוך בלוק של if — זה מה שהופך אותו לתלוי בתשובה",
+                     en: "The last tower belongs inside an if block — that is what makes it depend on the answer" } }
+}
 ```
 
 **hints**
-1. (he) "בלי `if` השורה תודפס תמיד, גם אם `distance` יהיה 2. איזו מילה הופכת
-   שורה ל'לפעמים'?"
-2. (he) "`if` + שאלה + נקודתיים בסוף השורה, ואז השורה הבאה נדחפת פנימה עם Tab."
-3. (he) "`if distance > 10:` — שימי לב לנקודתיים. בשורה הבאה לחצי Tab פעם אחת
-   ואז כתבי את ה־`print`. אחרי שזה עובד, שני את `distance` ל־2 והריצי שוב כדי
-   לראות שהשורה נעלמה."
+1. (he) "הריצי כמו שזה. פייתון מציין מספר שורה — לכי לשורה הזאת. מה יש בשורה
+   שמעליה בסוף?"
+2. (he) "שורה שנגמרת ב־`:` פותחת **בלוק**, ובלוק חייב להיות מוזח פנימה. עמדי
+   בתחילת השורה ולחצי Tab פעם אחת (ארבעה רווחים)."
+3. (he) "אחרי `if they_fly:` השורה הבאה נדחפת פנימה בארבעה רווחים. אחרי שזה רץ,
+   נסי בכוונה לשנות את `they_fly` ל־`False` ולהריץ שוב: הקשת לא תיבנה, ההרפיות
+   יעברו, והמנוע יגיד לך שהתותחים לא מסוגלים לפגוע במשהו שעף. זה בדיוק מה
+   שהבלוק שולט עליו."
 
-### e2 — Grover's stomach · 25 XP, 6 🪙
+### b2 — מי מגיע / Who Is Coming · 25 XP, 6 🪙
 
-**brief (he)**: לגרובר נשארו `0` חטיפים. אם יש לו יותר מ־0, הדפיסי `Grover eats
-a can.` אחרת הדפיסי `Grover chews his shoe.` בדיוק שורה אחת תודפס — לא שתיים
-ולא אפס.
+**Why this mechanic**: two branches, two completely different defenses, and the
+wrong one is not a near miss — it is two cannons watching eight harpies fly over
+them. `if`/`else` here is the difference between winning and killing four
+monsters out of twelve.
+
+```js
+map: { cols: 13, rows: 8,
+       path: [[0,6],[1,6],[2,6],[3,6],[3,5],[3,4],[3,3],[4,3],[5,3],
+              [6,3],[7,3],[8,3],[8,2],[8,1],[9,1],[10,1],[11,1],[12,1]] },
+gold: 200, campHp: 3, seed: 22, allowed: ["archer", "cannon"],
+waves: [
+  { delay: 0, enemies: [ { kind: "satyr", count: 4, gap: 0.8 } ] },
+  { delay: 8, enemies: [ { kind: "harpy", count: 8, gap: 0.6 } ] },
+],
+```
+
+**brief (he)**: אנאבת' חזרה מהסיור והשאירה שורה אחת בראש הקוד: `wave = "harpy"`.
+זה הדיווח, ואת לא משנה אותו.
+
+כתבי הגנה שמתאימה את עצמה לדיווח: **אם** הגל מעופף — ארבע קשתות, כי רק הן
+מגיעות לאוויר. **אחרת** — שני תותחים, שזה מה שהיה נכון נגד גל קרקעי.
+
+הענף השני לא ירוץ הפעם, ובכל זאת כתבי אותו. בשבוע הבא הדיווח ישתנה, והתוכנית
+צריכה להיות מוכנה.
 
 **starter**
 ```python
-snacks = 0
+wave = "harpy"
 
-if snacks > 0:
-    print("Grover eats a can.")
-# what happens otherwise?
+if wave == "harpy":
+    place_tower("archer", 2, 5)
 ```
 
 **solution**
 ```python
-snacks = 0
-if snacks > 0:
-    print("Grover eats a can.")
+wave = "harpy"
+
+if wave == "harpy":
+    place_tower("archer", 2, 5)
+    place_tower("archer", 4, 2)
+    place_tower("archer", 6, 2)
+    place_tower("archer", 10, 2)
 else:
-    print("Grover chews his shoe.")
+    place_tower("cannon", 4, 2)
+    place_tower("cannon", 7, 2)
 ```
-Verified output: `Grover chews his shoe.`
+Verified: 3/3, twelve kills, 200 of 200 spent. The `else` branch, run against
+this wave, kills four and loses 3 HP; a cannon plus two archers also loses.
 
 **check**
 ```js
-{ kind: "output", mode: "normalized", expect: "Grover chews his shoe." }
+check: {
+  kind: "battle",
+  also: { kind: "source", mustInclude: ["if", "else"],
+          message: { he: "התוכנית צריכה שני מסלולים: if לדיווח המעופף, ו־else לכל השאר",
+                     en: "The program needs both paths: if for the flying report, else for everything else" } }
+}
 ```
-plus
-```js
-{ kind: "source", mustInclude: ["else:"],
-  message: { he: "הפעם צריך גם מסלול שני — else",
-             en: "This one needs the second path — else" } }
-```
-The `source` check is what forces the `else`; without it she could pass with a
-single `print`. The `message` explains that, so the failure is never a mystery.
 
 **hints**
-1. (he) "אפשר לפתור את זה עם שני `if` נפרדים, וזה יעבוד. אבל מה יקרה אם מחר
-   מישהו ישנה את השאלה הראשונה ושכח לשנות את השנייה? יש מילה שאומרת 'כל השאר'."
-2. (he) "`else` נכתב אחרי הבלוק של ה־`if`, מיושר בדיוק מתחת למילה `if`, עם
-   נקודתיים אחריו — ובלי שאלה."
-3. (he) "אחרי שורת ה־`print` המוזחת, כתבי שורה חדשה צמודה לשוליים: `else:`
-   ואז שורה מוזחת עם ה־`print` השני. `else` אף פעם לא מקבל שאלה — הוא לוקח את
-   כל מה שנשאר."
+1. (he) "מה יקרה אם תבני את שני התותחים נגד הגל הזה? נסי, וקראי מה המנוע אומר
+   על המגדלים שלך אחרי הקרב."
+2. (he) "`else` נכתב צמוד לשוליים, מיושר בדיוק מתחת ל־`if` שלו, עם נקודתיים
+   אחריו — ובלי שאלה. כל מה שמתחתיו מוזח בארבעה רווחים."
+3. (he) "בתוך ה־`if` ארבע שורות `place_tower` של `\"archer\"` —
+   `(2,5)`, `(4,2)`, `(6,2)`, `(10,2)`. אחריהן, בשורה חדשה בלי הזחה, `else:`
+   ואז שני תותחים מוזחים. שימי לב שאת כותבת קוד לענף שלא ירוץ היום; זה תקין
+   לגמרי, וזה כל הרעיון."
 
-### e3 — The signpost · 30 XP, 8 🪙
+### b3 — שלושה דיווחים, שרשרת אחת / Three Reports, One Chain · 30 XP, 8 🪙
 
-**brief (he)**: כתבי את השלט של הרמס. קלטי שם של דרך ב־`input()` והדפיסי בדיוק
-שורה אחת:
+**Why this mechanic**: three branches where **each wrong one fails for its own
+reason**. The harpy branch is all archers and cannot dent armour 5. The cyclops
+branch is all cannons and cannot touch anything airborne. The wave is both at
+once, so only the third branch — a cannon *and* archers — holds. This is the
+level that proves an `elif` chain is a tool and not a formality.
 
-| קלט | פלט |
-| --- | --- |
-| `left` | `Safe road. Three days.` |
-| `right` | `Fast road. Two days. Loud.` |
-| `middle` | `Nobody has come back from the middle road.` |
-| כל דבר אחר | `That is not a road.` |
+```js
+map: { cols: 11, rows: 8, path: [[0,4],[1,4],[2,4],[3,4],[4,4],[5,4],[6,4],[7,4],[8,4],[9,4],[10,4]] },
+gold: 250, campHp: 3, seed: 26, allowed: ["archer", "cannon", "ice"],
+waves: [
+  { delay: 0,  enemies: [ { kind: "cyclops", count: 2, gap: 4 } ] },
+  { delay: 16, enemies: [ { kind: "harpy", count: 5, gap: 0.7 } ] },
+],
+```
+
+**brief (he)**: הדיווח הפעם אומר `"both"` — שני קיקלופים על הקרקע, ואחריהם חמש
+הרפיות באוויר. כתבי שרשרת של שלושה מסלולים:
+
+- `"harpy"` → שלוש קשתות. מספיק נגד אוויר, חסר לחלוטין נגד שריון.
+- `"cyclops"` → שני תותחים וקשת. מצוין נגד שריון 5, עיוור לגמרי לאוויר.
+- כל דיווח אחר → תותח **וגם** שלוש קשתות. יקר יותר, ומחזיק בשניהם.
+
+רק המסלול השלישי ירוץ. שני האחרים חייבים להיות כתובים נכון בכל זאת — ואם את
+רוצה לראות למה, שני את השורה הראשונה ל־`"harpy"` והריצי.
 
 **starter**
 ```python
-road = input("Which road? ")
+report = "both"
 
-# four possible answers, exactly one prints
+if report == "harpy":
+    place_tower("archer", 3, 3)
+    place_tower("archer", 6, 3)
+    place_tower("archer", 5, 5)
 ```
 
 **solution**
 ```python
-road = input("Which road? ")
+report = "both"
+
+if report == "harpy":
+    place_tower("archer", 3, 3)
+    place_tower("archer", 6, 3)
+    place_tower("archer", 5, 5)
+elif report == "cyclops":
+    place_tower("cannon", 4, 3)
+    place_tower("cannon", 7, 3)
+    place_tower("archer", 5, 5)
+else:
+    place_tower("cannon", 5, 3)
+    place_tower("archer", 2, 3)
+    place_tower("archer", 7, 3)
+    place_tower("archer", 5, 5)
+```
+Verified: 3/3, seven kills, 240 of 250 spent. The `"harpy"` branch leaks 2 (the
+cyclopes walk through 8 damage per second). The `"cyclops"` branch is overrun
+outright — it kills three and then the harpies arrive.
+
+**check**
+```js
+check: {
+  kind: "battle",
+  also: { kind: "source", mustInclude: ["if", "elif", "else"],
+          message: { he: "שלושה דיווחים אפשריים, ולכן שרשרת: if, elif ו־else",
+                     en: "Three possible reports, so a chain: if, elif and else" } }
+}
+```
+
+**hints**
+1. (he) "שלוש אפשרויות, ובכל הרצה רץ מסלול אחד בדיוק. כמה שאלות צריך כדי לכסות
+   שלוש אפשרויות? (פחות משלוש.)"
+2. (he) "`elif` הוא 'ואם לא, אולי ככה'. הוא נכתב צמוד לשוליים, מיושר עם ה־`if`,
+   עם שאלה משלו ונקודתיים. `else` בסוף, בלי שאלה, תופס את כל השאר — והפעם
+   הוא זה שירוץ."
+3. (he) "השלד: `if report == \"harpy\":` ואז שלוש שורות מוזחות. אחריו
+   `elif report == \"cyclops\":` ושלוש שורות מוזחות. אחריו `else:` וארבע שורות
+   מוזחות — תותח ב־`(5,3)` וקשתות ב־`(2,3)`, `(7,3)` ו־`(5,5)`. שימי לב ששלוש
+   המילים `if`, `elif` ו־`else` מתחילות באותו מקום בשורה בדיוק."
+
+### b4 — התוכנית הקרועה / The Torn Battle Plan · 30 XP, 8 🪙 — **the debugging battle**
+
+**Why this mechanic**: three separate bugs, reported **one at a time**, in the
+order Python meets them. Fix, run, read, fix again. The third bug is the
+interesting one: a line indented by two spaces that should be at the margin. It
+is the anti-air archer, and while it sits inside the `else` it never gets built —
+so the code runs, the battle is lost, and the reason is invisible until she reads
+the indentation.
+
+```js
+map: { cols: 13, rows: 8, path: <the same ROAD2 as b2> },
+gold: 240, campHp: 3, seed: 24, allowed: ["archer", "cannon"],
+waves: [
+  { delay: 0,  enemies: [ { kind: "satyr", count: 4, gap: 0.8 } ] },
+  { delay: 8,  enemies: [ { kind: "hellhound", count: 4, gap: 1.2 } ] },
+  { delay: 18, enemies: [ { kind: "harpy", count: 4, gap: 0.8 } ] },
+],
+```
+
+**brief (he)**: אנאבת' העתיקה את תוכנית ההגנה מהמפה הקרועה ויש בה שלוש שגיאות.
+הריצי, קראי, תקני **שורה אחת**, והריצי שוב — עד שהיא רצה.
+
+השורה האחרונה, הקשת ב־`(2, 5)`, שייכת לכל התוכניות: היא זו ששומרת על השמיים,
+והרפיות מגיעות בגל השלישי בכל מקרה. שימי לב איפה היא צריכה לשבת.
+
+**starter** (three deliberate bugs — `brokenStarter: true`, whitespace preserved
+byte for byte)
+```python
+report = "hellhound"
+
+if report == "cyclops"
+place_tower("cannon", 4, 2)
+elif report == "hellhound":
+    place_tower("cannon", 5, 2)
+    place_tower("archer", 7, 2)
+    place_tower("archer", 10, 2)
+else:
+    place_tower("archer", 5, 2)
+  place_tower("archer", 2, 5)
+```
+
+The three runs, verified in order:
+
+| Run | What the engine shows | What she fixes |
+| --- | --- | --- |
+| 1 | `SyntaxError: bad input (line 3)` + `SYNTAX_HELP.missingColon` | the `:` at the end of the `if` line |
+| 2 | `SyntaxError: bad input (line 4)` + `SYNTAX_HELP.missingIndent` | pushes line 4 into the block |
+| 3 | `SyntaxError: unindent does not match any outer indentation level (line 11)` + `SYNTAX_HELP.raggedIndent` | pulls the last line to the margin |
+
+That sequencing *is* the lesson: **an error message names one problem at a time,
+and re-running after each fix is the method.**
+
+**solution**
+```python
+report = "hellhound"
+
+if report == "cyclops":
+    place_tower("cannon", 4, 2)
+elif report == "hellhound":
+    place_tower("cannon", 5, 2)
+    place_tower("archer", 7, 2)
+    place_tower("archer", 10, 2)
+else:
+    place_tower("archer", 5, 2)
+place_tower("archer", 2, 5)
+```
+Verified: 3/3, twelve kills, 240 of 240 spent. With the last line left indented
+inside the `else` it is never placed, and the battle is lost with one leak — the
+code runs perfectly and still fails, which is exactly the bug this level is for.
+
+**check**
+```js
+check: {
+  kind: "battle",
+  also: { kind: "source", mustInclude: ["elif", "else"],
+          message: { he: "השרשרת צריכה להישאר שלמה: if, elif ו־else",
+                     en: "Keep the chain whole: if, elif and else" } }
+}
+```
+
+**hints**
+1. (he) "אל תתקני הכול בבת אחת. הריצי, קראי את מספר השורה, תקני רק אותה, הריצי
+   שוב. מה חסר בסוף שורה 3?"
+2. (he) "שלוש הבעיות: נקודתיים חסרות בסוף שורת ה־`if`; שורה שאחרי נקודתיים בלי
+   הזחה; ושורה אחרונה עם שני רווחים במקום אפס. שני רווחים לא מתאימים לשום רמה
+   פתוחה — לא לבלוק ולא לשוליים."
+3. (he) "שורה 3 מסתיימת ב־`:`. שורה 4 נדחפת פנימה בארבעה רווחים. השורה האחרונה
+   נצמדת לשוליים לגמרי — היא לא שייכת ל־`else`, היא שייכת לתוכנית, ולכן היא רצה
+   תמיד. אם תשאירי אותה מוזחת הקוד ירוץ בלי שגיאה, הקשת פשוט לא תיבנה, וההרפיות
+   בגל השלישי יעברו. הריצי ותראי."
+
+## The great battle — "פרשת הדרכים / The Crossroads" · 55 XP, 15 🪙
+
+```js
+map: { cols: 14, rows: 8,
+       path: [[0,1],[1,1],[2,1],[3,1],[4,1],[4,2],[4,3],[4,4],[3,4],[2,4],
+              [2,5],[2,6],[3,6],[4,6],[5,6],[6,6],[7,6],[8,6],[9,6],
+              [9,5],[9,4],[9,3],[10,3],[11,3],[12,3],[13,3]],
+       rock: [[12,0],[13,1]] },
+gold: 330, campHp: 3, seed: 27, allowed: ["archer", "cannon", "ice"],
+waves: [
+  { delay: 0,  enemies: [ { kind: "satyr", count: 7, gap: 0.5 } ] },
+  { delay: 10, enemies: [ { kind: "harpy", count: 6, gap: 0.7 } ] },
+  { delay: 20, enemies: [ { kind: "cyclops", count: 2, gap: 3.0 },
+                          { kind: "hellhound", count: 3, gap: 1.3 } ] },
+],
+```
+
+**Why this mechanic**: **a decision inside a decision.** The outer chain picks the
+road; inside the middle road's branch a second `if`/`else` asks whether there is
+enough gold for artillery. Three levels of indentation — 0, 4, 8 — and each one
+means something she can point at. It is also the first battle where the answer to
+one question changes which question gets asked next, which is what a decision
+tree is.
+
+**brief (he)**: הדרך מתפצלת לשלוש, ואת בוחרת את האמצעית: `road = "middle"`.
+הדרך הזאת מתפתלת שלוש פעמים, ומגיעים בה שלושה גלים — סאטירים, ואז הרפיות
+באוויר, ואז שני קיקלופים עם כלבי גיהינום. יש 330 זהב.
+
+התוכנית צריכה שתי רמות של החלטה:
+
+1. **איזו דרך** — `if road == "left"` / `elif road == "middle"` / `else`.
+2. בתוך הענף של הדרך האמצעית: **האם יש מספיק זהב לתותח?** אם כן — שני תותחים
+   נגד הקיקלופים. אם לא — קשתות במקומם.
+
+ובכל מקרה, בענף האמצעי, שלוש קשתות שומרות על השמיים. תותח לא פוגע בהרפיות, אז
+הקשתות אינן אופציונליות.
+
+**starter**
+```python
+road = "middle"
+gold = get_gold()
+
 if road == "left":
-    print("Safe road. Three days.")
-elif road == "right":
-    print("Fast road. Two days. Loud.")
-elif road == "middle":
-    print("Nobody has come back from the middle road.")
-else:
-    print("That is not a road.")
+    place_tower("archer", 2, 2)
 ```
-
-**check** (all four verified against the runtime)
-```js
-{ kind: "cases", cases: [
-    { stdin: ["left"],   expect: "Safe road. Three days." },
-    { stdin: ["right"],  expect: "Fast road. Two days. Loud." },
-    { stdin: ["middle"], expect: "Nobody has come back from the middle road." },
-    { stdin: ["forest"], expect: "That is not a road." } ] }
-```
-
-**hints**
-1. (he) "ארבע תוצאות אפשריות, ובכל הרצה מודפסת בדיוק אחת. כמה שאלות את צריכה
-   לשאול כדי לכסות ארבע אפשרויות? (רמז: פחות מארבע.)"
-2. (he) "`if` לראשונה, `elif` לשתיים שאחריה, `else` לכל השאר. אין צורך לשאול
-   'האם זו לא אף אחת מהדרכים' — זה בדיוק מה ש־`else` תופס."
-3. (he) "`road` הוא string, אז ההשוואה היא `road == \"left\"` עם גרשיים.
-   התחילי ב־`if road == \"left\":`, ואז `elif road == \"right\":`, ואז
-   `elif road == \"middle\":`, ואז `else:`. שימי לב ש־`Left` באות גדולה לא יזוהה
-   — פייתון מבדיל בין אותיות גדולות לקטנות, כמו שראית בשיעור 5."
-
-### e4 — The torn map · 30 XP, 8 🪙 — **the debugging exercise**
-
-**brief (he)**: אנאבת' העתיקה את הקוד מהמפה הקרועה ויש בו שלוש שגיאות. הריצי
-אותו, קראי את השגיאה, תקני שורה אחת, והריצי שוב — עד שהוא רץ. הפלט הנכון הוא
-שתי שורות: `We go around.` ואז `Grover is already walking.` השורה האחרונה
-צריכה להידפס תמיד, בכל ערך של `monsters`.
-
-**starter** (broken on purpose — three separate bugs)
-```python
-monsters = 6
-if monsters == 0
-print("The road is clear.")
-elif monsters < 5:
-    print("We fight through.")
-else:
-    print("We go around.")
-  print("Grover is already walking.")
-```
-
-Bug 1: line 2 has no `:`.
-Bug 2: line 3 is not indented (`IndentationError: expected an indented block`).
-Bug 3: line 8 has two spaces where it needs zero
-(`SyntaxError: unindent does not match any outer indentation level`).
-
-She will fix them one at a time, in that order, because that is the order the
-engine reports them. That sequencing *is* the lesson: **an error message names
-one problem at a time, and re-running after each fix is the method.**
 
 **solution**
 ```python
-monsters = 6
-if monsters == 0:
-    print("The road is clear.")
-elif monsters < 5:
-    print("We fight through.")
+road = "middle"
+gold = get_gold()
+
+if road == "left":
+    place_tower("archer", 2, 2)
+    place_tower("archer", 5, 5)
+elif road == "middle":
+    place_tower("archer", 3, 2)
+    place_tower("archer", 3, 5)
+    place_tower("archer", 10, 2)
+    if gold >= tower_cost("cannon"):
+        place_tower("cannon", 5, 5)
+        place_tower("cannon", 8, 4)
+    else:
+        place_tower("archer", 5, 5)
+        place_tower("archer", 8, 4)
 else:
-    print("We go around.")
-print("Grover is already walking.")
+    place_tower("ice", 5, 5)
+    place_tower("archer", 3, 2)
 ```
-Verified output:
-```
-We go around.
-Grover is already walking.
-```
+Verified: 3/3, eighteen kills, 330 of 330 spent — the budget is exact, which is
+why the inner `if` matters. Three branches were simulated as losses: the inner
+`else` (five archers, 250 gold) leaks 1; the `"left"` branch is overrun; an
+all-cannon build is overrun by the harpies.
 
 **check**
 ```js
-{ kind: "output", mode: "normalized", expect: "We go around.\nGrover is already walking." }
+check: {
+  kind: "battle",
+  also: { kind: "source", mustInclude: ["if", "elif", "else"],
+          message: { he: "הקרב הזה דורש עץ החלטות: שרשרת על הדרך, ובתוכה שאלה נוספת על הזהב",
+                     en: "This one needs a decision tree: a chain on the road, with a second question about gold inside it" } }
+}
 ```
 
 **hints**
-1. (he) "אל תנסי לתקן הכל בבת אחת. הריצי, קראי את מספר השורה בשגיאה, תקני רק
-   אותה, והריצי שוב. מה חסר בסוף שורה 2?"
-2. (he) "שלוש הבעיות הן: נקודתיים חסרות בסוף שורת ה־`if`; שורה שאחרי נקודתיים
-   שלא הוזחה; ושורה אחרונה עם שני רווחים במקום אפס. השורה האחרונה לא שייכת
-   ל־`else` — היא צריכה לרוץ תמיד."
-3. (he) "שורה 2 מסתיימת ב־`:`. שורה 3 נדחפת פנימה בארבעה רווחים. שורה 8 נצמדת
-   לשוליים לגמרי — היא לא חלק מאף בלוק, ולכן היא מודפסת בכל מקרה. אחרי שזה עובד,
-   שני את `monsters` ל־2 והריצי: איזו שורה התחלפה ואיזו נשארה?"
-
-## Quest — "פרשת הדרכים / The Crossroads" · 55 XP, 15 🪙
-
-**brief (he)**: זו ההחלטה האמיתית. התוכנית שלך שואלת שתי שאלות — באיזו דרך
-ללכת, וכמה דרכמות יש בכיס — ומדפיסה שורה אחת בלבד.
-
-```
-road = input("Which road? ")
-drachmas = int(input("How many drachmas? "))
-```
-
-החוקים:
-
-- **left** — יש מעבורת, והמעביר גובה 3 דרכמות.
-  - 3 דרכמות או יותר → `You pay the ferryman. Left road.`
-  - פחות מזה → `The ferryman turns you away.`
-- **right** — הדרך מלאה שודדים.
-  - 0 דרכמות → `Nothing to steal. The right road is safe today.`
-  - יותר מזה → `Hide your money. Right road.`
-- **middle** — `The middle road asks no price.` בלי קשר לכסף.
-- כל דבר אחר — `That is not a road.`
-
-**solution**
-```python
-road = input("Which road? ")
-drachmas = int(input("How many drachmas? "))
-
-if road == "left":
-    if drachmas >= 3:
-        print("You pay the ferryman. Left road.")
-    else:
-        print("The ferryman turns you away.")
-elif road == "right":
-    if drachmas == 0:
-        print("Nothing to steal. The right road is safe today.")
-    else:
-        print("Hide your money. Right road.")
-elif road == "middle":
-    print("The middle road asks no price.")
-else:
-    print("That is not a road.")
-```
-
-**check** (all six verified against the runtime)
-```js
-{ kind: "cases", cases: [
-    { stdin: ["left", "5"],   expect: "You pay the ferryman. Left road." },
-    { stdin: ["left", "1"],   expect: "The ferryman turns you away." },
-    { stdin: ["right", "0"],  expect: "Nothing to steal. The right road is safe today." },
-    { stdin: ["right", "12"], expect: "Hide your money. Right road." },
-    { stdin: ["middle", "4"], expect: "The middle road asks no price." },
-    { stdin: ["up", "4"],     expect: "That is not a road." } ] }
-```
-Both inputs are read before any decision, so every case queues two values even
-when the second is never used. That is intentional and worth a line in the brief:
-**קלטי את שני הנתונים בהתחלה, ורק אחר כך תחליטי.**
-
-**hints**
-1. (he) "יש לך ארבעה מקרים לדרך, אבל שניים מהם מתפצלים שוב לפי הכסף. ציירי את זה
-   על נייר כעץ: קודם הדרך, ואז — בתוך שתיים מהענפים — עוד שאלה."
-2. (he) "זו שרשרת `if/elif/elif/else` על `road`, ובתוך שניים מהבלוקים שלה יושב
-   `if/else` נוסף על `drachmas`. ה־`if` הפנימי מוזח בארבעה רווחים, וה־`print`
-   שבתוכו בשמונה."
-3. (he) "התחילי כך:
+1. (he) "ציירי את זה על נייר כעץ: קודם הדרך — שלושה ענפים. ואז, בתוך ענף אחד
+   בלבד, עוד שאלה. איזה ענף מכיל שאלה נוספת, ואיזה מגדל בענף הזה **חייב** להיות
+   קשת ולא תותח?"
+2. (he) "שרשרת `if`/`elif`/`else` על `road`, ובתוך הענף של `\"middle\"` יושב
+   `if`/`else` נוסף על `gold`. ה־`if` הפנימי מוזח בארבעה רווחים, וה־`place_tower`
+   שבתוכו בשמונה. שלוש הקשתות של הענף האמצעי נכתבות ברמה של ארבעה רווחים, כי הן
+   רצות בשני המקרים."
+3. (he) "כך זה מתחיל:
    ```python
-   if road == \"left\":
-       if drachmas >= 3:
-           print(\"You pay the ferryman. Left road.\")
-       else:
-           print(\"The ferryman turns you away.\")
-   elif road == \"right\":
+   elif road == \"middle\":
+       place_tower(\"archer\", 3, 2)
+       place_tower(\"archer\", 3, 5)
+       place_tower(\"archer\", 10, 2)
+       if gold >= tower_cost(\"cannon\"):
+           place_tower(\"cannon\", 5, 5)
    ```
-   שימי לב לשלוש רמות ההזחה: 0 ל־`if` החיצוני, 4 ל־`if` הפנימי, 8 ל־`print`.
-   `elif road == \"right\"` חוזר לרמה 0 כי הוא שייך לשרשרת החיצונית. את הענף של
-   `right` בני באותה צורה, ואת שני האחרונים בלי קינון בכלל."
+   שימי לב לשלוש רמות ההזחה: 0 לשרשרת החיצונית, 4 לתוכן שלה, 8 לתוך ה־`if`
+   הפנימי. אחרי התותח הראשון בא עוד אחד ב־`(8, 4)`, ואז `else:` ברמה של ארבעה
+   רווחים עם שתי קשתות במקומם. 330 זהב זה בדיוק שלוש קשתות ושני תותחים — אם
+   נשאר לך זהב בסוף, פספסת מגדל."
 
-**Why this is the quest**: it is the first program she writes that has *state*
-(two variables) and *structure* (two levels). When it passes, she has built a
-decision tree — and Chiron says so in the completion text, because naming what
-she has done is half the reward.
+**Why this is the great battle**: it is the first program she writes that has
+*state* (two variables) and *structure* (two levels of decision). When it passes,
+she has built a decision tree — and Chiron says exactly that in the completion
+text, because naming what she has done is half the reward.
 
 ## Reward & Recap
 
@@ -602,10 +787,12 @@ desc (he): "נעליים מהמחסן של הרמס. הן לא מהירות במ
 נועלות אותך בדרך אחת."
 
 **Achievements possible here**
-- *Forked Path* — first program containing an `else`.
-- *Debugger* — passed e4 after at least one failed run.
-- *Indent Master* — passed e4 without spending a single hint.
-- *Persistent* — solved any exercise here after five failed runs.
+- *Forked Path* — first battle won by a program containing an `else`.
+- *Debugger* — cleared b4 after at least one failed run.
+- *Indent Master* — cleared b4 without spending a single hint.
+- *Ground Control* — lost a battle to a cannon that could not reach the harpies,
+  then won it. Awarded warmly: that mistake is the lesson.
+- *Persistent* — won any battle here after five failed runs.
 
 **Recap bullets**
 - `if` + שאלה + `:` מריץ בלוק שלם רק כשהתשובה `True`
@@ -613,6 +800,7 @@ desc (he): "נעליים מהמחסן של הרמס. הן לא מהירות במ
 - `else` תופס את כל מה שנשאר ואף פעם לא מקבל שאלה; `elif` מוסיף שאלה נוספת
 - בשרשרת `if/elif/else` רץ **ענף אחד בלבד** — הראשון שענה `True`
 - שגיאת הזחה מציינת לך את מספר השורה המדויק. תקני שורה אחת, הריצי שוב
+- תותח לא פוגע במשהו שעף — לכן **איזה** מגדל לבנות היא שאלה, ולשאלה יש `if`
 
 **Next teaser (he)**: *"בחרת דרך, והיא מובילה אל הים. מחר תלמדי לחזור על אותה
 פעולה שוב ושוב — כי אי אפשר לחצות מֵצר בחתירה אחת, והסירנות כבר שרות."*
@@ -621,17 +809,21 @@ desc (he): "נעליים מהמחסן של הרמס. הן לא מהירות במ
 
 | She writes | She sees (verified in Skulpt) | CPython 3 says | Hint / explainer must cover |
 | --- | --- | --- | --- |
-| `if x > 3` (no colon) | `SyntaxError: bad input on line N` | `SyntaxError: expected ':'` | הנקודתיים בסוף השורה — בדקי את סוף השורה, לא את ההתחלה |
-| block not indented | `SyntaxError: bad input on line N` | `IndentationError: expected an indented block after 'if' statement on line N-1` | אחרי `:` חייבת לבוא שורה מוזחת; Tab בתחילת השורה |
-| indent with nothing above it | `SyntaxError: bad input on line N` | `IndentationError: unexpected indent` | בלוק נפתח רק אחרי שורה שנגמרת בנקודתיים |
-| 4 spaces then 2 in one block | `SyntaxError: unindent does not match any outer indentation level` | same wording | כל השורות בבלוק — אותה כמות רווחים בדיוק |
-| tab and spaces mixed | `SyntaxError: bad input on line N` | `TabError: inconsistent use of tabs and spaces in indentation` | להשתמש רק ב־Tab של העורך, שמכניס 4 רווחים |
-| `else if x > 1:` | `SyntaxError: bad input on line N` | `SyntaxError: invalid syntax` | המילה בפייתון היא `elif`, מילה אחת |
-| `else x > 3:` | `SyntaxError: bad input on line N` | `SyntaxError: invalid syntax` | ל־`else` אין שאלה אף פעם |
-| `if x = 1:` | `SyntaxError: bad input on line N` | `SyntaxError: invalid syntax. Maybe you meant '==' …` | `=` נותן, `==` שואל — חזרה לשיעור 5 |
+| `if x > 3` (no colon) | `SyntaxError: bad input (line N)` | `SyntaxError: expected ':'` | הנקודתיים בסוף השורה — בדקי את סוף השורה, לא את ההתחלה |
+| block not indented | `SyntaxError: bad input (line N)` | `IndentationError: expected an indented block after 'if' statement on line N-1` | אחרי `:` חייבת לבוא שורה מוזחת; Tab בתחילת השורה |
+| indent with nothing above it | `SyntaxError: bad input (line N)` | `IndentationError: unexpected indent` | בלוק נפתח רק אחרי שורה שנגמרת בנקודתיים |
+| 4 spaces then 2 in one block | `SyntaxError: unindent does not match any outer indentation level (line N)` | same wording | כל השורות בבלוק — אותה כמות רווחים בדיוק |
+| tab and spaces mixed | `SyntaxError: bad input (line N)` | `TabError: inconsistent use of tabs and spaces in indentation` | להשתמש רק ב־Tab של העורך, שמכניס 4 רווחים |
+| `else if x > 1:` | `SyntaxError: bad input (line N)` | `SyntaxError: invalid syntax` | המילה בפייתון היא `elif`, מילה אחת |
+| `else x > 3:` | `SyntaxError: bad input (line N)` | `SyntaxError: invalid syntax` | ל־`else` אין שאלה אף פעם |
+| `if x = 1:` | `SyntaxError: bad input (line N)` | `SyntaxError: invalid syntax. Maybe you meant '==' …` | `=` נותן, `==` שואל — חזרה לשיעור 5 |
 | `if road == left:` (no quotes) | `NameError: name 'left' is not defined` | same | בלי גרשיים פייתון מחפש משתנה בשם `left` |
 | `if road == "Left":` on input `left` | לא שגיאה — הענף לא רץ | — | אותיות גדולות/קטנות הן שני דברים שונים |
 | broad `elif` before narrow one | לא שגיאה — ענף שלא רץ אף פעם | — | השאלה הצרה ביותר קודם; הבאג הזה שקט |
+| cannons against a flying wave | הקרב נכשל, והמנוע אומר "המגדל במשבצת (x, y) הוא תותח, והוא לא מסוגל לפגוע במפלצות מעופפות" | — | הרפיות עפות; נגדן קשת, קרח או ברק |
+| archers against a cyclops | לא שגיאה — הקיקלופ ממשיך ללכת | — | שריון 5 מוריד כל חץ ל־5 נזק; פגז מוריד 23 |
+| a `place_tower` line left outside its branch | לא שגיאה — המגדל נבנה תמיד | — | ההזחה קובעת לאיזה ענף השורה שייכת |
+| the branch is right, the coordinates are on the path | "אי אפשר לבנות על השביל עצמו" | — | הענף הנכון עם משבצת שגויה נכשל בדיוק כמו ענף שגוי |
 
 ## Implementation notes
 
@@ -659,23 +851,37 @@ desc (he): "נעליים מהמחסן של הרמס. הן לא מהירות במ
 - **Show whitespace on demand.** A small "הצג רווחים" toggle in the editor that
   renders leading spaces as faint dots turns every indentation bug in this lesson
   from invisible to obvious. It is the highest-value UI affordance in Act II.
-- **e4's starter must be preserved byte-for-byte**, including the two-space
-  indent on the last line. If the editor normalises indentation on load, the
-  exercise silently loses its third bug. Mark the starter `preserveWhitespace:
-  true` or exempt starters from paste-normalisation.
-- All `cases` expectations omit `input()` prompt text — prompts go to the
-  Iris-message panel, not stdout (verified).
-- Every solution and every teach-block output in this file was executed through
-  the shipped `skulpt.min.js` with `__future__: Sk.python3`.
-- **e1 and e2 each carry two checks** — write them with the `also` field, as in
-  lesson 1 and as required by `.claude/rules/lesson-authoring.md`:
-  ```js
-  check: { kind: "source", mustInclude: ["else:"],
-           message: { he: "הפעם צריך גם מסלול שני — else", en: "This one needs the second path — else" },
-           also: { kind: "output", mode: "normalized", expect: "Grover chews his shoe." } }
-  ```
-- **`source` checks read a stripped skeleton** (comments and string literals
-  removed). `"if "` and `"else:"` are keywords outside any literal, so both
-  survive stripping and neither check needs `raw: true`. Watch this in e4: its
-  starter is full of broken code, but `source` is not used there — the check is
-  pure `output`, so the stripping rule does not apply.
+- **b1's and b4's starters must be preserved byte-for-byte**, including b4's
+  two-space indent on the last line. If the editor normalises indentation on
+  load, b4 silently loses its third bug. Both carry `brokenStarter: true`, which
+  is also what tells `tools/verify-python.mjs` not to assert that the starter
+  runs.
+- **Every level here was simulated headlessly** through
+  `assets/js/battle/{sim,pyapi,play}.js` in a Node VM, the way
+  `tools/verify-python.mjs` loads them. For all five: the stated `solution` wins,
+  an empty program loses, the `also` `source` rule passes on the solution, and
+  both broken starters fail with exactly the errors quoted above.
+- **The wrong branch was simulated too, and it always loses.** b1 without the
+  indented archer: overrun. b1 with a second cannon instead of it: overrun. b2's
+  `else` branch against a flying wave: overrun, four kills out of twelve. b3's
+  `"harpy"` branch: 2 leaks; b3's `"cyclops"` branch: overrun. b4 with the last
+  line left inside `else`: 1 leak. The great battle's inner `else`: 1 leak; its
+  `"left"` branch and an all-cannon build: overrun. This is what "the level
+  forces the concept" has to mean — not a source rule alone.
+- **A battle level's second check is the `also` field**, applied by `checker.js`
+  only after the battle objective has passed, so a source complaint never lands
+  on a run she already lost. `mustInclude` matches bare identifiers as whole
+  words, so `["if", "elif", "else"]` is exact: `elif` does not satisfy `else`,
+  and a variable named `iffy` does not satisfy `if`.
+- **The default objective is a perfect defense** — one leak fails the level. The
+  3 camp HP exist so a hopeless run ends fast, not as a budget she may spend.
+- **No `input()` in a battle level.** Her script runs once before the wave with
+  nothing queued on stdin. The `input()` material from lesson 3 stays in the
+  teaching blocks and the training ground.
+- **`get_wave()` is deliberately unused here.** It returns a list of dicts, and
+  lists arrive in lesson 9. The scouting report is a plain string variable at the
+  top of the starter, and the brief says Chiron rewrites that line before the
+  real thing — which is exactly true of lesson 9, where she will read the wave
+  herself.
+- **`optional`, `maxTowers` and `maxGoldSpent` are not used in this lesson.**
+  Everything is decided by the wave and the tower matchup.

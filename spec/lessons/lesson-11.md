@@ -12,8 +12,10 @@
 | **new vocabulary** | `{}`, `key: value`, `.get`, `.keys`, `.values`, `.items` |
 | **requires** | L9 lists, `len()`, `for`, `in` · L10 `sorted()`, `sum()` · L6 `if`/`else` · L3 f-strings · L7 accumulators |
 | **item** | 🗝️ מפתח הרמס / Hermes' Key |
-| **XP** | 20 + 25 + 25 + 30 (training) + 55 (quest) + 30 (bonus) = **185** |
-| **drachmas** | 5 + 7 + 7 + 8 + 14 = **41** 🪙 |
+| **XP** | 20 + 25 + 30 + 30 (training battles) + 55 (great battle) = **160** |
+| **drachmas** | 5 + 7 + 8 + 8 + 14 = **42** 🪙 |
+| **battle API** | `place_tower`, `tower_cost`, `get_wave`, `get_gold`, `camp_hp` — build script only |
+| **towers** | `archer`, `cannon`, `ice` — the cannon cannot hit anything flying |
 
 ## Teaching goal
 
@@ -28,9 +30,18 @@ usually a typo or a capital letter. Meeting `KeyError` in a calm moment, and
 then meeting `.get()` as the tool that makes the question survivable, is the
 core of the lesson.
 
-Lesson 10's quest ended with two parallel lists (`inventory` and `weights`)
-that stayed aligned only because nothing got reordered. This lesson opens by
-breaking exactly that, then fixing it.
+Lesson 10's battles ran on two parallel columns of hit points that stayed
+aligned only because nothing got reordered. This lesson opens by breaking exactly
+that, then fixing it.
+
+**And this is the lesson where `get_wave()` finally opens.** Since lesson 9 she
+has been carrying a list whose entries she could count but not read. Every entry
+is a dict — `{"kind", "hp", "speed", "armour", "flying"}` — and from here on the
+wave tells her what is coming, not merely how much of it. Three of her own dicts
+answer back: a counter table (kind → tower kind), a count table built with
+`.get(k, 0) + 1`, and a catalogue of prices from `tower_cost()`. Each one decides
+a `place_tower` call, so a `KeyError` is not a red message in a console — it is a
+camp with no towers on it.
 
 ## Story beat
 
@@ -112,9 +123,9 @@ small z and getting rained on).
    domains = {"Zeus": "sky", "Poseidon": "sea"}
    print(domains["Hera"])
    ```
-   Real error (verified in Skulpt):
+   Real error (verified against the engine, in the form the page renders):
    ```
-   KeyError: Hera on line 2
+   KeyError: Hera (line 2)
    ```
    Explanation: `KeyError` אומר דבר אחד: **המפתח הזה לא קיים בפנקס.** שימי לב
    כמה זה שונה מ־`IndexError` משיעור 9 — שם ספרת לא נכון, כאן ביקשת שם שלא
@@ -124,7 +135,7 @@ small z and getting rained on).
    - המפתח באמת לא שם, וזה מידע — לא תקלה
    גרובר גילה את השנייה בדרך הקשה. שאלת את `"zeus"`, קיבלת שגיאה, ואז גשם.
    In CPython the same line prints `KeyError: 'Hera'` with quotes; Skulpt drops
-   them. Show Skulpt's text — it is what she sees — and say so in one line.
+   them. Show the engine's text — it is what she sees — and say so in one line.
 
 7. **code (runnable)** — `.get()`, the safe question.
    ```python
@@ -200,9 +211,9 @@ small z and getting rained on).
     for name, domain in domains:
         print(name)
     ```
-    Real error (verified in Skulpt):
+    Real error (verified against the engine):
     ```
-    ValueError: too many values to unpack (expected 2) on line 2
+    ValueError: too many values to unpack (expected 2) (line 2)
     ```
     Explanation: לולאה על מילון ישר נותנת **מפתחות בלבד** — כלומר את המחרוזת
     `"Zeus"`. ביקשת לפרק אותה לשניים, ופייתון ניסה, ונתקע. שתי דרכים נכונות:
@@ -241,7 +252,64 @@ small z and getting rained on).
     האולימפיים לא זוכרים בעל־פה מי חייב למי מה. הם פותחים את הפנקס, מסתכלים תחת
     השם, וסוגרים. שלושת אלפי שנה של ביורוקרטיה אלוהית, וזה בדיוק `dict`.
 
+16. **code (runnable)** — the entries open. Since lesson 9 she has been carrying
+    a list whose tiles she could count but not read. Every tile is a dict.
+    ```python
+    wave = get_wave()
+    first = wave[0]
+    print(first["kind"])
+    print(first["hp"])
+    print(first["armour"])
+    print(first["flying"])
+    ```
+    Output on the practice field:
+    ```
+    satyr
+    20
+    0
+    False
+    ```
+    Caption: `זה אותו get_wave משיעור 9. מה שהשתנה זה שעכשיו יש לך את המפתח:
+    "kind", "hp", "armour", "flying". חמישה שדות, אותם שמות בכל מפלצת.`
+
+17. **code (runnable)** — a dict whose values are the *answers*, not the facts.
+    ```python
+    counters = {"harpy": "archer", "hellhound": "cannon"}
+    print(counters["harpy"])
+    print(counters["hellhound"])
+    ```
+    Output:
+    ```
+    archer
+    cannon
+    ```
+    Caption: `ולכן אפשר לכתוב place_tower(counters["harpy"], 3, 3) — הערך במילון
+    הוא בדיוק המחרוזת שהפקודה מצפה לה. הטבלה מחליטה, לא את, ומחר אפשר לשנות שורה
+    אחת בטבלה במקום לחפש שש קריאות בקוד.`
+
+18. **error block** — the counter table that is missing a row. This is the exact
+    error battle b3 opens with.
+    ```python
+    counters = {"harpy": "archer"}
+    print(counters["satyr"])
+    ```
+    Real error (verified against the engine):
+    ```
+    KeyError: satyr (line 2)
+    ```
+    Explanation: הטבלה שלך יודעת מה עושים נגד הרפיה, ולא יודעת מה עושים נגד סאטיר.
+    זה לא באג בקוד — זה **חור בטבלה**, והשאלה היחידה היא מה את רוצה שיקרה בחור
+    הזה. שתי תשובות סבירות:
+    - `counters[kind]` — כשאת בטוחה שכל סוג רשום. אם לא, שהתוכנית תעצור ותצעק.
+    - `counters.get(kind, "archer")` — כשמותר שיהיו חורים, ויש לך ברירת מחדל
+      הגיונית. קשת היא ברירת מחדל טובה: היא זולה, והיא פוגעת בכל דבר.
+    בקרב, `KeyError` פירושו שאף מגדל לא נבנה — הקוד נעצר לפני שהגיע ל־place_tower
+    הראשון. את רואה מחנה בלי הגנה, לא מגדל אחד חסר.
+
 ## Try It (ungraded)
+
+The game words work here too, against a practice field, so `get_wave()` answers
+and its entries can be opened.
 
 ```python
 domains = {"Zeus": "sky", "Poseidon": "sea", "Hades": "underworld"}
@@ -250,316 +318,440 @@ domains["Artemis"] = "the hunt"
 print(len(domains))
 for name, domain in domains.items():
     print(f"{name} rules {domain}")
+print(get_wave()[0]["kind"])
 ```
 
 Intro: *"הפנקס שלך. הוסיפי אלים, שני ערכים, נסי `.get` עם מפתח שלא קיים. ונסי גם
 `domains["zeus"]` עם ז' קטנה — כאן זה בטוח לגמרי, וכדאי שתראי את `KeyError` פעם
 אחת בשקט לפני שתיפגשי בו באמצע משימה."*
 
-## Training exercises
+## The battles
 
-### e1 — Open the ledger · 20 XP, 5 🪙
+Four training battles and one great battle. Level schema:
+`spec/09-battle-game.md`.
 
-**brief** — `בפנקס רשום רק זאוס. הוסיפי לו את פוסידון (sea) ואת האדס
-(underworld) כך שהמילון ייבנה בשורה אחת, ואז הדפיסי את התחום של זאוס, את התחום
-של האדס, ואת מספר האלים בפנקס.`
+All five levels were run headless against the vendored engine: **each stated
+solution wins its own battle, and an empty program loses every one of them.**
+
+The through-line is the **table**. A list answered "how many" (lesson 9) and
+"how much" (lesson 10). A dict answers "and what do I do about it": the counter
+table turns a monster's kind into a tower's kind, the count table turns the wave
+into numbers per kind, and the bestiary turns a name into armour. Each of the
+three is a dict, and each of them decides a `place_tower` call.
+
+### b1 — טבלת הנגד · The Counter Table · 20 XP, 5 🪙
+
+**Why this mechanic** — a dict literal and a lookup by key, where the value **is
+the argument**: `place_tower(counters["harpy"], 3, 3)`. Harpies fly and cannons
+cannot reach them, so the table is not decoration — it is the difference between
+a defense and four monsters walking over it.
+
+**level**
+```js
+{
+  map: { cols: 12, rows: 7, path: [[0,4],[1,4],[2,4],[3,4],[4,4],[5,4],[6,4],[7,4],[8,4],[9,4],[10,4],[11,4]] },
+  gold: 280, campHp: 3, seed: 30, allowed: ["archer", "cannon"],
+  waves: [
+    { delay: 0, enemies: [{ kind: "harpy", count: 5, gap: 0.9 }] },
+    { delay: 9, enemies: [{ kind: "hellhound", count: 4, gap: 1.2 }] },
+  ],
+}
+```
+
+**brief** — `שתי גלים: קודם הרפיות באוויר, אחר כך כלבי גיהינום על הקרקע.
+
+בני טבלת נגד — מילון שבו המפתח הוא סוג המפלצת והערך הוא סוג המגדל שעונה עליה:
+הרפיה → "archer", כלב גיהינום → "cannon".
+
+ואז בני ארבעה מגדלים בשורה 3, בעמודות 3, 5, 7 ו־9 — **בלי לכתוב את שם המגדל
+בעצמך**. שלפי אותו מהטבלה: שניים לפי המפתח של ההרפיה, שניים לפי המפתח של הכלב.
+הזהב מספיק בדיוק לשתי קשתות ולשני תותחים.`
 
 **starter**
 ```python
-domains = {"Zeus": "sky"}
-# add Poseidon -> sea and Hades -> underworld to the dict above
-# then print Zeus's domain, Hades's domain, and how many gods are registered
+counters = {"harpy": "archer"}
+print(counters["harpy"])
+place_tower(counters["harpy"], 3, 3)
 ```
 
 **solution**
 ```python
-domains = {"Zeus": "sky", "Poseidon": "sea", "Hades": "underworld"}
-print(domains["Zeus"])
-print(domains["Hades"])
-print(f"Gods in the registry: {len(domains)}")
-```
-
-Expected output:
-```
-sky
-underworld
-Gods in the registry: 3
+counters = {"harpy": "archer", "hellhound": "cannon"}
+print(counters["harpy"])
+print(counters["hellhound"])
+place_tower(counters["harpy"], 3, 3)
+place_tower(counters["harpy"], 5, 3)
+place_tower(counters["hellhound"], 7, 3)
+place_tower(counters["hellhound"], 9, 3)
 ```
 
 **check**
 ```js
-{ kind: "output", mode: "normalized",
-  expect: "sky\nunderworld\nGods in the registry: 3" }
-```
-plus
-```js
-{ kind: "source", raw: true, mustInclude: ["Poseidon", "len("],
-  message: { he: "פוסידון חייב להיות רשום בפנקס, והמספר חייב לבוא מ־len",
-             en: "Poseidon must be in the registry, and the count must come from len" } }
-```
-`raw: true` is required here: `"Poseidon"` is a string literal, and a stripped
-skeleton would never contain it.
+{ kind: "battle",
+  also: { kind: "source", mustInclude: ["counters[", "place_tower(counters["],
+          message: { he: "סוג המגדל צריך לצאת מהטבלה — place_tower(counters[...]) ולא מחרוזת שכתבת ביד",
+                     en: "The tower kind must come out of the table — place_tower(counters[...]), not a string you typed" } } }
 ```
 
 **hints**
-1. `כל זוג בפנקס נראה אותו דבר: שם, נקודתיים, תחום. מה מפריד בין זוג לזוג?`
-2. `` בתוך הסוגריים המסולסלים: `"Poseidon": "sea"`, פסיק, `"Hades": "underworld"`.
-   השליפה נעשית עם `domains["Zeus"]`. ``
-3. `` שורה 1: המילון עם שלושה זוגות, מופרדים בפסיקים. שורה 2: print(domains["Zeus"]).
-   שורה 3: print(domains["Hades"]). שורה 4: f-string עם {len(domains)}. ``
+1. `מה קורה לתותח כשהרפיה עוברת מעליו? ומה זה אומר על שני המגדלים הראשונים?`
+2. `` מילון נכתב `{"מפתח": "ערך", "מפתח": "ערך"}`. `counters["harpy"]` מחזיר את
+   המחרוזת `"archer"`, וזה בדיוק מה ש־`place_tower` רוצה בארגומנט הראשון. ``
+3. `` שורה אחת למילון עם שני זוגות, ואז ארבע שורות בנייה:
+   `place_tower(counters["harpy"], 3, 3)`, אותו דבר ב־5, ואז
+   `place_tower(counters["hellhound"], 7, 3)` ו־9. שימי לב לגרשיים — המפתח הוא
+   string, בדיוק כמו בשיעור 1. ``
 
-### e2 — Offerings at the altar · 25 XP, 7 🪙
+### b2 — לספור את הגל · Counting the Wave · 25 XP, 7 🪙
 
-**brief** — `הרמס מעדכן את הפנקס. הוסיפי את הרמס עם 4 מנחות, והוסיפי 2 מנחות
-למה שכבר יש לפוסידון. אחר כך הדפיסי את המצב של פוסידון, את המצב של הרמס, וכמה
-אלים רשומים.`
+**Why this mechanic** — `counts[kind] = counts.get(kind, 0) + 1`, the counting
+pattern, running over `get_wave()`. The first time she meets a kind it is not in
+the dict yet, so `[ ]` raises and `.get(kind, 0)` does not. The counts then
+divide into tower numbers, and the gold covers exactly that.
+
+**level**
+```js
+{
+  map: { cols: 12, rows: 7, path: [[0,4],[1,4],[2,4],[3,4],[4,4],[5,4],[6,4],[7,4],[8,4],[9,4],[10,4],[11,4]] },
+  gold: 370, campHp: 3, seed: 31, allowed: ["archer", "cannon"],
+  waves: [
+    { delay: 0, enemies: [{ kind: "satyr", count: 8, gap: 0.6 }] },
+    { delay: 8, enemies: [{ kind: "hellhound", count: 6, gap: 1.0 }] },
+  ],
+}
+```
+
+**brief** — `אף אחד לא אומר לך הפעם כמה מכל סוג מגיעים. עברי על הגל ובני מילון
+ספירה: מפתח = סוג, ערך = כמה כאלה.
+
+הכלל של המחנה: **תותח אחד לכל שני כלבי גיהינום, קשת אחת לכל ארבעה סאטירים.**
+
+התותחים בעמודות [2, 5, 8] בשורה 3, הקשתות בעמודות [0, 10] באותה שורה. בני בדיוק
+כמה שהספירה אומרת — הזהב מספיק בדיוק לזה.`
 
 **starter**
 ```python
-offerings = {"Zeus": 3, "Poseidon": 5, "Athena": 2}
-# add Hermes with 4
-# add 2 more to whatever Poseidon already has
-# then print the three report lines
+wave = get_wave()
+counts = {}
+for m in wave:
+    counts[m["kind"]] = counts.get(m["kind"], 0) + 1
+print(counts)
 ```
 
 **solution**
 ```python
-offerings = {"Zeus": 3, "Poseidon": 5, "Athena": 2}
-offerings["Hermes"] = 4
-offerings["Poseidon"] = offerings["Poseidon"] + 2
-print(f"Poseidon: {offerings['Poseidon']}")
-print(f"Hermes: {offerings['Hermes']}")
-print(f"Gods on the list: {len(offerings)}")
-```
+wave = get_wave()
+counts = {}
+for m in wave:
+    counts[m["kind"]] = counts.get(m["kind"], 0) + 1
+print(counts)
 
-Expected output:
-```
-Poseidon: 7
-Hermes: 4
-Gods on the list: 4
+cannons = counts["hellhound"] // 2
+archers = counts["satyr"] // 4
+print(cannons)
+print(archers)
+
+ridge = [2, 5, 8]
+for i in range(cannons):
+    place_tower("cannon", ridge[i], 3)
+
+watch = [0, 10]
+for i in range(archers):
+    place_tower("archer", watch[i], 3)
 ```
 
 **check**
 ```js
-{ kind: "output", mode: "normalized",
-  expect: "Poseidon: 7\nHermes: 4\nGods on the list: 4" }
-```
-plus
-```js
-{ kind: "source", raw: true,
-  mustExclude: ["\"Poseidon\": 7", "'Poseidon': 7"],
-  message: { he: "המספר 7 צריך להיווצר מחישוב — 5 ועוד 2 — ולא להיכתב לתוך המילון",
-             en: "The 7 must be computed — 5 plus 2 — not written into the dict" } }
-```
-`raw: true` again: the forbidden text is a key literal paired with a number, so
-the check has to see the source as written.
+{ kind: "battle",
+  also: { kind: "source", mustInclude: [".get(", "get_wave(", "counts["],
+          message: { he: "הספירה חייבת לצאת מהגל עם התבנית get(מפתח, 0) + 1 — לא מספרים שכתבת ביד",
+                     en: "The counts must come from the wave with the get(key, 0) + 1 pattern — not numbers typed by hand" } } }
 ```
 
 **hints**
-1. `להוסיף 2 למשהו שכבר קיים דורש קודם לקרוא אותו. איך את קוראת ערך מהפנקס?`
-2. `` `offerings["Poseidon"]` שולף את 5. `offerings["Poseidon"] = ... + 2` כותב
-   חזרה. אותה תבנית של accumulator משיעור 7, רק שהמשתנה יושב בתוך מילון. ``
-3. `` הוספת הרמס היא שורה אחת: `offerings["Hermes"] = 4` — מפתח שלא קיים נוצר
-   מיד. עדכון פוסידון:
-   `offerings["Poseidon"] = offerings["Poseidon"] + 2`. שימי לב לגרשיים
-   בתוך ה־f-string: חיצוניים כפולים, פנימיים בודדים. ``
+1. `בסיבוב הראשון של הלולאה, האם המפתח "satyr" כבר קיים במילון? מה יקרה אם
+   תבקשי אותו עם סוגריים מרובעים?`
+2. `` `counts[m["kind"]] = counts.get(m["kind"], 0) + 1` היא כל הספירה בשורה
+   אחת: קחי מה שיש, ואם אין — קחי 0, והוסיפי אחד. אחר כך `counts["hellhound"]`
+   ו־`counts["satyr"]` הם מספרים רגילים. ``
+3. `` שישה כלבים חלקי 2 זה שלושה תותחים; שמונה סאטירים חלקי 4 זה שתי קשתות.
+   שתי לולאות בנייה נפרדות, `for i in range(cannons)` ו־`for i in range(archers)`,
+   כל אחת עם רשימת המשבצות שלה. שלושה תותחים ושתי קשתות הם 370 בדיוק. ``
 
-### e3 — The safe question · 25 XP, 7 🪙
+### b3 — המפתח שאינו שם · The Key That Is Not There · 30 XP, 8 🪙
 
-**brief** — `ארבעה שמות מבקשים לעבור בשער, ורק חלק מהם רשומים. הדפיסי שורה לכל
-שם — התחום שלו אם הוא רשום, והודעה מתאימה אם לא. התוכנית חייבת לרוץ עד הסוף בלי
-לקרוס.`
+**Why this mechanic** — a real `KeyError`, inside a battle, on purpose. The
+starter is the scouts' plan written with `[ ]`, and it crashes on `"satyr"`
+before a single tower is placed — so she watches the camp fall with no defense at
+all. `.get(kind, "archer")` is the one-word repair, and the default it returns is
+a real decision: the archer is cheap and hits everything.
+
+**level**
+```js
+{
+  map: {
+    cols: 14, rows: 8,
+    path: [[0,5],[1,5],[2,5],[3,5],[4,5],[5,5],[5,4],[5,3],[6,3],[7,3],[8,3],
+           [8,4],[8,5],[9,5],[10,5],[11,5],[12,5],[13,5]],
+    rock: [[2,1]],
+  },
+  gold: 330, campHp: 3, seed: 32, allowed: ["archer", "cannon"],
+  waves: [
+    { delay: 0,  enemies: [{ kind: "satyr", count: 6, gap: 0.7 }] },
+    { delay: 8,  enemies: [{ kind: "harpy", count: 7, gap: 0.8 }] },
+    { delay: 17, enemies: [{ kind: "hellhound", count: 6, gap: 0.9 }] },
+    { delay: 27, enemies: [{ kind: "hellhound", count: 4, gap: 0.9 },
+                           { kind: "cyclops", count: 2, gap: 1.5 }] },
+  ],
+}
+```
+
+**brief** — `הסיירת דיווחה חמישה גלים לפי הסדר, ולכל אחד מהם משבצת שמורה:
+
+scouted = ["harpy", "hellhound", "satyr", "harpy", "cyclops"]
+spots = [2, 4, 6, 9, 11]      # כולן בשורה 4
+
+הקוד כבר כתוב, והוא נופל. הריצי אותו, קראי את השגיאה, ותקני אותה — בלי להוסיף
+שורות לטבלה. הטבלה נכונה; **הדרך שבה שואלים אותה** היא מה שצריך להשתנות.
+
+הזהב מספיק בדיוק לבנייה שיוצאת מהטבלה המתוקנת.`
+
+**starter** (deliberately broken — fixing it is the task; `brokenStarter: true`)
+```python
+counters = {"harpy": "archer", "hellhound": "cannon", "cyclops": "cannon"}
+scouted = ["harpy", "hellhound", "satyr", "harpy", "cyclops"]
+spots = [2, 4, 6, 9, 11]
+for i in range(len(scouted)):
+    kind = counters[scouted[i]]
+    place_tower(kind, spots[i], 4)
+```
+Running it produces `KeyError: satyr (line 5)` and **no towers at all** — the
+script stops on the third turn of the loop, before any `place_tower` for it runs,
+and the two towers already placed are not enough to matter. She sees an empty
+field, which is exactly what a crash costs in this game.
+
+**solution**
+```python
+counters = {"harpy": "archer", "hellhound": "cannon", "cyclops": "cannon"}
+scouted = ["harpy", "hellhound", "satyr", "harpy", "cyclops"]
+spots = [2, 4, 6, 9, 11]
+for i in range(len(scouted)):
+    kind = counters.get(scouted[i], "archer")
+    print(kind)
+    place_tower(kind, spots[i], 4)
+```
+
+**check**
+```js
+{ kind: "battle",
+  also: { kind: "source", mustInclude: [".get(", "counters"],
+          message: { he: "התיקון הוא .get עם ברירת מחדל — לא להוסיף שורה לטבלה ולא לכתוב את הסוגים ביד",
+                     en: "The repair is .get with a default — not a new row in the table, and not typing the kinds by hand" } } }
+```
+
+**hints**
+1. `הריצי. השגיאה נותנת לך מפתח ומספר שורה. חפשי את המפתח הזה בטבלה — הוא שם?`
+2. `` `counters.get(scouted[i], "archer")` מחזיר את הערך אם המפתח קיים, ואת
+   `"archer"` אם לא — בלי לעצור את התוכנית. ``
+3. `` שינוי של שלוש מילים בשורה אחת: `counters[scouted[i]]` הופך ל־
+   `counters.get(scouted[i], "archer")`. התוצאה: קשת, תותח, קשת (ברירת המחדל
+   לסאטיר), קשת, תותח — שלוש קשתות ושני תותחים, 330 בדיוק. אפשר היה גם להוסיף
+   `"satyr": "archer"` לטבלה, וזה נכון לגמרי — אבל בקרב הבא הסיירת תדווח על סוג
+   שעוד לא ראית, ואז `.get` הוא מה שמחזיק. ``
+
+### b4 — המרשם · The Bestiary · 30 XP, 8 🪙
+
+**Why this mechanic** — she builds the dict herself, out of the wave, instead of
+being handed one: `bestiary[kind] = armour`. Then `.items()` reads it back as a
+report, and the two counts it produces — armoured and airborne — decide the two
+halves of the build. It is lesson 11's whole toolkit in one program, and no
+number in it was typed by a human.
+
+**level**
+```js
+{
+  map: {
+    cols: 14, rows: 8,
+    path: [[0,3],[1,3],[2,3],[3,3],[3,4],[3,5],[4,5],[5,5],[6,5],[6,4],[6,3],
+           [7,3],[8,3],[9,3],[9,4],[9,5],[10,5],[11,5],[12,5],[13,5]],
+    rock: [[12,1]],
+  },
+  gold: 420, campHp: 3, seed: 33, allowed: ["archer", "cannon"],
+  waves: [
+    { delay: 0,  enemies: [{ kind: "satyr", count: 6, gap: 0.6 }] },
+    { delay: 7,  enemies: [{ kind: "hellhound", count: 6, gap: 0.9 }] },
+    { delay: 20, enemies: [{ kind: "cyclops", count: 3, gap: 1.4 }] },
+    { delay: 32, enemies: [{ kind: "harpy", count: 6, gap: 0.8 }] },
+  ],
+}
+```
+
+**brief** — `הרמס נותן לך פנקס ריק ואומר: תמלאי אותו בעצמך.
+
+1. עברי על הגל ובני מרשם: מפתח = סוג המפלצת, ערך = השריון שלה (`m["armour"]`).
+2. הדפיסי את המרשם שורה־שורה עם `.items()`.
+3. ספרי שני דברים: כמה מפלצות עם שריון 2 ומעלה, וכמה מפלצות מעופפות
+   (`m["flying"]`).
+4. הכלל: **תותח אחד לכל שלוש משוריינות, קשת אחת לכל שתי מעופפות.** התותחים
+   בעמודות [3, 6, 9] בשורה 2, הקשתות בעמודות [1, 5, 8] באותה שורה.
+
+הזהב מספיק בדיוק לתוצאה של החשבון הזה.`
 
 **starter**
 ```python
-domains = {"Zeus": "sky", "Poseidon": "sea", "Hades": "underworld"}
-asking = ["Poseidon", "Hera", "Hades", "Janus"]
-# for each name in asking, print:  NAME -> domain
-# a name that is not registered gets:  NAME -> not in the registry
+wave = get_wave()
+bestiary = {}
+for m in wave:
+    bestiary[m["kind"]] = m["armour"]
+for kind, value in bestiary.items():
+    print(f"{kind}: armour {value}")
 ```
 
 **solution**
 ```python
-domains = {"Zeus": "sky", "Poseidon": "sea", "Hades": "underworld"}
-asking = ["Poseidon", "Hera", "Hades", "Janus"]
-for name in asking:
-    domain = domains.get(name, "not in the registry")
-    print(f"{name} -> {domain}")
-```
+wave = get_wave()
+bestiary = {}
+for m in wave:
+    bestiary[m["kind"]] = m["armour"]
+for kind, value in bestiary.items():
+    print(f"{kind}: armour {value}")
 
-Expected output:
-```
-Poseidon -> sea
-Hera -> not in the registry
-Hades -> underworld
-Janus -> not in the registry
+armoured = 0
+flyers = 0
+for m in wave:
+    if bestiary[m["kind"]] >= 2:
+        armoured = armoured + 1
+    if m["flying"]:
+        flyers = flyers + 1
+print(armoured)
+print(flyers)
+
+ridge = [3, 6, 9]
+for i in range(armoured // 3):
+    place_tower("cannon", ridge[i], 2)
+
+watch = [1, 5, 8]
+for i in range(flyers // 2):
+    place_tower("archer", watch[i], 2)
 ```
 
 **check**
 ```js
-{ kind: "output", mode: "normalized",
-  expect: "Poseidon -> sea\nHera -> not in the registry\nHades -> underworld\nJanus -> not in the registry" }
-```
-plus
-```js
-{ kind: "source", mustInclude: [".get("],
-  message: { he: "המשימה הזאת דורשת .get — הפנקס לא אמור לקרוס על שם שלא רשום",
-             en: "This one needs .get — the ledger must not crash on an unregistered name" } }
+{ kind: "battle",
+  also: { kind: "source", mustInclude: [".items()", "bestiary[", "get_wave("],
+          message: { he: "המרשם צריך להיבנות מהגל ולהיקרא עם .items() — לא להיכתב ביד",
+                     en: "The bestiary must be built from the wave and read back with .items() — not typed by hand" } } }
 ```
 
 **hints**
-1. `` אם תכתבי `domains["Hera"]` — מה יקרה לשורות שאחריה? התוכנית תמשיך? ``
-2. `` `.get(name, "not in the registry")` מחזיר את הערך אם הוא קיים, ואת הטקסט
-   השני אם לא — בלי שגיאה ובלי `if`. ``
-3. `` לולאת for על `asking`. בתוכה שורה אחת ששומרת את התוצאה של
-   `domains.get(name, "not in the registry")` במשתנה, ואז print עם f-string
-   שמדפיס `{name} -> {domain}`. פתרון עם `if name in domains` גם עובד, אבל
-   ה־check דורש את `.get` — כי זה הכלי שהשיעור מלמד. ``
+1. `שישה כלבים, שלושה קיקלופים ושש הרפיות. איזו מהן השאלה "שריון 2 ומעלה" תופסת,
+   ואיזו היא מפספסת לגמרי?`
+2. `` בניית המרשם: `bestiary[m["kind"]] = m["armour"]` בתוך לולאה על הגל — כל סוג
+   נכתב שוב ושוב עם אותו ערך, וזה בסדר, כי מפתח במילון הוא ייחודי. הקריאה חזרה:
+   `for kind, value in bestiary.items():` נותן שם וערך יחד. ``
+3. `` תשע משוריינות חלקי 3 זה שלושה תותחים; שש מעופפות חלקי 2 זה שלוש קשתות —
+   420 בדיוק. שני accumulators נפרדים לפני הלולאה, שני `if` בתוכה (בלי `elif`,
+   כי מפלצת יכולה להיספר רק באחד מהם ממילא), ושתי לולאות בנייה אחריה. ``
 
-### e4 — Reading the whole ledger · 30 XP, 8 🪙
+## The great battle — פנקס הרמס · The Ledger of Hermes · 55 XP, 14 🪙
 
-**brief** — `הרמס רוצה סיכום של הפנקס כולו: כמה מנחות יש בסך הכול, לכמה אלים אין
-אף מנחה, ומי הכי נדיב אליו — עם המספר שלו בסוגריים. עברי על כל הפנקס בלולאה אחת.`
+**Why this mechanic** — three dicts, three different jobs, in one program: a
+**count** table built from the wave with `.get(k, 0) + 1`, a **counter** table
+read with `.get(k, default)` because `"satyr"` is deliberately not in it, and a
+**catalogue** built from `tower_cost()` so the plan can be priced before it is
+built. `.items()` prints the whole ledger, and the values of the counter table
+are the arguments to `place_tower`.
+
+**level**
+```js
+{
+  map: {
+    cols: 16, rows: 9,
+    path: [[0,2],[1,2],[2,2],[3,2],[3,3],[3,4],[4,4],[5,4],[6,4],[6,5],[6,6],
+           [7,6],[8,6],[9,6],[9,5],[9,4],[10,4],[11,4],[12,4],[12,3],[12,2],
+           [13,2],[14,2],[15,2]],
+    rock: [[5,7],[14,6]],
+  },
+  gold: 530, campHp: 3, seed: 34, allowed: ["archer", "cannon", "ice"],
+  waves: [
+    { delay: 0,  enemies: [{ kind: "satyr", count: 10, gap: 0.5 }] },
+    { delay: 9,  enemies: [{ kind: "hellhound", count: 8, gap: 0.7 }] },
+    { delay: 20, enemies: [{ kind: "harpy", count: 10, gap: 0.5 }] },
+    { delay: 30, enemies: [{ kind: "hellhound", count: 8, gap: 0.6 },
+                           { kind: "cyclops", count: 5, gap: 1.0 }] },
+  ],
+}
+```
+
+**brief** — `הרמס פותח את הפנקס ומחכה.
+
+1. ספרי את הגל למילון ספירה, ואז הדפיסי שורה לכל סוג בצורה
+   NAME xN -> TOWER — כשה־TOWER בא מטבלת הנגד. שימי לב: סוג אחד בגל לא רשום
+   בטבלה בכלל, והדוח חייב לשרוד אותו.
+2. בני קטלוג מחירים מ־tower_cost, והדפיסי כמה יעלה כל קו לפני שאת בונה אותו.
+3. קו הרכס — ridge = [1, 4, 5, 8, 10, 11, 14] בשורה 3 — מקבל את המגדל שעונה
+   על **הרפיות**. המעבר — ford = [7, 9] בשורה 7 — מקבל את המגדל שעונה על **כלבי
+   גיהינום**. את שני הסוגים שלפי מהטבלה, לא מהזיכרון.
+
+שבעה על הרכס ושניים במעבר, וזה בדיוק כל הזהב.`
 
 **starter**
 ```python
-offerings = {"Zeus": 3, "Poseidon": 7, "Athena": 2, "Hermes": 4, "Ares": 0}
-# Total offerings: ?
-# Gods with nothing: ?
-# Most generous: NAME (COUNT)
+wave = get_wave()
+counters = {"harpy": "archer", "hellhound": "cannon", "cyclops": "cannon"}
+catalogue = {"archer": tower_cost("archer"), "cannon": tower_cost("cannon")}
+print(catalogue["archer"])
 ```
 
 **solution**
 ```python
-offerings = {"Zeus": 3, "Poseidon": 7, "Athena": 2, "Hermes": 4, "Ares": 0}
-total = 0
-empty = 0
-best_name = ""
-best_count = -1
-for name, count in offerings.items():
-    total = total + count
-    if count == 0:
-        empty = empty + 1
-    if count > best_count:
-        best_count = count
-        best_name = name
-print(f"Total offerings: {total}")
-print(f"Gods with nothing: {empty}")
-print(f"Most generous: {best_name} ({best_count})")
-```
+wave = get_wave()
 
-Expected output:
-```
-Total offerings: 16
-Gods with nothing: 1
-Most generous: Poseidon (7)
-```
+counts = {}
+for m in wave:
+    counts[m["kind"]] = counts.get(m["kind"], 0) + 1
 
-**check**
-```js
-{ kind: "output", mode: "normalized",
-  expect: "Total offerings: 16\nGods with nothing: 1\nMost generous: Poseidon (7)" }
-```
-plus
-```js
-{ kind: "source", mustInclude: [".items()"],
-  message: { he: "הסיכום חייב לעבור על הפנקס עם .items() — שם וערך יחד",
-             en: "The summary must walk the ledger with .items() — name and value together" } }
-```
+counters = {"harpy": "archer", "hellhound": "cannon", "cyclops": "cannon"}
+catalogue = {"archer": tower_cost("archer"), "cannon": tower_cost("cannon"), "ice": tower_cost("ice")}
 
-**hints**
-1. `שלוש התשובות מגיעות מאותה נסיעה על הפנקס. כמה לולאות באמת צריך פה?`
-2. `` `for name, count in offerings.items():` נותן לך בכל סיבוב שם ומספר. שלושה
-   משתנים נפרדים לפני הלולאה יאספו את שלוש התשובות — בדיוק כמו accumulator
-   משיעור 7, רק שלושה במקביל. ``
-3. `` לפני הלולאה: total = 0, empty = 0, best_name = "", best_count = -1.
-   בתוך הלולאה: total מתעדכן תמיד; empty עולה כשהמספר 0; ואם count גדול
-   מ־best_count — שני משתני ה־best מתעדכנים יחד. אחרי הלולאה, מחוץ להזחה, שלוש
-   שורות print. ``
+for kind, n in counts.items():
+    answer = counters.get(kind, "archer")
+    print(f"{kind} x{n} -> {answer}")
 
-## Quest — "The Ledger of Hermes" · פנקס הרמס · 55 XP, 14 🪙
+ridge = [1, 4, 5, 8, 10, 11, 14]
+ridge_kind = counters["harpy"]
+print(catalogue[ridge_kind] * len(ridge))
+for x in ridge:
+    place_tower(ridge_kind, x, 3)
 
-**brief** — `ארבע בקשות מגיעות לשער, בסדר שהן רשומות. לכל בקשה: מצאי את התחום של
-האל בפנקס (ואם הוא לא רשום — "unknown"), הוסיפי לו מנחה אחת לספירת המנחות (גם
-אם עוד לא הייתה לו אף אחת), והדפיסי שורה אחת. בסוף — שלוש שורות סיכום. שום שם
-לא רשאי להפיל את התוכנית.`
+ford = [7, 9]
+ford_kind = counters["hellhound"]
+print(catalogue[ford_kind] * len(ford))
+for x in ford:
+    place_tower(ford_kind, x, 7)
 
-**starter**
-```python
-domains = {"Zeus": "sky", "Poseidon": "sea", "Athena": "wisdom", "Hermes": "roads"}
-offerings = {"Zeus": 3, "Poseidon": 7, "Athena": 2}
-petitions = ["Poseidon", "Athena", "Hermes", "Hera"]
-
-# === LEDGER OF HERMES ===
-# NAME | DOMAIN | offerings: N       <- one line per petition, in order
-# Gods in the registry: ?            <- how many are in domains
-# Gods with offerings: ?             <- how many are in offerings, after the updates
-# Total offerings: ?
-```
-
-**solution**
-```python
-domains = {"Zeus": "sky", "Poseidon": "sea", "Athena": "wisdom", "Hermes": "roads"}
-offerings = {"Zeus": 3, "Poseidon": 7, "Athena": 2}
-petitions = ["Poseidon", "Athena", "Hermes", "Hera"]
-
-print("=== LEDGER OF HERMES ===")
-for name in petitions:
-    domain = domains.get(name, "unknown")
-    count = offerings.get(name, 0) + 1
-    offerings[name] = count
-    print(f"{name} | {domain} | offerings: {count}")
-
-total = 0
-for count in offerings.values():
-    total = total + count
-print(f"Gods in the registry: {len(domains)}")
-print(f"Gods with offerings: {len(offerings)}")
-print(f"Total offerings: {total}")
-```
-
-Expected output (verified in Skulpt):
-```
-=== LEDGER OF HERMES ===
-Poseidon | sea | offerings: 8
-Athena | wisdom | offerings: 3
-Hermes | roads | offerings: 1
-Hera | unknown | offerings: 1
-Gods in the registry: 4
-Gods with offerings: 5
-Total offerings: 16
+print(get_gold())
 ```
 
 **check**
 ```js
-{ kind: "output", mode: "normalized",
-  expect: "=== LEDGER OF HERMES ===\nPoseidon | sea | offerings: 8\nAthena | wisdom | offerings: 3\nHermes | roads | offerings: 1\nHera | unknown | offerings: 1\nGods in the registry: 4\nGods with offerings: 5\nTotal offerings: 16" }
+{ kind: "battle",
+  also: { kind: "source", mustInclude: [".get(", ".items()", "catalogue[", "counters["],
+          message: { he: "הקרב הזה דורש את שלושת הפנקסים: ספירה עם .get, דוח עם .items, ומחירים מהקטלוג",
+                     en: "This battle needs all three ledgers: counting with .get, the report with .items, and prices from the catalogue" } } }
 ```
-plus
-```js
-{ kind: "source", mustInclude: [".get("],
-  message: { he: "שני מפתחות חסרים בפנקס — הרמס במנחות והרה לגמרי. בלי .get התוכנית תיפול",
-             en: "Two keys are missing — Hermes in offerings, Hera entirely. Without .get this crashes" } }
-```
-
-Why this quest: it forces **both** faces of `.get()` in one program. `Hermes` is
-in `domains` but missing from `offerings`, so `.get(name, 0) + 1` is the only
-way to count him without a crash. `Hera` is missing from both, so
-`.get(name, "unknown")` covers the other side. And the two summary counts differ
-(4 vs 5) precisely because `Hera` was added while looping — which shows her, in
-one number, that a dict grew under her hands.
 
 **hints**
-1. `שני שמות בבקשות לא נמצאים במקום שאת מחפשת אותם. אם תשתמשי בסוגריים
-   מרובעים — באיזו שורה בדיוק התוכנית תיעצר?`
-2. `` `domains.get(name, "unknown")` פותר את התחום החסר, ו־`offerings.get(name, 0) + 1`
-   פותר את הספירה החסרה. אחרי שחישבת את הספירה, שימי אותה חזרה:
-   `offerings[name] = count`. ``
-3. `` סדר העבודה: כותרת → לולאה על `petitions`, ובתוכה שלוש שורות (תחום עם get,
-   ספירה עם get ועוד 1, כתיבה חזרה למילון) ואז ה־print עם התו `|` בין החלקים.
-   אחרי הלולאה: משתנה total שמתחיל ב־0 ולולאה על `offerings.values()` שמחברת
-   הכול, ואז שלוש שורות סיכום. `sum(offerings.values())` גם עובד ונותן את אותה
-   התשובה. ``
+1. `סוג אחד מהארבעה בגל לא רשום בטבלת הנגד. באיזו שורה בדוח התוכנית תיפול, ומה
+   יקרה לכל הבנייה שאחריה?`
+2. `` שלוש שורות נושאות את כל הקרב: `counts[m["kind"]] = counts.get(m["kind"], 0) + 1`
+   לספירה, `counters.get(kind, "archer")` לדוח, ו־`counters["harpy"]` שנשמר
+   במשתנה ומועבר ל־`place_tower` שבע פעמים. ``
+3. `` סדר העבודה: ספירה בלולאה → הגדרת `counters` ו־`catalogue` → לולאת
+   `.items()` שמדפיסה `{kind} x{n} -> {answer}` → `ridge_kind = counters["harpy"]`
+   והדפסת `catalogue[ridge_kind] * len(ridge)` → לולאה שבונה שבעה בשורה 3 →
+   אותו הדבר למעבר עם `counters["hellhound"]` בשורה 7. שבע קשתות (350) ושני
+   תותחים (180) הם 530 — `get_gold()` בסוף יראה 0. ``
 
 ## Reward & Recap
 
@@ -568,9 +760,9 @@ one number, that a dict grew under her hands.
 camp necklace.)
 
 **Achievements possible here**:
-- *Key Holder* — finish the quest with no crash on any run.
-- *Debugger* — hit a `KeyError`, fix it, and pass the same exercise.
-- *Registrar* — finish every exercise in the lesson with zero hints.
+- *Key Holder* — win the great battle with no crash on any run.
+- *Debugger* — hit b3's `KeyError`, repair it with `.get`, and win that battle.
+- *Registrar* — finish every battle in the lesson with zero hints.
 
 **Recap bullets**:
 - מילון (`dict`) שומר זוגות של מפתח וערך בתוך `{ }`, בצורה `"key": value`
@@ -579,6 +771,8 @@ camp necklace.)
 - `d.get(key, default)` שואל בלי לקרוס, ו־`d.get(key, 0) + 1` היא תבנית הספירה
 - `in` על מילון בודק **מפתחות**; לערכים צריך `d.values()`
 - `for k, v in d.items()` נותן שם וערך יחד; לולאה על המילון עצמה נותנת מפתחות בלבד
+- כל תא ב־`get_wave()` הוא מילון: `m["kind"]`, `m["hp"]`, `m["armour"]`, `m["flying"]`
+- טבלת נגד היא מילון שהערך שלו הוא ארגומנט: `place_tower(counters[kind], x, y)`
 
 **Next teaser**: *"יש לך מגילה ויש לך פנקס. אבל מה קורה כשערך בתוך הפנקס הוא בעצמו
 פנקס שלם? בשיעור הבא זה בדיוק מה שיעלה מהמים — ולכל ראש שלו יש רשומה משלו."*
@@ -587,35 +781,53 @@ camp necklace.)
 
 | She does | She sees | Hint must cover |
 | --- | --- | --- |
-| `domains["zeus"]` | `KeyError: zeus on line 2` | keys are case-sensitive; `"zeus"` ≠ `"Zeus"` |
-| `domains["sea"]` | `KeyError: sea on line 2` | that is a value, not a key |
-| `domains[0]` | `KeyError: 0 on line 2` | a dict has no positions — the name *is* the address |
-| `d = {"Zeus" = "sky"}` | `SyntaxError: bad input on line 1` | inside `{}` the separator is `:`, not `=` |
-| `for name, domain in domains:` | `ValueError: too many values to unpack (expected 2) on line 2` | `.items()` is what yields pairs |
+| `domains["zeus"]` | `KeyError: zeus (line 2)` | keys are case-sensitive; `"zeus"` ≠ `"Zeus"` |
+| `domains["sea"]` | `KeyError: sea (line 2)` | that is a value, not a key |
+| `domains[0]` | `KeyError: 0 (line 2)` | a dict has no positions — the name *is* the address |
+| `d = {"Zeus" = "sky"}` | `SyntaxError: bad input (line 1)` | inside `{}` the separator is `:`, not `=` |
+| `for name, domain in domains:` | `ValueError: too many values to unpack (expected 2) (line 2)` | `.items()` is what yields pairs |
 | `d["Hermes"] = d["Hermes"] + 1` on a missing key | `KeyError: Hermes` | `d.get("Hermes", 0) + 1` is the counting pattern |
-| `domains.get["Zeus"]` | `TypeError: 'builtin_function_or_method' does not support indexing on line 2` | `.get` is *called* with `( )`, never indexed with `[ ]` |
+| `domains.get["Zeus"]` | `TypeError: 'builtin_function_or_method' does not support indexing (line 2)` | `.get` is *called* with `( )`, never indexed with `[ ]` |
 | `"sky" in domains` expecting `True` | `False`, with no error at all | the quietest bug here — `in` reads keys |
-| `d = {}` then `print(d["a"])` | `KeyError: a` | an empty dict has no keys yet; `len(d)` is `0` |
+| `d = {}` then `print(d["a"])` | `KeyError: a (line 2)` | an empty dict has no keys yet; `len(d)` is `0` |
+| `counters[kind]` on a kind the table lacks | `KeyError: satyr (line 5)` **and an empty battlefield** | a crash costs every tower, not one; `.get(kind, "archer")` |
+| `counts[kind] = counts[kind] + 1` on first sight | `KeyError` on the very first monster | the counting pattern is `.get(kind, 0) + 1` |
+| `m["Kind"]` | `KeyError: Kind` | the wave's keys are lowercase: `kind`, `hp`, `speed`, `armour`, `flying` |
+| a cannon aimed at the harpy line | *"it cannot hit anything airborne"*, and the wave walks through | the counter table exists because of exactly this |
 
 ## Implementation notes
 
 - Every code sample and every solution here was executed against the vendored
-  `skulpt.min.js`. Verified: dict literals, `d[k]` read and write, `len(d)`,
-  `.get(k)` and `.get(k, default)`, `in` on a dict, `.keys()`, `.values()`,
-  `.items()`, `sum(d.values())`, and nested quotes inside an f-string
-  (`f"{d['Zeus']}"`).
+  `skulpt.min.js`, and **every level was simulated headless**: each solution wins
+  its own battle and an empty program loses all five. Verified: dict literals,
+  `d[k]` read and write, `len(d)`, `.get(k)` and `.get(k, default)`, `in` on a
+  dict, `.keys()`, `.values()`, `.items()`, `sum(d.values())`, nested quotes
+  inside an f-string (`f"{d['Zeus']}"`), and reading a `get_wave()` entry with
+  `m["kind"]` / `m["armour"]` / `m["flying"]`.
 - **Dict ordering was verified**: this build of Skulpt preserves insertion order
   for printing, `.keys()`, `.values()` and `.items()`, matching CPython 3.7+.
-  Even so, only e4 depends on iteration order, and there the printed answers
-  (a total, a count, and a strict maximum) are order-independent by
-  construction. The quest gets its determinism from the explicit `petitions`
-  list rather than from dict order. **Rule for future lessons: never assert the
-  printed form of a whole dict in a `check`.** Teach blocks may print one, since
-  nothing is graded there.
-- Skulpt renders `KeyError: Hera on line 2`; CPython 3 renders `KeyError: 'Hera'`.
-  The lesson shows Skulpt's text — that is what appears on her screen — and
-  mentions the quote difference in one sentence, following the honesty policy in
-  `01-architecture.md`.
+  **No level relies on it.** `.items()` is used only for printed reports, which
+  nothing grades; every build order comes from an explicit list (`ridge`, `ford`,
+  `scouted`, `spots`). **Rule, unchanged: never assert the printed form of a whole
+  dict in a `check`** — and, in the battle model, never let the *outcome* depend
+  on dict iteration order either.
+- b3 is the only level in the act with `brokenStarter: true`. `verify-python.mjs`
+  skips the "starter runs" assertion for it, which is the point: the starter is
+  supposed to raise.
+- **A `source` check reads a skeleton with string literals stripped**, so a
+  requirement that appears only inside an f-string is invisible. The great
+  battle's `.get(` therefore appears in the counting line as well as in the
+  report line.
+- Every level's `gold` is exactly the cost of the intended build, so the counts
+  the dicts produce are enforced in both directions: too few leaks, too many
+  raises a `tooPoor` build error and loses the level with the camp untouched.
+- The page renders an error as `Type: message (line N)` — so a `KeyError` on a
+  missing key reads `KeyError: Hera (line 2)`, and that is the exact string an
+  `error` teach block must declare. CPython 3 renders `KeyError: 'Hera'` with
+  quotes; Skulpt drops them. Show the engine's text — that is what appears on her
+  screen — and mention the difference in one sentence, following the honesty
+  policy in `01-architecture.md`. `verify-python.mjs` fails the build on drift
+  here, so do not paraphrase.
 - All output checks use `mode: "normalized"`. No expected line depends on
   leading whitespace.
 - e2's `source` check uses `mustExclude` rather than `mustInclude` so it forbids
