@@ -61,13 +61,25 @@ function runPython(code, stdin = []) {
     const mod = Sk.importMainWithBody("<stdin>", false, code, true);
     return { ok: true, out, error: null, mod, captured };
   } catch (e) {
+    /* Render errors exactly as assets/js/engine.js describeError() does, so a
+     * lesson's declared `error` string can be compared against what she will
+     * actually see on the page. */
+    let type = "Error";
     let msg = String(e);
+    let line = null;
     try {
-      if (e && e.args && e.args.v && e.args.v.length) {
-        msg = (e.tp$name || "Error") + ": " + e.args.v[0].v;
+      if (e && e.tp$name) type = e.tp$name;
+      if (e && e.args && e.args.v && e.args.v.length) msg = String(e.args.v[0].v);
+      if (e && e.traceback && e.traceback.length && e.traceback[0].lineno !== undefined) {
+        line = e.traceback[0].lineno;
       }
-    } catch { /* keep String(e) */ }
-    return { ok: false, out, error: msg, mod: null, captured };
+    } catch { /* fall through to the regex below */ }
+    if (line === null) {
+      const m = /on line (\d+)/.exec(String(e));
+      if (m) line = parseInt(m[1], 10);
+    }
+    const text = type + ": " + msg + (line ? " (line " + line + ")" : "");
+    return { ok: false, out, error: text, mod: null, captured };
   }
 }
 
@@ -204,6 +216,14 @@ function verify(contentPath) {
       const r = runPython(block.code);
       report(!r.ok, `teach[${i}] error block actually errors`,
         r.ok ? "it ran successfully — the lesson claims it fails" : null);
+      /* Showing her an error message the engine never produces teaches her to
+       * recognise the wrong thing. Skulpt's wording differs from CPython's in
+       * several places, so this must be asserted, not assumed. */
+      if (!r.ok && block.error) {
+        report(r.error.trim() === block.error.trim(),
+          `teach[${i}] declared error text matches reality`,
+          `actual:   ${r.error}\n         declared: ${block.error}`);
+      }
     }
     if (block.type === "compare") {
       for (const side of ["bad", "good"]) {
@@ -211,6 +231,12 @@ function verify(contentPath) {
         const r = runPython(block[side].code);
         // A `bad` side is allowed (and usually expected) to fail.
         if (side === "good") report(r.ok, `teach[${i}] compare.good runs`, r.error);
+        if (block[side].result) {
+          const actual = r.ok ? r.out : r.error;
+          report(normalize(actual).includes(normalize(block[side].result)),
+            `teach[${i}] compare.${side} declared result matches reality`,
+            `actual:   ${JSON.stringify(actual)}\n         declared: ${JSON.stringify(block[side].result)}`);
+        }
       }
     }
   });

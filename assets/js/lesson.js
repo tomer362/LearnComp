@@ -393,8 +393,10 @@ window.LC = window.LC || {};
 
   /* ---- completion ------------------------------------------------------ */
 
+  /* Optional side quests are rendered and rewarded, but never block completing
+   * the lesson. See spec/07-curriculum.md. */
   function allExercises() {
-    var list = (current.training || []).slice();
+    var list = (current.training || []).filter(function (ex) { return !ex.optional; });
     if (current.quest) list.push(current.quest);
     return list;
   }

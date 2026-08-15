@@ -82,10 +82,12 @@ LC.registerLesson({
 
     { type: "error",
       code: 'print("Hello)',
-      error: "SyntaxError: EOL while scanning string literal on line 1",
+      /* This is the message the engine really produces — verified by
+       * tools/verify-python.mjs, which fails the build if it drifts. */
+      error: "SyntaxError: bad input (line 1)",
       explain: {
-        he: "פתחנו גרשיים אבל אף פעם לא סגרנו אותם. פייתון קרא עד סוף השורה, חיפש את הגרש השני, לא מצא — ועצר.\n\nזאת לא קטסטרופה. זו הודעה. פייתון אומר לך בדיוק **באיזו שורה** הוא התבלבל, וזה כמעט תמיד המקום הנכון להתחיל בו. גיבורה שאף פעם לא רואה שגיאה היא גיבורה שאף פעם לא כתבה משהו מעניין.",
-        en: "We opened a quote and never closed it. Python read to the end of the line, looked for the second quote, did not find it — and stopped.\n\nThis is not a disaster. It is a message. Python tells you exactly **which line** confused it, and that is almost always the right place to start. A hero who never sees an error is a hero who never wrote anything interesting." } },
+        he: "פתחנו גרשיים אבל אף פעם לא סגרנו אותם. פייתון קרא עד סוף השורה, חיפש את הגרש השני, לא מצא — ועצר.\n\n`bad input` זה פייתון שאומר \"לא הבנתי את השורה הזאת\". זה לא מנומס במיוחד, אבל יש שם דבר אחד חשוב: **מספר השורה**. וזה כמעט תמיד המקום הנכון להתחיל בו.\n\nזאת לא קטסטרופה, זו הודעה. גיבורה שאף פעם לא רואה שגיאה היא גיבורה שאף פעם לא כתבה משהו מעניין.",
+        en: "We opened a quote and never closed it. Python read to the end of the line, looked for the second quote, did not find it — and stopped.\n\n`bad input` is Python saying \"I could not understand that line\". Not the most helpful phrasing, but it carries the one thing that matters: **the line number**. That is almost always the right place to start.\n\nThis is not a disaster, it is a message. A hero who never sees an error is a hero who never wrote anything interesting." } },
 
     { type: "compare",
       bad: {

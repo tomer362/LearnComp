@@ -583,8 +583,17 @@ desc (he): "גוש שעווה קטן וחם מהמצר. כל עוד הוא בא�
   block 5 (reading `=` right to left) land. Introduce `+=` no earlier than
   lesson 10, and when you do, introduce it as shorthand for something she
   already writes fluently.
-- e1, e3 and e4 each carry two checks (`output` + `source`) — same `all: [...]`
-  wrapper question raised in lessons 5 and 6.
+- **e1, e3 and e4 each carry two checks** — write them with the `also` field, as
+  in lesson 1 and as required by `.claude/rules/lesson-authoring.md`:
+  ```js
+  check: { kind: "source", mustInclude: ["while True", "break"],
+           message: { he: "המשימה הזו דורשת while True ויציאה עם break",
+                      en: "This one needs while True and a break to get out" },
+           also: { kind: "output", mode: "normalized", expect: "Stroke 1\n…\nThe wax is gone." } }
+  ```
+- **`source` checks read a stripped skeleton** (comments and string literals
+  removed). `while`, `while True` and `break` are all keywords outside literals,
+  so they survive stripping — no check here needs `raw: true`.
 - `mustInclude: ["while True", "break"]` in e4 matches `while True:` since the
   colon follows the matched substring. It does not match `while  True` with two
   spaces; the hint text and starter both use the single-space form, and the

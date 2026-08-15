@@ -529,7 +529,23 @@ desc (he): "עדשת זכוכית עכורה מעליית הגג. כשמסתכל
 - Chained comparison (`3 < 5 < 10`) **does** work in Skulpt, but it is not taught
   here — one new idea per lesson. If she discovers it, the engine will not
   punish her.
-- e1 needs two checks on one exercise (`source` + `output`). If `checker.js`
-  supports only one `check` object per exercise, add an `all: [...]` wrapper
-  kind; otherwise express e1 as `{kind:"source"}` and rely on the hint text for
-  the output shape. Decide once — lesson 8's boss needs the same wrapper.
+- **Two checks on one exercise use the `also` field**, the pattern established
+  by lesson 1 (e1 and e4) and required by `.claude/rules/lesson-authoring.md`.
+  Every "plus" check written in this file is an `also`:
+  ```js
+  check: { kind: "source", mustInclude: [">", "=="], mustExclude: ["True", "False"],
+           message: { he: "…", en: "…" },
+           also: { kind: "output", mode: "normalized", expect: "True\nFalse" } }
+  ```
+  Applies to e1, e3 and the quest here, and to every `source` + `output` pair in
+  lessons 6, 7 and 8.
+- **`source` checks read a stripped skeleton** — comments and string literals are
+  removed before matching (`.claude/rules/lesson-authoring.md`). Two consequences
+  in this lesson, both benign and both intentional:
+  - e1's `mustExclude: ["True", "False"]` matches the bare keywords only, so
+    `print("True")` slips past it — and then fails the `mustInclude: [">", "=="]`
+    half, because a stripped literal leaves no comparison behind. The pair covers
+    the cheat path; neither half does alone.
+  - The quest's `mustInclude: ["=="]` is unaffected by `"Luke"` being stripped,
+    since the operator sits outside the literal.
+  No check in this lesson needs `raw: true`.

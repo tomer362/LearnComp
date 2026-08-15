@@ -83,8 +83,80 @@ window.LC = window.LC || {};
       en: "Python could not read that line. Check for unclosed brackets, missing quotes, or a missing colon at the end of an if or loop line." }
   ];
 
-  function explain(err) {
+  /* Skulpt flattens every indentation mistake into "SyntaxError: bad input on
+   * line N" — it never emits CPython's IndentationError, and "missing colon"
+   * and "else if" land in the same bucket. That message is useless to a
+   * beginner, and lesson 6 is built entirely on indentation. So when we see
+   * `bad input`, look at the source and work out what she actually did.
+   * Verified against Skulpt 1.2.0; see spec/01-architecture.md. */
+  var SYNTAX_HELP = {
+    elseif: {
+      he: "בפייתון אין `else if` — המילה היא `elif`, מילה אחת.",
+      en: "Python has no `else if` — the word is `elif`, one word." },
+    missingColon: {
+      he: "חסרות נקודתיים בסוף השורה. כל `if`, `elif`, `else`, `for` ו-`while` נגמרים ב-`:` שפותח את הבלוק.",
+      en: "There is a colon missing at the end of the line. Every `if`, `elif`, `else`, `for` and `while` ends with a `:` that opens its block." },
+    missingIndent: {
+      he: "השורה שלפני נגמרת ב-`:`, ולכן השורה הזאת צריכה להיות מוזחת פנימה — ארבעה רווחים. ההזחה היא מה שאומר לפייתון שהשורה שייכת לבלוק.",
+      en: "The line before ends with `:`, so this line needs to be indented — four spaces. The indentation is what tells Python this line belongs to the block." },
+    unexpectedIndent: {
+      he: "השורה הזאת מוזחת פנימה, אבל השורה שלפניה לא פותחת בלוק. מזיחים רק אחרי שורה שנגמרת ב-`:`.",
+      en: "This line is indented, but the line before it does not open a block. You only indent after a line that ends with `:`." },
+    unclosedQuote: {
+      he: "פתחת גרשיים ולא סגרת אותם. לכל `\"` צריך בן זוג באותה שורה.",
+      en: "You opened a quote and did not close it. Every `\"` needs a partner on the same line." },
+    unclosedBracket: {
+      he: "יש סוגר עגול שנפתח ולא נסגר. לכל `(` צריך `)`.",
+      en: "A bracket was opened and never closed. Every `(` needs a `)`." },
+    py2Print: {
+      he: "בפייתון 3 צריך סוגריים סביב מה שמדפיסים: `print(\"hi\")` ולא `print \"hi\"`.",
+      en: "Python 3 needs brackets around what you print: `print(\"hi\")`, not `print \"hi\"`." },
+    raggedIndent: {
+      he: "ההזחה לא עקבית — השורה הזאת לא מיושרת עם אף בלוק פתוח. השתמשי בארבעה רווחים לכל רמה, תמיד באותו מספר.",
+      en: "The indentation is inconsistent — this line does not line up with any open block. Use four spaces per level, always the same amount." }
+  };
+
+  function indentWidth(s) {
+    var m = /^[ \t]*/.exec(s);
+    return m ? m[0].length : 0;
+  }
+
+  function diagnoseSyntax(code, line) {
+    if (!code || !line) return null;
+    var lines = String(code).split("\n");
+    var cur = lines[line - 1];
+    if (cur === undefined) return null;
+
+    var pi = line - 2;
+    while (pi >= 0 && !lines[pi].trim()) pi--;
+    var prev = pi >= 0 ? lines[pi] : "";
+    var opensBlock = /:\s*(#.*)?$/.test(prev);
+
+    /* An odd number of quotes on the line means one is unterminated. Skulpt
+     * reports this as plain "bad input", which is unusable for a beginner —
+     * and it is the single most common lesson-1 mistake. */
+    var doubles = (cur.match(/"/g) || []).length;
+    var singles = (cur.match(/'/g) || []).length;
+    if (doubles % 2 === 1 || singles % 2 === 1) return "unclosedQuote";
+
+    if (/^\s*print\s+[^(=]/.test(cur)) return "py2Print";
+    if (/\belse\s+if\b/.test(cur)) return "elseif";
+    if (/^\s*(if|elif|else|for|while|def|class|try|except|finally)\b[^:]*$/.test(cur)) return "missingColon";
+    if (opensBlock && cur.trim() && indentWidth(cur) <= indentWidth(prev)) return "missingIndent";
+    if (!opensBlock && prev.trim() && cur.trim() && indentWidth(cur) > indentWidth(prev)) return "unexpectedIndent";
+    return null;
+  }
+
+  function explain(err, code) {
     var probe = err.type + " " + err.message;
+
+    if (/bad input/i.test(probe)) {
+      var kind = diagnoseSyntax(code, err.line);
+      if (kind) return SYNTAX_HELP[kind];
+    }
+    if (/unindent does not match/i.test(probe)) return SYNTAX_HELP.raggedIndent;
+    if (/EOF in multi-line/i.test(probe)) return SYNTAX_HELP.unclosedBracket;
+
     for (var i = 0; i < EXPLAIN.length; i++) {
       if (EXPLAIN[i].test.test(probe)) {
         return { he: EXPLAIN[i].he, en: EXPLAIN[i].en };
@@ -167,7 +239,7 @@ window.LC = window.LC || {};
           ok: false,
           output: buffer,
           error: described,
-          explanation: explain(described),
+          explanation: explain(described, code),
           vars: {}
         });
       });

@@ -83,12 +83,20 @@ LC.registerLesson({
 
 { type: "error",                       // deliberately broken code + its real error
   code: "print(\"Hello)",
-  error: "SyntaxError: bad input on line 1",
+  error: "SyntaxError: bad input (line 1)",   // EXACTLY what the engine renders
   explain: { he, en } }
 ```
 
 The `error` block is required in lesson 1 and encouraged everywhere: seeing a
 real error in a safe, expected context is how an error stops being frightening.
+
+**The `error` string must be exactly what the engine renders**, in the form
+`Type: message (line N)` — not CPython's wording. `verify-python.mjs` asserts
+this and fails the build on drift, because showing her a message she will never
+actually see teaches her to recognise the wrong thing. Same for a `compare`
+block's `result`. Skulpt's wording differs from CPython's in several places
+(`spec/01-architecture.md`); where that matters pedagogically, say so in
+`explain` rather than quoting CPython in `error`.
 
 ### Exercise object
 
@@ -106,6 +114,8 @@ real error in a safe, expected context is how an error stops being frightening.
     { he, en },                        // 2: concrete — names the construct
     { he, en },                        // 3: walks through it; solution unlocks
   ],
+  optional: false,                     // true = a side quest: rendered and
+                                       // rewarded, but never blocks completion
   check: { … },                        // one of the four kinds below
 }
 ```
@@ -139,8 +149,29 @@ real error in a safe, expected context is how an error stops being frightening.
     { stdin: ["Annabeth"], expect: "Hello, Annabeth!" } ] }
 ```
 
-`normalized` trims and collapses runs of whitespace. **Prefer it.** A missing
-trailing space must never fail a beginner.
+`normalized` trims each line, collapses runs of spaces *within* a line, and
+collapses blank lines — but **keeps single line breaks**, so a single `print`
+can never satisfy a task that asks for three lines. **Prefer it.** A missing
+trailing space must never fail a beginner. (Because it collapses blank lines, an
+exercise whose expected output contains a deliberate blank line needs
+`mode: "exact"`.)
+
+**Never assert a whole dictionary's printed form in a `check`.** Dict ordering is
+an implementation detail; assert over an explicit list of keys, or over a single
+derived answer, so the exercise cannot break on iteration order.
+
+**Boss `cases` must read bare `input()` with no prompt string.** A prompt goes to
+the in-page panel and never reaches stdout, which makes the expected output
+ambiguous to read and to write.
+
+**Never grade space-based alignment.** `normalized` collapses runs of spaces, so
+`f"{name:<10}"` is untestable. Formatting exercises pad with a visible character
+instead — `.center(20, "=")`, `"*"` — which survives normalisation and is easier
+to read anyway.
+
+**`source` `mustInclude`/`mustExclude` match bare identifiers as whole words**, so
+excluding `sum` does not trip on `sum_total` and requiring `for` is not satisfied
+by `forest`. Anything containing punctuation (`print(`, `#`) matches literally.
 
 ## Authoring rules that the schema cannot enforce
 

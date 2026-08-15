@@ -132,7 +132,7 @@ screen.
          print(i)
      ```
    Both outputs verified identical: `0 1 2 3 4`, one per line.
-   Note under the compare (he): הגרסה עם `while` **לא שגויה**. היא פשוט עושה
+   Note under the compare (he): הגרסה עם `while` **לא שגויה**. היא עושה
    ביד את מה ש־`for` עושה לבד, ולכן יש בה יותר הזדמנויות לבאג.
 
 8. **prose** — the rule for choosing, in two sentences worth memorising:
@@ -730,9 +730,21 @@ in the lesson: *"מכאן והלאה, החלק הקשה הוא לא שהתוכנ
   a schema addition. It must not count toward lesson completion, the completion
   bonus, or the *No Hints Needed* achievement, but it does award its own XP and
   drachmas and it does count toward *Completionist*.
-- e1–e4 each carry two checks (`output` + `source`) — same `all: [...]` wrapper
-  question raised in lessons 5, 6 and 7. Act II cannot be authored until that is
-  resolved; the boss's `cases` check is a single check and is unaffected.
+- **e1–e5 each carry two checks** — write them with the `also` field, as in
+  lesson 1 and as required by `.claude/rules/lesson-authoring.md`:
+  ```js
+  check: { kind: "source", mustInclude: ["continue"],
+           message: { he: "המשימה הזו דורשת continue — לדלג על סיבוב, לא לצאת מהלולאה",
+                      en: "This one needs continue — skip a round, do not leave the loop" },
+           also: { kind: "output", mode: "normalized", expect: "Row 1 checked\n…" } }
+  ```
+  The boss uses a single `cases` check with no `also`.
+- **`source` checks read a stripped skeleton** (comments and string literals
+  removed). `for `, `range(` and `continue` all sit outside literals and survive
+  stripping, so no check in this lesson needs `raw: true`. This is also why e2's
+  `mustInclude: ["for "]` cannot be satisfied by a comment reading
+  `# for each row` — the comment is gone before matching, which is exactly the
+  behaviour that exercise needs.
 - **`source` substrings use trailing markers**: `"for "` and `"range("` rather
   than `"for"` and `"range"`, so a variable named `forest` or a comment about
   ranges cannot satisfy the requirement.

@@ -203,6 +203,35 @@ await page.waitForSelector(".beat-try .output.has-error", { timeout: 40000 });
 const limitErr = await tryIt.locator(".err-real").textContent();
 check(/TimeLimit/i.test(limitErr), "an infinite loop is stopped by the exec limit", limitErr);
 
+/* ---- syntax diagnosis -------------------------------------------------- */
+
+/* Skulpt reports every indentation mistake as a flat "bad input", which is
+ * useless to a beginner and would sink lesson 6. The engine diagnoses these
+ * from the source; if that regresses, lesson 6 becomes unteachable. */
+section("Beginner error diagnosis");
+const diagnoses = await page.evaluate(async () => {
+  const cases = [
+    ["missing indent",     'if True:\nprint("hi")',                        /מוזחת|indent/],
+    ["unexpected indent",  'print("a")\n    print("b")',                   /לא פותחת בלוק|does not open a block/],
+    ["missing colon",      'x = 1\nif x == 1\n    print("hi")',            /נקודתיים|colon/],
+    ["else if",            'x=1\nif x==1:\n    print("a")\nelse if x==2:\n    print("b")', /elif/],
+    ["unclosed quote",     'print("hi)',                                   /גרשיים|quote/],
+    ["ragged indent",      'if True:\n    print("a")\n  print("b")',       /עקבית|inconsistent/],
+    ["python 2 print",     'print "hi"',                                   /סוגריים|brackets/],
+  ];
+  const out = [];
+  for (const [name, code, re] of cases) {
+    const r = await LC.Engine.run(code, { execLimitMs: 3000 });
+    out.push({
+      name,
+      ok: !r.ok && re.test(r.explanation.he + " " + r.explanation.en),
+      got: r.explanation ? r.explanation.en.slice(0, 60) : "(ran without error)",
+    });
+  }
+  return out;
+});
+for (const d of diagnoses) check(d.ok, `diagnoses: ${d.name}`, d.got);
+
 /* ---- input() ---------------------------------------------------------- */
 
 section("input() suspension");
@@ -219,6 +248,47 @@ await page.waitForFunction(
 check(true, "input() resumes the program with her answer");
 
 if (shots) await page.screenshot({ path: path.join(shotDir, "lesson-he.png"), fullPage: true });
+
+/* ---- checker kinds ----------------------------------------------------- */
+
+/* Lesson 1 only exercises `output` and `source`. `variable` and `cases` are
+ * load-bearing from lesson 2 and every boss, so cover them here rather than
+ * discovering they are broken when someone writes lesson 4. */
+section("Checker kinds");
+const checkerResults = await page.evaluate(async () => {
+  const t = async (name, exercise, source, want) => {
+    const v = await LC.Checker.check(exercise, source);
+    return { name, ok: v.pass === want, detail: `${v.passedCount ?? "?"}/${v.total ?? "?"}` };
+  };
+  return [
+    await t("variable: correct values accepted",
+      { check: { kind: "variable", vars: { hero: "Percy", age: 12, hp: 3.5, party: ["a", "b"] } } },
+      'hero = "Percy"\nage = 12\nhp = 3.5\nparty = ["a", "b"]', true),
+    await t("variable: wrong value rejected",
+      { check: { kind: "variable", vars: { hero: "Percy" } } }, 'hero = "Annabeth"', false),
+    await t("variable: missing variable rejected",
+      { check: { kind: "variable", vars: { hero: "Percy" } } }, "x = 1", false),
+    await t("cases: stdin is queued per case",
+      { check: { kind: "cases", cases: [
+        { stdin: ["Percy"], expect: "Hello, Percy!" },
+        { stdin: ["Annabeth"], expect: "Hello, Annabeth!" }] } },
+      'n = input("Name: ")\nprint(f"Hello, {n}!")', true),
+    await t("cases: partial progress is counted (boss health)",
+      { check: { kind: "cases", cases: [
+        { stdin: ["1"], expect: "one" }, { stdin: ["2"], expect: "two" }] } },
+      'n = input()\nprint("one")', false),
+    await t("source: mustInclude / mustExclude",
+      { check: { kind: "source", mustInclude: ["for"], mustExclude: ["while"], message: { he: "", en: "" } } },
+      "for i in range(3):\n    print(i)", true),
+    await t("source: not fooled by a string literal",
+      { check: { kind: "source", mustInclude: ["for"], message: { he: "", en: "" } } },
+      'print("for")', false),
+    await t("source: raw:true sees comments",
+      { check: { kind: "source", raw: true, mustInclude: ["#"], message: { he: "", en: "" } } },
+      '# a note\nprint("hi")', true),
+  ];
+});
+for (const r of checkerResults) check(r.ok, r.name, r.detail);
 
 /* ---- persistence ------------------------------------------------------ */
 

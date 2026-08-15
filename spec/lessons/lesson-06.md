@@ -667,6 +667,15 @@ desc (he): "נעליים מהמחסן של הרמס. הן לא מהירות במ
   Iris-message panel, not stdout (verified).
 - Every solution and every teach-block output in this file was executed through
   the shipped `skulpt.min.js` with `__future__: Sk.python3`.
-- e1 and e2 each carry two checks (`output` + `source`). Same `all: [...]`
-  wrapper question raised in lesson 5 — resolve it before authoring the content
-  files for Act II.
+- **e1 and e2 each carry two checks** — write them with the `also` field, as in
+  lesson 1 and as required by `.claude/rules/lesson-authoring.md`:
+  ```js
+  check: { kind: "source", mustInclude: ["else:"],
+           message: { he: "הפעם צריך גם מסלול שני — else", en: "This one needs the second path — else" },
+           also: { kind: "output", mode: "normalized", expect: "Grover chews his shoe." } }
+  ```
+- **`source` checks read a stripped skeleton** (comments and string literals
+  removed). `"if "` and `"else:"` are keywords outside any literal, so both
+  survive stripping and neither check needs `raw: true`. Watch this in e4: its
+  starter is full of broken code, but `source` is not used there — the check is
+  pure `output`, so the stripping rule does not apply.

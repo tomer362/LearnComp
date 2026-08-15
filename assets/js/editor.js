@@ -22,6 +22,18 @@ window.LC = window.LC || {};
       .replace(/ /g, " "); // non-breaking space -> plain space
   }
 
+  /* Tabs are a trap here specifically: Skulpt happily RUNS a file that mixes
+   * tabs and spaces, but real CPython rejects it with TabError. Code that works
+   * in the course and breaks the day she installs Python is the worst possible
+   * outcome, so tabs never make it into the buffer. */
+  function normalizeTabs(text) {
+    return String(text).replace(/\t/g, INDENT);
+  }
+
+  function clean(text) {
+    return normalizeTabs(normalizeQuotes(text));
+  }
+
   function create(container, options) {
     options = options || {};
     var value = options.value || "";
@@ -72,12 +84,12 @@ window.LC = window.LC || {};
       if (!text) return;
       var pasted = text.getData("text");
       if (pasted === null || pasted === undefined) return;
-      var clean = normalizeQuotes(pasted);
-      if (clean === pasted) return; // nothing to fix, let the browser handle it
+      var fixed = clean(pasted);
+      if (fixed === pasted) return; // nothing to fix, let the browser handle it
       e.preventDefault();
       var start = area.selectionStart, end = area.selectionEnd;
-      area.value = area.value.slice(0, start) + clean + area.value.slice(end);
-      area.selectionStart = area.selectionEnd = start + clean.length;
+      area.value = area.value.slice(0, start) + fixed + area.value.slice(end);
+      area.selectionStart = area.selectionEnd = start + fixed.length;
       renderGutter();
     });
 
@@ -125,7 +137,7 @@ window.LC = window.LC || {};
     return {
       el: wrap,
       textarea: area,
-      get: function () { return normalizeQuotes(area.value); },
+      get: function () { return clean(area.value); },
       set: function (text) { area.value = text; renderGutter(); },
       reset: function () { area.value = value; renderGutter(); },
       focus: function () { area.focus(); },
@@ -137,5 +149,5 @@ window.LC = window.LC || {};
     };
   }
 
-  LC.Editor = { create: create, normalizeQuotes: normalizeQuotes };
+  LC.Editor = { create: create, normalizeQuotes: normalizeQuotes, normalizeTabs: normalizeTabs, clean: clean };
 })(window.LC);

@@ -266,7 +266,8 @@ place where nothing is at stake, is how it stops being frightening.)*
 **starter:**
 ```python
 def total_drachmas(a, b):
-    # החזירי כאן את הסכום
+    # return the sum here
+    return 0
 
 print(total_drachmas(12, 30))
 ```
@@ -399,11 +400,11 @@ Storm toll: <מכס על 10 בתעריף 5> drachmas
 ```python
 distances = [3, 7, 10, 4]
 
-# 1. הפונקציה toll
+# 1. the toll function
 
-# 2. לולאה שמצברת את הסכום
+# 2. a loop that adds up the total
 
-# 3. שתי שורות פלט
+# 3. two output lines
 ```
 
 **solution:**
@@ -478,13 +479,13 @@ rooms = [
     {"letter": "D", "number": 2, "monsters": 1},
 ]
 
-# 1. room_name(letter, number) — מחזירה "A-1"
+# 1. room_name(letter, number) -> returns "A-1"
 
-# 2. is_dangerous(monsters, limit=2) — מחזירה True או False
+# 2. is_dangerous(monsters, limit=2) -> returns True or False
 
-# 3. describe(room) — משתמשת בשתי הקודמות ומחזירה שורת תיאור
+# 3. describe(room) -> uses both of those, returns one line
 
-# 4. לולאה שמדפיסה תיאור לכל חדר
+# 4. a loop that prints a description for every room
 
 print("Strict check on room D:")
 print(is_dangerous(rooms[3]["monsters"], 1))
@@ -609,3 +610,13 @@ and that a beginner cannot debug.)*
   `checker.js` should normalise runs of whitespace in the source before matching
   so `def  room_name` does not fail her.
 - All output checks are `normalized`. No `input()` in this lesson.
+- **Every starter in this lesson runs without a syntax error before she writes
+  anything.** Stub bodies carry a placeholder statement (`print(n)`, `return 0`)
+  rather than a bare comment, because a comment-only body raises
+  `IndentationError` the moment she presses Run — an error that teaches nothing
+  and reads as "you broke it before you started".
+- **Combined checks** use the `source` + `also: { output }` pattern
+  (`.claude/rules/lesson-authoring.md`); both halves must pass, and the `source`
+  check is the outer one so its `message` is what she reads on failure. All
+  `source` requirements in this lesson are keywords or identifiers, never
+  comments or string literals, so no check needs `raw: true`.

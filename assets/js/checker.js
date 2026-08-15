@@ -96,6 +96,17 @@ window.LC = window.LC || {};
   /* `raw: true` inspects the original source instead of the skeleton. Needed
    * when the requirement IS a comment (lesson 1 e4) — the skeleton strips
    * those, so a "must contain #" check could never pass against it. */
+  /* A bare identifier like "for" or "sum" must match as a WORD, otherwise
+   * `forest` satisfies a "must use for" rule and `sum_total` trips a
+   * "must not use sum" rule. Anything containing punctuation (`print(`, `#`)
+   * is matched literally. */
+  function present(haystack, needle) {
+    if (/^[A-Za-z_]\w*$/.test(needle)) {
+      return new RegExp("\\b" + needle + "\\b").test(haystack);
+    }
+    return haystack.indexOf(needle) !== -1;
+  }
+
   function checkSource(source, check) {
     var skeleton = check.raw ? String(source) : sourceSkeleton(source);
     var msg = check.message || {
@@ -105,14 +116,14 @@ window.LC = window.LC || {};
     var i;
     if (check.mustInclude) {
       for (i = 0; i < check.mustInclude.length; i++) {
-        if (skeleton.indexOf(check.mustInclude[i]) === -1) {
+        if (!present(skeleton, check.mustInclude[i])) {
           return { pass: false, reason: msg };
         }
       }
     }
     if (check.mustExclude) {
       for (i = 0; i < check.mustExclude.length; i++) {
-        if (skeleton.indexOf(check.mustExclude[i]) !== -1) {
+        if (present(skeleton, check.mustExclude[i])) {
           return { pass: false, reason: msg };
         }
       }

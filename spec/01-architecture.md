@@ -118,10 +118,26 @@ inheritance · `try/except` · string methods (`.split`, `.join`, `.upper`,
 - The lesson UI echoes her typed answer into the visible output panel for
   readability, but that echo is UI-only and never reaches the checker.
 
+**Skulpt has no `IndentationError`.** Every indentation mistake — missing indent,
+unexpected indent, a missing colon, `else if` — comes back as the same flat
+`SyntaxError: bad input on line N`. Only a ragged block gives CPython's
+`unindent does not match any outer indentation level`. That message is useless to
+a beginner, and lesson 6 is built on indentation, so `engine.js` **diagnoses
+`bad input` from the source**: it looks at the reported line and the previous
+non-blank line and works out which of missing-indent / unexpected-indent /
+missing-colon / `else if` / unclosed-quote / Python-2 `print` actually happened,
+then explains that. The real English error is still shown.
+
+**Skulpt runs code that CPython rejects.** Mixing tabs and spaces executes here
+but raises `TabError` in real Python. `editor.js` therefore converts tabs to four
+spaces on paste and on read, so she can never build that habit.
+
 **Known fidelity gaps to be honest about:**
 
 - `1/0` → `integer division or modulo by zero`; CPython 3 says `division by zero`.
 - `KeyError: zz`; CPython quotes the key (`KeyError: 'zz'`).
+- `[1,2].sort()[0]` → `TypeError: 'NoneType' does not support indexing`; CPython
+  says `'NoneType' object is not subscriptable`. Lesson 10 teaches this trap.
 - `round(2.5)` → `2`, matching CPython 3's banker's rounding. Still, no exercise
   should depend on a `.5` tie.
 - Lesson 18 teaches that error wording varies between Python implementations.

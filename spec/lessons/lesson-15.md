@@ -113,7 +113,7 @@ exists).
    ```
    Error: `NameError: name 'random' is not defined`
    Explain: פייתון לא מכירה את `random` עד שביקשת אותו. זו אותה שגיאה בדיוק כמו
-   שם משתנה שלא הוגדר — בשביל פייתון, `random` הוא פשוט שם שאין לו ערך. שורת
+   שם משתנה שלא הוגדר — בשביל פייתון, `random` הוא עוד שם שאין לו ערך. שורת
    `import` אחת בראש הקובץ פותרת את זה לכל התוכנית.
 
 7. **callout · tip** — כותרת: *"`import` בראש הקובץ, פעם אחת"*.
@@ -218,9 +218,9 @@ Intro: *"גלגלי כמה פעמים. שני את הקובייה לקובייה
 
 **starter:**
 ```python
-# שורת import כאן
+# your import line here
 
-# והגלגול כאן
+# and your roll here
 ```
 
 **solution:**
@@ -261,7 +261,7 @@ import random
 random.seed(11)
 first = random.randint(1, 20)
 
-# קבעי שוב את אותו seed ושמרי גלגול שני
+# set the same seed again, then roll into second
 
 print(f"Same thread: {first == second}")
 ```
@@ -310,7 +310,7 @@ import random
 
 weapons = ["sword", "spear", "shield"]
 
-# בחרי אחד באקראי והדפיסי משפט
+# pick one at random and print the sentence
 ```
 
 **solution:**
@@ -359,11 +359,11 @@ import math
 dx = 7
 dy = 11
 
-# 1. distance עם math.sqrt ו-**
+# 1. distance, with math.sqrt and **
 
-# 2. שורת הפלט הראשונה, עם round
+# 2. the first output line, with round
 
-# 3. days עם math.ceil, ושורת הפלט השנייה
+# 3. days, with math.ceil, and the second output line
 ```
 
 **solution:**
@@ -432,7 +432,7 @@ def roll():
 def strike(name, target_hp, bonus=2):
     dice = roll()
     damage = dice + bonus
-    # אם dice הוא 6 — הכפילי את הנזק והדפיסי CRITICAL HIT!
+    # if dice is 6: double the damage and print CRITICAL HIT!
 
     print(f"{name} hits for {damage}!")
     return target_hp - damage
@@ -441,9 +441,9 @@ hero_hp = 25
 sphinx_hp = 25
 round_number = 1
 
-# הלולאה שלך כאן
+# your while loop here
 
-# ובסוף — מי ניצח?
+# and at the end: who won?
 ```
 
 **solution:**
@@ -589,3 +589,8 @@ UI that this version cannot be auto-checked, and that it is hers to keep.
   `TimeLimitError` message catches the rest.
 - No `input()` in any graded exercise here; the optional interactive extension is
   the only place it appears, and it is explicitly ungraded.
+- **Combined checks** use the `source` + `also: { output }` pattern
+  (`.claude/rules/lesson-authoring.md`); both halves must pass, and the `source`
+  check is the outer one so its `message` is what she reads on failure. All
+  `source` requirements in this lesson are keywords or identifiers, never
+  comments or string literals, so no check needs `raw: true`.

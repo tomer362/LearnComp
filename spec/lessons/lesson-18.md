@@ -571,6 +571,17 @@ without opening a hint), *Persistent* (solved an exercise after five failed runs
 - The engine's Hebrew explainer should have an entry per error type in the block-6
   list. Never replace the English text — show both, English first, exactly as
   lesson 1 established.
+- **Two checks on one exercise use the `also` field**, the pattern established
+  in lesson 1 e1. Both "plus" checks in this file (e3, the quest) are `also`:
+  ```js
+  { kind: "output", mode: "normalized", expect: "…",
+    also: { kind: "source", mustInclude: ["try", "except"],
+            message: { he: "…", en: "…" } } }
+  ```
+- **No check in this lesson needs `raw: true`.** Every `source` requirement here
+  targets syntax — `try`, `except`, `ZeroDivisionError` — which survives comment
+  and literal stripping. Do not add `raw` out of caution; it would let a matching
+  word inside a Hebrew comment satisfy the check.
 - e4 is the only exercise here that uses `input()`, so it is the only one using
   `kind: "cases"`. Its two cases cover the retry path and the first-try path.
 - The Try It block ships **broken on purpose** and is ungraded, so nothing about

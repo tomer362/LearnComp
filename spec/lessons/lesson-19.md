@@ -80,7 +80,7 @@ Annabeth in the side quest.
    Talos: 40 HP
    {'name': 'Talos', 'hp': 40, 'hpp': 35}
    ```
-   Caption: התכוונת לעדכן את ה-HP. כתבת `hpp`. פייתון לא התלונן — הוא פשוט הוסיף
+   Caption: התכוונת לעדכן את ה-HP. כתבת `hpp`. פייתון לא התלונן — הוא הוסיף
    מפתח חדש למילון, והמפלצת נשארה עם 40. אין שגיאה. יש תשובה שגויה.
 
 3. **prose** — Name the two problems out loud, because she should be able to say
@@ -222,7 +222,7 @@ Annabeth in the side quest.
 
 11. **prose** — Kill the last piece of mystery. `self` הוא **לא מילה שמורה**
     בפייתון. הוא סתם שם של פרמטר, ואפשר לקרוא לו `banana` והכל יעבוד. אף אחד
-    בעולם לא עושה את זה. כל תוכניתן שיקרא את הקוד שלך מצפה ל-`self`, וכתיבת
+    בעולם לא עושה את זה. כל מי שיקרא את הקוד שלך מצפה ל-`self`, וכתיבת
     משהו אחר תעלה לך יותר ממה שהיא שווה. זה מנהג, לא חוק — וזה מנהג שכדאי
     לשמור.
 
@@ -653,7 +653,7 @@ else:
   1. שני האובייקטים הם מאותה תבנית, אבל הם נפרדים לגמרי. בתוך `attack`, מי
      זה `self` ומי זה `other`? ועל HP של מי היא עובדת?
   2. `attack(self, other)` מורידה מ-`other.hp` את `self.damage` — התוקף מוריד
-     מהמותקף. `is_alive(self)` פשוט מחזירה `self.hp > 0`, בלי `if`. הלולאה
+     מהמותקף. `is_alive(self)` מחזירה `self.hp > 0` ישירות, בלי `if`. הלולאה
      היא `while hero.is_alive() and foe.is_alive():`.
   3. בתוך `attack`: `other.hp = other.hp - self.damage`, ואז רצפה על אפס, ואז
      `return` של שורת הלוג עם `str(self.damage)`. בלולאה: מדפיסים את מספר
@@ -763,6 +763,17 @@ Bead 19 is added to the necklace. Nineteen down.
 - `super()` with no arguments works in Skulpt (verified). The explicit
   `Fighter.__init__(self, ...)` form also works; the side quest uses `super()`
   because that is what she will read in real code everywhere.
+- **Two checks on one exercise use the `also` field**, the pattern established
+  in lesson 1 e1. Every "plus" in this file (e2, e4, the quest, the side quest)
+  is an `also`:
+  ```js
+  { kind: "output", mode: "normalized", expect: "…",
+    also: { kind: "source", mustInclude: ["__init__", "self.name", "self.hp"],
+            message: { he: "…", en: "…" } } }
+  ```
+- **No check in this lesson needs `raw: true`.** Every `source` requirement is
+  syntax — `class Camper`, `__init__`, `self.name`, `.upper()`, `def attack`,
+  `while `, `class Dragon(Fighter)`, `super()` — and survives stripping.
 - No `input()` anywhere in this lesson, so nothing blocks on a prompt and every
   check is a plain `output` comparison.
 - The quest's expected output is 14 lines. Store it in the content file as one

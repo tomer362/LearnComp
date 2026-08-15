@@ -205,7 +205,7 @@ the base case, and the lesson may say that outright, as a joke that is also true
 11. **callout · tip** — כותרת: *"לפעמים מקרה הבסיס כותב את עצמו"*.
     ב-`sweep` אין שורת `if` של עצירה — ובכל זאת היא נעצרת. למה? כי חדר בלי
     תת-חדרים הוא רשימה ריקה, ולולאה על רשימה ריקה לא מבצעת אף סיבוב, ולכן אין
-    קריאה נוספת. זה עדיין מקרה בסיס, הוא פשוט מוסתר בתוך ה-`for`. אם את לא בטוחה
+    קריאה נוספת. זה עדיין מקרה בסיס, והוא מוסתר בתוך ה-`for`. אם את לא בטוחה
     — כתבי אותו במפורש. זה אף פעם לא מזיק.
 
 12. **compare** — מתי רקורסיה, ומתי לא. **הבלוק הכן.**
@@ -255,9 +255,9 @@ Intro: *"שני את המספר. שני את המילה. ואז — בזהירו
 **starter:**
 ```python
 def stairs(n):
-    # קודם מקרה הבסיס: מה קורה כשאין יותר מדרגות?
-
-    # ואז: הדפיסי את המדרגה, ורדי אחת למטה
+    # 1. base case first: what happens when there are no stairs left?
+    # 2. then: print this stair and go one step down
+    print(n)
 
 stairs(5)
 ```
@@ -301,9 +301,9 @@ stairs(5)
 **starter:**
 ```python
 def echo(word, times):
-    # מקרה הבסיס קודם
-
-    # ואז שורה אחת של הדפסה, וקריאה עם מספר קטן יותר
+    # 1. base case first
+    # 2. then one print, and a call with a smaller number
+    print(word)
 
 echo("Ariadne", 4)
 ```
@@ -347,9 +347,9 @@ that `word` rides along unchanged while `times` does the work.*
 **starter:**
 ```python
 def total_steps(n):
-    # מה מחזירים כשאין יותר מדרגות?
-
-    # ומה מחזירים בכל שאר המקרים?
+    # 1. what do you return when there are no stairs left?
+    # 2. and what do you return in every other case?
+    return 0
 
 print(total_steps(10))
 ```
@@ -367,7 +367,7 @@ print(total_steps(10))
 **check:**
 ```js
 { kind: "source",
-  mustInclude: ["def total_steps", "return"], mustExclude: ["while", "for", "sum("],
+  mustInclude: ["def total_steps", "return"], mustExclude: ["while", "for", "sum"],
   message: { he: "כאן צריך רקורסיה שמחזירה ערך — בלי לולאה ובלי sum",
              en: "This needs a recursion that returns a value — no loop, no sum" },
   also: { kind: "output", mode: "normalized", expect: "55" } }
@@ -506,18 +506,18 @@ LABYRINTHS = {
 
 
 def count_torches(room):
-    # התחילי מהלפידים של החדר עצמו,
-    # ואז הוסיפי את מה שמחזיר כל תת-חדר
+    # start from this room's own torches,
+    # then add what every sub-room gives back
     return 0
 
 
 def deepest_level(room):
-    # חדר בלי תת-חדרים הוא קומה אחת.
-    # אחרת: אחת ועוד העומק של התת-חדר העמוק ביותר
+    # a room with no sub-rooms is one level deep.
+    # otherwise: one plus the depth of the deepest sub-room
     return 1
 
 
-# ===== מתקן הבדיקה של כירון — אל תשני כלום מכאן ומטה =====
+# ===== Chiron's test rig - do not change anything below this line =====
 maze = LABYRINTHS[input()]
 print(count_torches(maze))
 print(deepest_level(maze))
@@ -614,7 +614,7 @@ def fib(n):
 for i in range(12):
     print(fib(i))
 
-print(round(fib(15) / fib(14), 5))
+print(round(fib(16) / fib(15), 5))
 ```
 Output: `0 1 1 2 3 5 8 13 21 34 55 89`, each on its own line, then `1.61803`.
 
@@ -632,7 +632,7 @@ Output: `0 1 1 2 3 5 8 13 21 34 55 89`, each on its own line, then `1.61803`.
 **myth callout**: היחס 1.618 נקרא **יחס הזהב**, והוא חוזר בפרתנון, בקונכיות
 ובחמניות. היוונים לא ידעו לכתוב `def`, אבל את היחס הם מצאו.
 
-*Performance note*: `fib(15)` is ~2,000 calls in this naive form — fine in
+*Performance note*: `fib(16)` is ~3,000 calls in this naive form — fine in
 Skulpt. Do not let her go past ~22 without a warning; `fib(30)` is 2.7 million
 calls and will hit the 5-second `execLimit`. That is a **teachable moment, not a
 bug** — say so in a callout: "רקורסיה תמימה יכולה להיות יקרה מאוד."
@@ -694,8 +694,13 @@ bug** — say so in a callout: "רקורסיה תמימה יכולה להיות 
      state. Do not ship the CPython text if Skulpt prints something else.
   4. If the tab can actually freeze (case c), add a recursion-depth guard in the
      engine before this lesson goes live. She must never lose work to a hang.
+- **Every starter in this lesson runs without a syntax error before she writes
+  anything.** Stub bodies carry a placeholder statement (`print(n)`, `return 0`)
+  rather than a bare comment, because a comment-only body raises
+  `IndentationError` the moment she presses Run — an error that teaches nothing
+  and reads as "you broke it before you started".
 - **Recursion depth used by this lesson is tiny** — maximum 5 levels in the boss,
-  10 in e3, ~15 in the optional Fibonacci. No legitimate solution comes near any
+  10 in e3, ~16 in the optional Fibonacci. No legitimate solution comes near any
   stack limit.
 - **`mustExclude: ["while", "for"]` must match whole words**, not substrings.
   A variable named `forest`, `before` or `format` contains `for`, and failing her
@@ -728,3 +733,8 @@ bug** — say so in a callout: "רקורסיה תמימה יכולה להיות 
   already knows from lesson 12.
 - All expected values were computed and re-verified against the literal exactly
   as it appears in the starter: A 2/1, B 8/2, C 5/5, D 10/2, E 11/4, F 33/5.
+- **Combined checks** use the `source` + `also: { output }` pattern
+  (`.claude/rules/lesson-authoring.md`); both halves must pass, and the `source`
+  check is the outer one so its `message` is what she reads on failure. All
+  `source` requirements in this lesson are keywords or identifiers, never
+  comments or string literals, so no check needs `raw: true`.

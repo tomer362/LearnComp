@@ -255,9 +255,9 @@ Intro: *"המגרש שלך. שני את מה שהפונקציה מדפיסה, ק
 
 **starter:**
 ```python
-# הגדירי כאן את הפונקציה
+# define your function here
 
-# וקראי לה כאן
+# and call it here
 ```
 
 **solution:**
@@ -294,7 +294,7 @@ battle_cry()
 **starter:**
 ```python
 def greet(name):
-    # מה היא מדפיסה?
+    print("Welcome to camp, someone.")
 
 greet("Annabeth")
 ```
@@ -392,9 +392,9 @@ thing that fails her. `normalized` protects her from trailing spaces.*
 ```python
 guards = ["Argus", "Chiron", "Clarisse"]
 
-# הפונקציה שלך כאן
+# your function here
 
-# והלולאה כאן
+# and your loop here
 ```
 
 **solution:**
@@ -444,11 +444,11 @@ Status: ready to build
 ```python
 parts = ["bronze wing", "gear ring", "wax seal"]
 
-# 1. הגדירי כאן את blueprint(part)
+# 1. define blueprint(part) here
 
-# 2. הפעילי אותה על כל חלק ברשימה
+# 2. run it on every part in the list
 
-# 3. הדפיסי את שורת הסיום
+# 3. print the closing line
 ```
 
 **solution:**
@@ -536,12 +536,21 @@ print("All parts ready.")
   **whatever Skulpt actually prints**, because that is what she will see. If the
   wordings diverge badly, keep the Skulpt text in the `error` block and add one
   Hebrew line: "בפייתון האמיתי הניסוח קצת שונה — הכוונה זהה."
-- **Two-object checks** (`source` + `output`) follow the lesson-01 e1/e4 pattern.
-  `checker.js` must accept an array of check objects and pass only if all pass;
-  the failure message shown is the first failing one, so order matters — put the
-  `source` check first so "you need a function here" is what she reads.
+- **Combined checks** use the `source` + `also: { output }` pattern from
+  lesson-01 e1/e4 (`.claude/rules/lesson-authoring.md`). Both must pass. The
+  `source` check is the outer one so that "this needs a function" is the message
+  she reads first; the loose output check rides along in `also`.
+- **`source` checks here inspect the stripped skeleton** (comments and string
+  literals removed), so `mustInclude: ["def"]` cannot be satisfied by a comment
+  reading `# def`. None of this lesson's requirements are comments or literals,
+  so no check needs `raw: true`.
 - **No `input()` anywhere in this lesson.** Nothing blocks on a prompt, so all
   checks are single-run and fast.
+- **Every starter in this lesson runs without a syntax error before she writes
+  anything.** Stub bodies carry a placeholder statement (`print(n)`, `return 0`)
+  rather than a bare comment, because a comment-only body raises
+  `IndentationError` the moment she presses Run — an error that teaches nothing
+  and reads as "you broke it before you started".
 - All output checks are `normalized`. The `===`/`***` borders are the only
   place where character-exact width matters; the brief and hint 3 both state the
   widths (19 characters) so the border is never the hidden failure.

@@ -280,7 +280,7 @@ print(scroll[3:-3])
 ```
 
 - **check**: `{ kind: "output", mode: "normalized", expect: "THE FURIES ARE COMING" }`
-  plus `{ kind: "source", mustExclude: ["\"THE FURIES"], message: { he: "צריך לחתוך את המחרוזת, לא להדפיס אותה מחדש ביד", en: "Slice the string — do not retype the message" } }`
+  plus `{ kind: "source", raw: true, mustExclude: ["\"THE FURIES"], message: { he: "צריך לחתוך את המחרוזת, לא להדפיס אותה מחדש ביד", en: "Slice the string — do not retype the message" } }`
 - Teaches positive and negative indices in one slice. `.replace("X", "")` also
   produces the right answer and is a legitimate different idea — accept it, and
   say so in hint 3.
@@ -446,7 +446,7 @@ print(f"AVERAGE PER LINE: {average:.1f}")
 ```
 
 - **check**: `{ kind: "output", mode: "normalized", expect: "-------- THE PROPHECY --------\nHIDDEN WORD: RESCUE\nWORDS: 22\nAVERAGE PER LINE: 3.7" }`
-  plus `{ kind: "source", mustInclude: [".join", ".strip"], mustExclude: ["RESCUE"], message: { he: "המילה חייבת להיבנות מהשורות, לא להיכתב ביד", en: "The word must be built from the lines, not typed in" } }`
+  plus `{ kind: "source", raw: true, mustInclude: [".join", ".strip"], mustExclude: ["RESCUE"], message: { he: "המילה חייבת להיבנות מהשורות, לא להיכתב ביד", en: "The word must be built from the lines, not typed in" } }`
 - Why `.strip()` is load-bearing and not busywork: `"  Six shall stand"[0]` is a
   **space**, so the hidden word comes out as `RE CU E` without it. She will
   probably hit that, and it is the best possible proof that cleaning input
@@ -508,9 +508,22 @@ Bead 17 is added to the necklace.
   options: pad with a visible character (`.center(30, "=")`) — used in e4 and the
   quest — or declare `mode: "exact"` with a written reason. Never use `exact`
   merely to be strict.
-- `mustExclude: ["RESCUE"]` in the quest will also trip if she writes the word in
-  a Hebrew comment. That is acceptable; the `message` explains the requirement,
-  and the failure is self-evident.
+- **Two checks on one exercise use the `also` field**, the pattern established
+  in lesson 1 e1. Every "plus" written in this file is an `also`:
+  ```js
+  { kind: "output", mode: "normalized", expect: "9\nstolen",
+    also: { kind: "source", mustInclude: [".split"],
+            message: { he: "…", en: "…" } } }
+  ```
+- **`raw: true` is required on exactly two `source` checks here** — e2 and the
+  quest — because both name string literals (`"THE FURIES`, `RESCUE`) and a
+  comment-and-literal-stripped skeleton would never contain them. Without `raw`,
+  e2's `mustExclude` could never fire and the quest's could never fire either,
+  so both shortcuts would pass silently. e3's `.split` and the quest's `.join` /
+  `.strip` are syntax and survive stripping, so `raw: true` does not hurt them.
+- `mustExclude: ["RESCUE"]` with `raw: true` will also trip if she writes the
+  word in a Hebrew comment. That is acceptable; the `message` explains the
+  requirement, and the failure is self-evident.
 - No `input()` in this lesson, so nothing blocks on a prompt.
 - The `[::-1]` reverse trick in callout 5 is shown, not required by any check.
   Keep it that way — step slicing is a nice thing to recognise and a poor thing
