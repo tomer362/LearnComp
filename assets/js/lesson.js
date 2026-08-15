@@ -35,7 +35,11 @@ window.LC = window.LC || {};
       set: function (text) { pre.textContent = text; },
       empty: function () {
         pre.textContent = "";
-        pre.appendChild(el("span", "muted", LC.esc(LC.s("noOutput"))));
+        /* This placeholder is Hebrew prose sitting inside an LTR panel, so it
+         * needs its own direction or the brackets flip. */
+        var ph = el("span", "muted", LC.esc(LC.s("noOutput")));
+        ph.setAttribute("dir", "auto");
+        pre.appendChild(ph);
       },
       /* Real English error first, Hebrew explanation beside it — never
        * instead of it. See spec/00-overview.md rule 5. */
@@ -134,10 +138,21 @@ window.LC = window.LC || {};
         if (current) s.lessons[current.id] = st;
       });
 
+      /* The game words exist here too, against a practice field, so a command
+       * she just learned never dies with a NameError. */
+      var sandbox = LC.PyApi ? LC.PyApi.installSandbox() : null;
+
       return LC.Engine.run(source, {
         onStdout: function (t) { output.write(t); },
         onInput: function (p) { return askInput(output, p); }
       }).then(function (result) {
+        if (sandbox) {
+          sandbox.placements.forEach(function (p) {
+            var spec = LC.Sim.TOWERS[p.kind];
+            output.write((spec ? spec.icon : "🗼") + "  " + p.kind + " → (" + p.x + ", " + p.y + ")\n");
+          });
+          sandbox.uninstall();
+        }
         busy = false;
         runBtn.disabled = false;
         runBtn.textContent = LC.s("run");
@@ -233,9 +248,66 @@ window.LC = window.LC || {};
 
   /* ---- exercises ------------------------------------------------------- */
 
+  /* ---- the battle panel attached to a level ---------------------------- */
+
+  function battlePanel(card, level) {
+    var host = el("div", "battle-host");
+    card.appendChild(host);
+    var view = LC.BattleView.create(host, level);
+
+    var hud = el("div", "battle-hud");
+    hud.setAttribute("dir", "ltr");
+    var hudWave = el("span", "bhud", "");
+    var hudHp = el("span", "bhud", "");
+    var hudGold = el("span", "bhud", "");
+    hud.appendChild(hudHp); hud.appendChild(hudGold); hud.appendChild(hudWave);
+    host.insertBefore(hud, host.firstChild);
+
+    var controls = el("div", "battle-controls");
+    var playBtn = el("button", "btn btn-small btn-ghost", "⏸");
+    playBtn.type = "button";
+    playBtn.setAttribute("aria-label", "play/pause");
+    var againBtn = el("button", "btn btn-small btn-ghost", "↻");
+    againBtn.type = "button";
+    againBtn.setAttribute("aria-label", "replay");
+    var speedBtn = el("button", "btn btn-small btn-ghost", "1×");
+    speedBtn.type = "button";
+    controls.appendChild(playBtn);
+    controls.appendChild(againBtn);
+    controls.appendChild(speedBtn);
+    host.appendChild(controls);
+
+    playBtn.addEventListener("click", function () {
+      if (view.isPlaying()) { view.pause(); playBtn.textContent = "▶"; }
+      else { view.play(); playBtn.textContent = "⏸"; }
+    });
+    againBtn.addEventListener("click", function () {
+      view.restart(); playBtn.textContent = "⏸";
+    });
+    speedBtn.addEventListener("click", function () {
+      var next = view.getSpeed() === 1 ? 2 : view.getSpeed() === 2 ? 4 : 1;
+      view.setSpeed(next);
+      speedBtn.textContent = next + "×";
+    });
+
+    var startHp = level.campHp === undefined ? 10 : level.campHp;
+    view.onUpdate(function (snap) {
+      hudHp.textContent = "🏛️ " + snap.campHp + "/" + startHp;
+      hudGold.textContent = "🪙 " + snap.gold;
+      hudWave.textContent = "👾 " + snap.enemies.length;
+    });
+    hudHp.textContent = "🏛️ " + startHp + "/" + startHp;
+    hudGold.textContent = "🪙 " + level.gold;
+    hudWave.textContent = "👾 0";
+
+    window.addEventListener("resize", function () { view.relayout(); });
+    return { view: view, playBtn: playBtn };
+  }
+
   function renderExercise(ex, index, isQuest) {
     var lessonId = current.id;
-    var card = el("section", "exercise" + (isQuest ? " exercise-quest" : ""));
+    var isBattle = ex.check && ex.check.kind === "battle";
+    var card = el("section", "exercise" + (isQuest ? " exercise-quest" : "") + (isBattle ? " exercise-battle" : ""));
     var solved = LC.Game.isExerciseDone(lessonId, ex.id);
     if (solved) card.classList.add("is-solved");
 
@@ -250,6 +322,10 @@ window.LC = window.LC || {};
     head.appendChild(reward);
     card.appendChild(head);
     card.appendChild(el("div", "prose exercise-brief", LC.rich(ex.brief)));
+
+    /* the battlefield sits between the brief and the editor, so she can read
+     * the coordinates while she writes the code that uses them */
+    var battle = isBattle ? battlePanel(card, ex) : null;
 
     /* boss health bar */
     var bossBar = null;
@@ -274,7 +350,7 @@ window.LC = window.LC || {};
     });
 
     var bar = el("div", "runner-bar");
-    var checkBtn = el("button", "btn btn-run", LC.esc(LC.s("check")));
+    var checkBtn = el("button", "btn btn-run", LC.esc(isBattle ? LC.s("fight") : LC.s("check")));
     checkBtn.type = "button";
     var resetBtn = el("button", "btn btn-ghost", LC.esc(LC.s("reset")));
     resetBtn.type = "button";
@@ -351,7 +427,16 @@ window.LC = window.LC || {};
 
       return LC.Checker.check(ex, source).then(function (res) {
         checkBtn.disabled = false;
-        checkBtn.textContent = LC.s("check");
+        checkBtn.textContent = isBattle ? LC.s("fight") : LC.s("check");
+
+        /* Play the battle back, win or lose — watching where they got through
+         * IS the debugging. */
+        if (battle && res.sim) {
+          battle.view.show(res.sim, {
+            label: res.pass ? "The camp holds" : "Monsters reached the camp"
+          });
+          battle.playBtn.textContent = "⏸";
+        }
 
         /* show what her program actually printed */
         if (res.runs && res.runs.length) {
@@ -367,7 +452,7 @@ window.LC = window.LC || {};
 
         if (res.pass) {
           verdict.className = "verdict is-pass";
-          verdict.innerHTML = "<strong>✓ " + LC.esc(LC.s("correct")) + "</strong>";
+          verdict.innerHTML = "<strong>✓ " + LC.esc(isBattle ? LC.s("campHolds") : LC.s("correct")) + "</strong>";
           var already = LC.Game.markExerciseDone(lessonId, ex.id);
           if (!already) {
             LC.Game.award(ex.xp, ex.drachmas);
@@ -380,7 +465,7 @@ window.LC = window.LC || {};
         } else {
           verdict.className = "verdict is-fail";
           var why = res.reason ? LC.rich(res.reason) : LC.esc(LC.s("tryAgain"));
-          verdict.innerHTML = "<strong>" + LC.esc(LC.s("notYet")) + "</strong> " + why;
+          verdict.innerHTML = "<strong>" + LC.esc(isBattle ? LC.s("campFell") : LC.s("notYet")) + "</strong> " + why;
           LC.Game.noteFailure(lessonId, ex.id);
         }
         return res;

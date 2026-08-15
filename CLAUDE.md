@@ -1,9 +1,16 @@
 # Demigod Code · קוד של חצי־אל
 
-An offline, gamified, Hebrew/English Python course for one 14-year-old girl with
-zero programming experience. Percy Jackson framing. She double-clicks
-`index.html` and learns to code — no install, no terminal, no internet, no
-account.
+An offline, Hebrew/English Python course for one 14-year-old girl with zero
+programming experience, built as a **2D tower-defense game**. Percy Jackson
+framing. She double-clicks `index.html` and learns to code — no install, no
+terminal, no internet, no account.
+
+**The game IS the course.** There are no abstract exercises. Every task is a
+battle: monsters walk a path toward Camp Half-Blood and the only way to stop
+them is to write Python. She graduates through three control models — build
+scripts (`place_tower(...)`), then a strategy function the game calls every tick
+(`def choose_target(enemies):`), then her own tower classes. Read
+`spec/09-battle-game.md` before touching any of it.
 
 **Who she is** — 14, Hebrew-native, English second, never programmed. She does
 not know what a variable, a terminal, or an error message is. Every decision in
@@ -52,6 +59,8 @@ index.html            Quest map hub
 lessons/lesson-NN.html  Thin ~30-line shell
 content/lesson-NN.js    All text (he+en), examples, exercises for that lesson
 assets/js/             store, i18n, curriculum, engine, editor, checker, game, lesson, hub
+assets/js/battle/      sim (headless deterministic simulation) · pyapi (Python API)
+                       · play (orchestration) · render (canvas)
 assets/js/vendor/      Skulpt 1.2.0 (MIT, committed on purpose)
 spec/                  The design contract — read this before changing behaviour
 tools/                 Dev-only verification
@@ -74,6 +83,7 @@ launch and would bury these rules).
 | any user-visible text, or a layout flip | `spec/03-i18n-and-rtl.md` |
 | **authoring a lesson** | `spec/04-lesson-template.md` (schema) + `spec/06-authoring-guide.md` (voice) |
 | CSS or a new component | `spec/05-visual-design.md` |
+| **anything about the battles** | `spec/09-battle-game.md` |
 | what a lesson may teach | `spec/07-curriculum.md` |
 | about to call a lesson done | `spec/08-quality-checklist.md` |
 | picking up work | `spec/TODO.md` |
@@ -94,12 +104,18 @@ Then run both tools and tick `spec/08-quality-checklist.md`.
 
 ## Definition of done for a lesson
 
-- Six beats in order: Prophecy → Chiron Teaches → Try It → Training → Quest → Recap
+- Six beats in order: Prophecy → Chiron Teaches → Training Ground → Battles →
+  Great Battle → Recap
 - Every learner-visible string is a `{he, en}` pair — no bare strings
-- 3–5 training exercises ramping from nearly-free to genuinely hard, plus one quest
-- Every exercise has **exactly three** escalating hints (nudge → tool → walkthrough)
-- **Every `solution` passes its own `check`** (`verify-python.mjs` asserts this)
-- Only concepts from lessons 1..N-1 (`spec/07-curriculum.md` is the authority)
+- 3–5 training battles ramping from nearly-free to genuinely hard, plus one great battle
+- Every level has **exactly three** escalating hints (nudge → tool → walkthrough)
+- **Every `solution` wins its battle** AND **no level is winnable by writing
+  nothing** — `verify-python.mjs` asserts both by simulating them
+- Each level's mechanic must *force* the lesson's concept. A level she can beat
+  without it is a broken level; use `check.also` with a `source` rule to require
+  the construct where the map alone cannot
+- Only concepts from lessons 1..N-1 (`spec/07-curriculum.md` is the authority),
+  and only the API available at that point (`spec/09-battle-game.md`)
 - At least one `error` block showing real broken code and its real error
 - Both tools pass; zero console errors; no horizontal scroll at 390px
 

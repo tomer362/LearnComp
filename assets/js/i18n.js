@@ -21,10 +21,10 @@ window.LC = window.LC || {};
     /* lesson sections */
     secProphecy:    { he: "הנבואה",               en: "The Prophecy" },
     secTeach:       { he: "כירון מלמד",           en: "Chiron Teaches" },
-    secTryIt:       { he: "נסי בעצמך",            en: "Try It Yourself" },
-    secTraining:    { he: "אימונים",              en: "Training" },
-    secQuest:       { he: "המשימה",               en: "The Quest" },
-    secBoss:        { he: "קרב בוס",              en: "Boss Fight" },
+    secTryIt:       { he: "מגרש האימונים",        en: "The Training Ground" },
+    secTraining:    { he: "הקרבות",               en: "The Battles" },
+    secQuest:       { he: "הקרב הגדול",           en: "The Great Battle" },
+    secBoss:        { he: "קרב בוס",              en: "Boss Battle" },
     secRecap:       { he: "שכר וסיכום",           en: "Reward & Recap" },
 
     /* editor + runner */
@@ -40,6 +40,11 @@ window.LC = window.LC || {};
     solutionLabel:  { he: "פתרון אפשרי",          en: "One possible solution" },
     inputPrompt:    { he: "התוכנית מחכה לתשובה שלך", en: "Your program is waiting for input" },
     send:           { he: "שליחה",                en: "Send" },
+
+    /* battle */
+    fight:          { he: "לקרב!",                en: "Fight!" },
+    campHolds:      { he: "המחנה עמד!",           en: "The camp holds!" },
+    campFell:       { he: "הן עברו.",             en: "They got through." },
 
     /* results */
     correct:        { he: "נכון!",                en: "Correct!" },

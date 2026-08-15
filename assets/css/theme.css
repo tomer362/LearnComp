@@ -389,6 +389,45 @@ a { color: var(--bronze-lit); }
   vertical-align: middle;
 }
 
+/* ---------- battle ---------- */
+
+/* The board is a diagram, not prose: never mirrored in Hebrew, because its
+ * coordinates must agree with what she typed. See spec/09-battle-game.md. */
+.battle-host {
+  direction: ltr;
+  margin: 0 0 .8rem;
+  background: #0d1a12;
+  border: var(--line);
+  border-top: 3px solid var(--cabin);
+  border-radius: var(--radius);
+  padding: .6rem;
+  overflow-x: auto;
+}
+.battle-canvas {
+  display: block;
+  margin: 0 auto;
+  max-width: 100%;
+  image-rendering: auto;
+}
+.battle-hud {
+  display: flex;
+  gap: .9rem;
+  justify-content: center;
+  font-family: var(--font-code);
+  font-size: .85rem;
+  color: var(--marble-dim);
+  margin-bottom: .4rem;
+}
+.bhud { white-space: nowrap; }
+.battle-controls {
+  display: flex;
+  gap: .4rem;
+  justify-content: center;
+  margin-top: .4rem;
+}
+.battle-controls .btn { min-height: 34px; padding: .2rem .7rem; font-size: .85rem; }
+.exercise-battle { border-color: rgba(201, 139, 58, .55); }
+
 /* ---------- recap ---------- */
 
 .complete { display: none; }

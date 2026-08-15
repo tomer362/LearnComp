@@ -1,7 +1,7 @@
 # ⚡ קוד של חצי־אל · Demigod Code
 
-**ללמוד פייתון במחנה חצי־דם** — קורס פייתון אינטראקטיבי, בעברית, בסגנון פרסי ג'קסון.
-*An interactive Python course in Hebrew and English, Percy Jackson style.*
+**ללמוד פייתון במחנה חצי־דם** — משחק הגנת־מגדלים דו־ממדי שבו כותבים פייתון כדי לעצור מפלצות.
+*A 2D tower-defense game where you write Python to stop the monsters. Hebrew and English, Percy Jackson style.*
 
 ---
 
@@ -52,21 +52,46 @@ Python.
 
 ---
 
+## The game
+
+Monsters walk a path toward Camp Half-Blood. The only way to stop them is to
+write Python.
+
+```python
+place_tower("archer", 2, 3)     # lesson 1 — a function call with arguments
+```
+
+She graduates through three ways of commanding the battle:
+
+| Lessons | She writes | The game |
+| --- | --- | --- |
+| 1–13 | a build script | runs it once before the wave |
+| 14–18 | `def choose_target(enemies):` | **calls her code** every time a tower picks a target |
+| 19–20 | `class LightningTower:` | instantiates her class and calls its methods |
+
+The mechanics are the concepts, not a costume over them: the map grid *is* a list
+of lists, a wave *is* a list of dictionaries, building a wall *is* a `for` loop,
+and her own tower type *is* a class. If her loop is wrong, monsters reach the
+camp and she watches it happen.
+
 ## The course
 
-Twenty lessons, five acts, from `print()` to a text adventure game she builds
-herself.
+Twenty lessons, five acts, from `print()` to designing her own tower classes
+against Kronos.
 
 | Act | Lessons | Learns |
 | --- | --- | --- |
-| I — Camp Half-Blood | 1–4 | print, variables, input, arithmetic |
-| II — The Lightning Thief | 5–8 | booleans, if/elif/else, while, for |
-| III — Sea of Monsters | 9–12 | lists, list methods, dictionaries, nested data |
-| IV — The Titan's Curse | 13–16 | functions, return, random/math, recursion |
-| V — The Last Olympian | 17–20 | strings, errors, classes, the capstone |
+| Act | Lessons | Learns | In the game |
+| --- | --- | --- | --- |
+| I — Camp Half-Blood | 1–4 | print, variables, input, arithmetic | placing towers, the gold economy |
+| II — The Lightning Thief | 5–8 | booleans, if/elif/else, while, for | countering monster types, walls built by loop |
+| III — Sea of Monsters | 9–12 | lists, dicts, nested data | reading the wave roster and the map grid |
+| IV — The Titan's Curse | 13–16 | functions, return, random/math, recursion | **the game starts calling her code** |
+| V — The Last Olympian | 17–20 | strings, errors, classes, capstone | designing her own tower types |
 
-Each act ends in a boss fight. Each lesson grants an item. Lesson 20 ends by
-pointing her at installing real Python, because the point was never the game.
+Each act ends in a boss battle — the Minotaur, Medusa, the Hydra, the Labyrinth,
+and finally Kronos. Each lesson grants an item. Lesson 20 ends by pointing her at
+installing real Python, because the point was never the game.
 
 **Status:** lesson 1 is complete and playable. Lessons 2–20 have full design
 specs in `spec/lessons/` and are tracked in `spec/TODO.md`.
@@ -111,9 +136,11 @@ node tools/smoke-test.mjs         # full file:// browser test with the network b
 node tools/smoke-test.mjs --shots # ...plus screenshots into .screenshots/
 ```
 
-`verify-python.mjs` runs the real vendored Skulpt in Node and asserts that
-**every exercise's stated solution passes its own checker** — the failure that
-would otherwise strand a learner on an impossible exercise.
+`verify-python.mjs` runs the real vendored Skulpt in Node, loads the same battle
+engine the browser uses, and **simulates every level**. It asserts that each
+stated solution actually *wins* its battle, and — just as important — that no
+level can be won by writing nothing. Those are the two failures that would
+otherwise strand a learner or let her click straight through.
 
 `smoke-test.mjs` drives the real pages in Chromium over `file://` with all
 network requests blocked, and asserts zero network attempts and zero console

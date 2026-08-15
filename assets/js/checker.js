@@ -139,6 +139,45 @@ window.LC = window.LC || {};
     var spec = exercise.check || {};
     var kind = spec.kind || "output";
 
+    /* A battle level: run her code, simulate, judge against the objective.
+     * See spec/09-battle-game.md. */
+    if (kind === "battle") {
+      return LC.Battle.play(exercise, source, function (code) {
+        return LC.Engine.run(code, { execLimitMs: spec.execLimitMs || 5000 });
+      }).then(function (r) {
+        if (!r.ok) {
+          return {
+            pass: false, sim: null, runs: [r], error: r.error, explanation: r.explanation,
+            reason: { he: "התוכנית נעצרה עם שגיאה לפני שהקרב התחיל.",
+                      en: "Your program stopped with an error before the battle began." }
+          };
+        }
+        var verdict = LC.Battle.objective(r.sim, exercise);
+
+        /* A battle may also demand HOW she won — "yes, but with a loop". */
+        if (verdict.pass && spec.also) {
+          var extra = spec.also.kind === "source"
+            ? checkSource(source, spec.also)
+            : compareOutput(r.output, spec.also);
+          if (!extra.pass) {
+            return { pass: false, sim: r.sim, runs: [r], reason: extra.reason, error: null, explanation: null };
+          }
+        }
+
+        return {
+          pass: verdict.pass,
+          sim: r.sim,
+          runs: [r],
+          error: null,
+          explanation: null,
+          reason: verdict.pass ? null : (LC.Battle.diagnose(r.sim, exercise) || {
+            he: "ההגנה לא החזיקה. הריצי שוב וצפי איפה הן עוברות.",
+            en: "The defense did not hold. Run it again and watch where they get through."
+          })
+        };
+      });
+    }
+
     /* `cases` runs the program once per case with queued stdin. */
     if (kind === "cases") {
       var cases = spec.cases || [];

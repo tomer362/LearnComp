@@ -27,11 +27,19 @@ sandbox.self = sandbox;
 sandbox.globalThis = sandbox;
 vm.createContext(sandbox);
 
+sandbox.Promise = Promise;
 for (const file of ["skulpt.min.js", "skulpt-stdlib.js"]) {
   const src = fs.readFileSync(path.join(root, "assets/js/vendor", file), "utf8");
   vm.runInContext(src, sandbox, { filename: file });
 }
+/* The battle engine is loaded into the SAME sandbox, so verification runs the
+ * exact simulation the browser runs. See spec/09-battle-game.md. */
+for (const file of ["sim.js", "pyapi.js", "play.js"]) {
+  const src = fs.readFileSync(path.join(root, "assets/js/battle", file), "utf8");
+  vm.runInContext(src, sandbox, { filename: "battle/" + file });
+}
 const Sk = sandbox.Sk;
+const LCB = sandbox.LC;
 if (!Sk) {
   console.error("Skulpt failed to load from assets/js/vendor/");
   process.exit(1);
@@ -39,7 +47,19 @@ if (!Sk) {
 
 /* ---- run one program ------------------------------------------------- */
 
+/* Mirrors the page: the game words are always available, against a practice
+ * field, so teaching examples and starters behave here exactly as they do for
+ * her. See assets/js/battle/pyapi.js. */
 function runPython(code, stdin = []) {
+  const sandbox_ctx = LCB.PyApi.installSandbox();
+  try {
+    return runPythonBare(code, stdin);
+  } finally {
+    sandbox_ctx.uninstall();
+  }
+}
+
+function runPythonBare(code, stdin = []) {
   let out = "";
   let i = 0;
   const captured = {};
@@ -141,6 +161,41 @@ function sameValue(a, b) {
   try { return JSON.stringify(a) === JSON.stringify(b); } catch { return false; }
 }
 
+/* Same runner shape LC.Battle.play expects in the browser.
+ * MUST use the bare runner: LC.Battle.play has already installed the API for
+ * this level, and installing the sandbox on top would swallow her placements. */
+function pyRunner(code) {
+  const r = runPythonBare(code);
+  return Promise.resolve({
+    ok: r.ok, output: r.out, error: r.ok ? null : { text: r.error },
+    explanation: null, module: r.mod,
+  });
+}
+
+async function runBattleCheck(level, source) {
+  const r = await LCB.Battle.play(level, source, pyRunner);
+  if (!r.ok) return { pass: false, why: "error before the battle: " + (r.error && r.error.text) };
+
+  const verdict = LCB.Battle.objective(r.sim, level);
+  if (!verdict.pass) {
+    const d = LCB.Battle.diagnose(r.sim, level);
+    return {
+      pass: false,
+      why: `lost (${verdict.reason}): hp ${r.sim.campHp}/${r.sim.campHpStart}, ` +
+           `leaked ${r.sim.leaked}, towers ${r.sim.towers.length}, spent ${r.sim.goldSpent}` +
+           (d ? `\n         → ${d.en}` : ""),
+    };
+  }
+  if (specAlso(level)) {
+    const ok = checkSource(source, level.check.also);
+    if (!ok) return { pass: false, why: "won, but the `also` source requirement failed" };
+  }
+  return { pass: true, sim: r.sim };
+}
+function specAlso(level) {
+  return level.check && level.check.also && level.check.also.kind === "source";
+}
+
 function runCheck(exercise, source) {
   const spec = exercise.check || {};
   const kind = spec.kind || "output";
@@ -197,7 +252,7 @@ function report(ok, label, why) {
   }
 }
 
-function verify(contentPath) {
+async function verify(contentPath) {
   const lesson = loadLesson(contentPath);
   console.log("\n\x1b[1m" + path.relative(root, contentPath) + "\x1b[0m  — lesson " + lesson.id);
 
@@ -252,14 +307,35 @@ function verify(contentPath) {
   if (lesson.quest) all.push(lesson.quest);
 
   for (const ex of all) {
-    if (ex.starter && ex.starter.trim() && ex.id !== "e3") {
-      // e3 is deliberately broken — that is the exercise.
+    const isBattle = ex.check && ex.check.kind === "battle";
+
+    /* A starter is allowed to be deliberately broken — that IS the task in a
+     * "fix the code" level. Flag it as intentional rather than skipping by id. */
+    if (ex.starter && ex.starter.trim() && !ex.brokenStarter) {
       const r = runPython(ex.starter);
-      report(r.ok, `${ex.id} starter runs`, r.error);
+      if (isBattle) {
+        /* A battle starter may legitimately fail to win; it must merely run. */
+        report(r.ok, `${ex.id} starter runs`, r.error);
+      } else {
+        report(r.ok, `${ex.id} starter runs`, r.error);
+      }
     }
+
     if (!ex.solution) { report(false, `${ex.id} has a solution`); continue; }
-    const verdict = runCheck(ex, ex.solution);
-    report(verdict.pass, `${ex.id} solution passes its own check`, verdict.why);
+
+    if (isBattle) {
+      const verdict = await runBattleCheck(ex, ex.solution);
+      report(verdict.pass, `${ex.id} solution WINS its battle`, verdict.why);
+
+      /* The level must not be passable by doing nothing — otherwise it teaches
+       * nothing and she can click straight through it. */
+      const lazy = await runBattleCheck(ex, '# nothing\n');
+      report(!lazy.pass, `${ex.id} cannot be won by writing nothing`,
+        lazy.pass ? "an empty program passes this level" : null);
+    } else {
+      const verdict = runCheck(ex, ex.solution);
+      report(verdict.pass, `${ex.id} solution passes its own check`, verdict.why);
+    }
 
     const hints = ex.hints || [];
     report(hints.length === 3, `${ex.id} has exactly 3 hints`, `found ${hints.length}`);
@@ -275,7 +351,7 @@ const files = args.length
       .filter((f) => /^lesson-\d+\.js$/.test(f))
       .map((f) => path.join(root, "content", f));
 
-for (const f of files) verify(f);
+for (const f of files) await verify(f);
 
 console.log(`\n${checks - failures}/${checks} checks passed`);
 if (failures) {

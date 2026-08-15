@@ -231,7 +231,10 @@ window.LC = window.LC || {};
           output: buffer,
           error: null,
           explanation: null,
-          vars: readVars(mod, opts.captureVars)
+          vars: readVars(mod, opts.captureVars),
+          /* The finished module, so the battle layer can read her
+           * choose_target / tower class back out. See battle/pyapi.js. */
+          module: mod
         });
       }, function (err) {
         var described = describeError(err);

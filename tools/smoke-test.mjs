@@ -116,13 +116,32 @@ check(outDir === "ltr", "output stays dir=ltr in Hebrew mode", "got " + outDir);
 
 /* ---- exercise: wrong answer, hint ladder, right answer ----------------- */
 
-section("Exercise flow — fail, hint, pass");
-const e2 = page.locator(".exercise").nth(1); // e2: three lines
-await e2.locator(".editor-area").fill('print("wrong")');
+section("Battle rendering");
+check((await page.locator(".battle-canvas").count()) === 5, "every level renders a battlefield canvas",
+  "found " + (await page.locator(".battle-canvas").count()));
+const boardPainted = await page.evaluate(() => {
+  const c = document.querySelector(".battle-canvas");
+  const d = c.getContext("2d").getImageData(0, 0, c.width, c.height).data;
+  let painted = 0;
+  for (let i = 3; i < d.length; i += 4000) if (d[i] > 0) painted++;
+  return painted;
+});
+check(boardPainted > 10, "the board is actually drawn, not blank", "opaque samples: " + boardPainted);
+check((await page.locator(".battle-controls .btn").count()) >= 15, "each battle has playback controls");
+
+section("Battle flow — lose, diagnose, win");
+const e2 = page.locator(".exercise").nth(1); // b2: needs three towers
+await e2.locator(".editor-area").fill('place_tower("archer", 0, 0)');
 await e2.locator(".btn-run").click();
-await page.waitForSelector(".exercise:nth-of-type(2) .verdict.is-fail", { timeout: 30000 }).catch(() => {});
+await page.waitForFunction(
+  () => document.querySelectorAll(".exercise")[1].querySelector(".verdict")?.className.includes("is-fail"),
+  { timeout: 30000 }
+).catch(() => {});
 check((await e2.locator(".verdict").getAttribute("class")).includes("is-fail"),
-  "a wrong answer is rejected");
+  "a losing defense is rejected");
+const why = await e2.locator(".verdict").textContent();
+check(/רחוק|too far|path|שביל/i.test(why),
+  "the loss is explained, not just reported", why.trim().slice(0, 90));
 
 const ambrosiaBefore = await page.locator(".hud-res .res").nth(1).textContent();
 await e2.locator(".btn-hint").click();
@@ -132,28 +151,30 @@ check(ambrosiaBefore !== ambrosiaAfter, "a hint costs ambrosia",
   `${ambrosiaBefore} -> ${ambrosiaAfter}`);
 
 await e2.locator(".editor-area").fill(
-  'print("I am a demigod")\nprint("I am not afraid")\nprint("(mostly)")'
+  'place_tower("archer", 2, 3)\nplace_tower("archer", 5, 3)\nplace_tower("archer", 7, 5)'
 );
 await e2.locator(".btn-run").click();
 await page.waitForFunction(
   () => document.querySelectorAll(".exercise")[1].querySelector(".verdict")?.className.includes("is-pass"),
   { timeout: 30000 }
 );
-check(true, "the correct answer is accepted");
-check((await e2.getAttribute("class")).includes("is-solved"), "the exercise is marked solved");
+check(true, "a winning defense is accepted");
+check((await e2.getAttribute("class")).includes("is-solved"), "the level is marked solved");
 
 /* ---- complete the whole lesson ---------------------------------------- */
 
 section("Completing lesson 1");
+/* The declared solutions from content/lesson-01.js. verify-python.mjs already
+ * proves these win headlessly; this proves the page agrees. */
 const solutions = [
-  'print("Annabeth")',
-  'print("I am a demigod")\nprint("I am not afraid")\nprint("(mostly)")',
-  'print("Riptide is a pen")\nprint("Its also a sword")',
-  '# my first quest\nprint("Day one at Camp Half-Blood")\nprint("I survived")',
-  'print("Campers, gather!")\nprint("A new demigod has arrived.")\n' +
-    'print("She outran a monster to reach these gates.")\n' +
-    'print("Tonight, we find out who her parent is.")\n' +
-    'print("Welcome to Camp Half-Blood.")',
+  'place_tower("archer", 2, 3)',
+  'place_tower("archer", 2, 3)\nplace_tower("archer", 5, 3)\nplace_tower("archer", 7, 5)',
+  'place_tower("archer", 2, 3)\nplace_tower("archer", 5, 3)\nplace_tower("archer", 7, 5)',
+  '# cover the straight run, then the corner\nplace_tower("archer", 2, 2)\n' +
+    'place_tower("archer", 3, 4)\nplace_tower("archer", 6, 4)\nplace_tower("archer", 8, 6)',
+  '# cover both bends and the final run\nplace_tower("archer", 2, 2)\n' +
+    'place_tower("archer", 4, 3)\nplace_tower("archer", 2, 0)\nplace_tower("archer", 5, 3)\n' +
+    'place_tower("archer", 6, 5)\nplace_tower("archer", 8, 5)',
 ];
 for (let i = 0; i < solutions.length; i++) {
   const card = page.locator(".exercise").nth(i);
@@ -164,7 +185,7 @@ for (let i = 0; i < solutions.length; i++) {
     i, { timeout: 30000 }
   ).catch(() => {});
   check((await card.getAttribute("class")).includes("is-solved"),
-    `exercise ${i + 1} of 5 accepted`);
+    `battle ${i + 1} of 5 won`);
 }
 
 check(await page.locator("#lesson-complete.show").isVisible(),
