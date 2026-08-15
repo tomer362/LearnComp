@@ -283,8 +283,8 @@ print(total_drachmas(12, 30))
 ```js
 { kind: "source", mustInclude: ["return"],
   message: { he: "כאן הפונקציה צריכה להחזיר ערך, לא להדפיס אותו",
-             en: "This function must return a value, not print it" } }
-{ kind: "output", mode: "normalized", expect: "42" }
+             en: "This function must return a value, not print it" },
+  also: { kind: "output", mode: "normalized", expect: "42" } }
 ```
 *Note: `print` inside the function would also put `42` on the screen — the
 `source` check is the only thing that distinguishes them, and its message is
@@ -372,8 +372,8 @@ print(attack_power(50, 15))
 ```js
 { kind: "source", mustInclude: ["def attack_power"],
   message: { he: "השאירי את שם הפונקציה attack_power ואל תמחקי את שתי הקריאות",
-             en: "Keep the function named attack_power and keep both calls" } }
-{ kind: "output", mode: "normalized", expect: "50\n65" }
+             en: "Keep the function named attack_power and keep both calls" },
+  also: { kind: "output", mode: "normalized", expect: "50\n65" } }
 ```
 *The one-argument call is what forces a default to exist; no fragile source match
 on `bonus=0` (she might write `bonus = 0`), and no way to fake it.*
@@ -425,9 +425,9 @@ print(f"Storm toll: {toll(10, 5)} drachmas")
 ```js
 { kind: "source", mustInclude: ["def", "for", "return"],
   message: { he: "כאן צריך פונקציה שמחזירה ערך, ולולאה שמשתמשת בו",
-             en: "This needs a function that returns, and a loop that uses it" } }
-{ kind: "output", mode: "normalized",
-  expect: "Normal toll: 48 drachmas\nStorm toll: 50 drachmas" }
+             en: "This needs a function that returns, and a loop that uses it" },
+  also: { kind: "output", mode: "normalized",
+    expect: "Normal toll: 48 drachmas\nStorm toll: 50 drachmas" } }
 ```
 *(3+7+10+4 = 24, ×2 = 48. The storm line is 10×5 = 50 — the same function called
 with the default overridden, so both halves of the lesson appear in one output.)*
@@ -523,9 +523,9 @@ print(is_dangerous(rooms[3]["monsters"], 1))
 ```js
 { kind: "source", mustInclude: ["def room_name", "def is_dangerous", "def describe", "return"],
   message: { he: "המשימה דורשת שלוש פונקציות בשמות room_name, is_dangerous ו-describe",
-             en: "The quest needs three functions named room_name, is_dangerous and describe" } }
-{ kind: "output", mode: "normalized",
-  expect: "A-1: clear\nB-4: DANGER (3 monsters)\nC-9: DANGER (2 monsters)\nD-2: clear\nStrict check on room D:\nTrue" }
+             en: "The quest needs three functions named room_name, is_dangerous and describe" },
+  also: { kind: "output", mode: "normalized",
+    expect: "A-1: clear\nB-4: DANGER (3 monsters)\nC-9: DANGER (2 monsters)\nD-2: clear\nStrict check on room D:\nTrue" } }
 ```
 
 **hints:**

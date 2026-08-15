@@ -48,7 +48,7 @@ a decision tree), Hermes in the myth callout.
 **Prophecy panel**:
 
 > יצאתם מהמחנה לפני עלות השחר, ותשעה ימים על השעון.
-> אחרי שעתיים הדרך פשוט נגמרת — ומתפצלת לשלוש.
+> אחרי שעתיים הדרך נגמרת בלי אזהרה — ומתפצלת לשלוש.
 > על עמוד עץ ישן חרוט סמל של הרמס, ומתחתיו שלוש שורות:
 > "הדרך הימנית מהירה. הדרך השמאלית בטוחה. הדרך האמצעית — תלוי."
 > גרובר מסתכל עלייך: "תלוי במה?"
@@ -188,7 +188,7 @@ a decision tree), Hermes in the myth callout.
       print("Run.")
       ```
       label (he): "אותן שלוש שורות, רווחים אחרים, משמעות אחרת: `Run.` מודפס תמיד.
-      אף אחת מהן לא שגויה — הן פשוט שתי תוכניות שונות."
+      אף אחת מהן לא שגויה — הן שתי תוכניות שונות."
 
     This is the block that turns "indentation is a rule I must obey" into
     "indentation is a tool I use". Put it right after the three errors, while the
@@ -593,12 +593,12 @@ when the second is never used. That is intentional and worth a line in the brief
 **Why this is the quest**: it is the first program she writes that has *state*
 (two variables) and *structure* (two levels). When it passes, she has built a
 decision tree — and Chiron says so in the completion text, because naming what
-she just did is half the reward.
+she has done is half the reward.
 
 ## Reward & Recap
 
 **Item**: 👟 **נעלי הכנף / The Winged Shoes**
-desc (he): "נעליים מהמחסן של הרמס. הן לא מהירות במיוחד — הן פשוט אף פעם לא
+desc (he): "נעליים מהמחסן של הרמס. הן לא מהירות במיוחד — הן אף פעם לא
 נועלות אותך בדרך אחת."
 
 **Achievements possible here**
@@ -630,7 +630,7 @@ desc (he): "נעליים מהמחסן של הרמס. הן לא מהירות במ
 | `else x > 3:` | `SyntaxError: bad input on line N` | `SyntaxError: invalid syntax` | ל־`else` אין שאלה אף פעם |
 | `if x = 1:` | `SyntaxError: bad input on line N` | `SyntaxError: invalid syntax. Maybe you meant '==' …` | `=` נותן, `==` שואל — חזרה לשיעור 5 |
 | `if road == left:` (no quotes) | `NameError: name 'left' is not defined` | same | בלי גרשיים פייתון מחפש משתנה בשם `left` |
-| `if road == "Left":` on input `left` | לא שגיאה — פשוט לא נכנס לענף | — | אותיות גדולות/קטנות הן שני דברים שונים |
+| `if road == "Left":` on input `left` | לא שגיאה — הענף לא רץ | — | אותיות גדולות/קטנות הן שני דברים שונים |
 | broad `elif` before narrow one | לא שגיאה — ענף שלא רץ אף פעם | — | השאלה הצרה ביותר קודם; הבאג הזה שקט |
 
 ## Implementation notes

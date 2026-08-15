@@ -86,6 +86,11 @@ horizontal scroll at 390px
       built. Lessons unlock strictly in order today.
 - [ ] **Achievements** `persistent`, `debugger`, `noHints` are wired but only
       lesson 1 can currently trigger them.
+- [ ] **Only tested in Chromium.** The smoke test uses the one browser installed
+      in this environment. Before giving her the folder, open it once in the
+      browser she actually uses — especially Safari, where `localStorage` on
+      `file://` is the least reliable (`store.js` falls back to memory, so the
+      course still runs, but progress would not survive a reload).
 - [ ] Consider a `verify-all` npm-less script that runs both tools in sequence.
 - [ ] The boss health bar animates per passing case; with a single-case check it
       is a one-segment bar. Bosses should always declare 4–6 cases.

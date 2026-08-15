@@ -234,8 +234,8 @@ print(random.randint(1, 6))
 ```js
 { kind: "source", mustInclude: ["import random", "randint"],
   message: { he: "כאן צריך import random ואת הפונקציה randint",
-             en: "This one needs import random and the randint function" } }
-{ kind: "output", mode: "regex", expect: "^[1-6]\\s*$" }
+             en: "This one needs import random and the randint function" },
+  also: { kind: "output", mode: "regex", expect: "^[1-6]\\s*$" } }
 ```
 *The regex accepts only 1–6, so `randint(0, 6)` or `randint(1, 5)` will pass
 sometimes and fail sometimes — which is a real property of random code and worth
@@ -283,8 +283,8 @@ print(f"Same thread: {first == second}")
 ```js
 { kind: "source", mustInclude: ["random.seed"],
   message: { he: "המשימה הזאת דורשת random.seed",
-             en: "This one needs random.seed" } }
-{ kind: "output", mode: "normalized", expect: "Same thread: True" }
+             en: "This one needs random.seed" },
+  also: { kind: "output", mode: "normalized", expect: "Same thread: True" } }
 ```
 *This is the one seed exercise in the course whose expected output is safe: it
 compares two runs **inside Skulpt** instead of hard-coding a generated number.
@@ -327,8 +327,8 @@ print(f"You draw the {choice}.")
 ```js
 { kind: "source", mustInclude: ["random.choice"],
   message: { he: "כאן צריך את random.choice על הרשימה",
-             en: "This one needs random.choice on the list" } }
-{ kind: "output", mode: "regex", expect: "^You draw the (sword|spear|shield)\\.\\s*$" }
+             en: "This one needs random.choice on the list" },
+  also: { kind: "output", mode: "regex", expect: "^You draw the (sword|spear|shield)\\.\\s*$" } }
 ```
 
 **hints:**
@@ -384,9 +384,9 @@ print(f"Days of travel: {days}")
 ```js
 { kind: "source", mustInclude: ["import math", "math.sqrt", "math.ceil"],
   message: { he: "המשימה דורשת math.sqrt ו-math.ceil",
-             en: "This one needs math.sqrt and math.ceil" } }
-{ kind: "output", mode: "normalized",
-  expect: "Distance: 13.04 stadia\nDays of travel: 4" }
+             en: "This one needs math.sqrt and math.ceil" },
+  also: { kind: "output", mode: "normalized",
+    expect: "Distance: 13.04 stadia\nDays of travel: 4" } }
 ```
 *√(49+121) = √170 = 13.038…, so `round(…, 2)` is `13.04` and `ceil(13.038/4)` is
 `ceil(3.259…)` = 4. Note that `math.ceil` must be applied to the **unrounded**
@@ -485,9 +485,9 @@ else:
 ```js
 { kind: "source", mustInclude: ["import random", "def strike", "while", "return"],
   message: { he: "המשימה דורשת random, את הפונקציה strike, ולולאת while",
-             en: "The quest needs random, the strike function, and a while loop" } }
-{ kind: "output", mode: "regex",
-  expect: "(The Sphinx bows its head|You fall back to camp)" }
+             en: "The quest needs random, the strike function, and a while loop" },
+  also: { kind: "output", mode: "regex",
+    expect: "(The Sphinx bows its head|You fall back to camp)" } }
 ```
 *The output check is deliberately loose: the fight is different every run, so the
 only thing that can be asserted is that it **finished** with one of the two

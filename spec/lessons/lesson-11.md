@@ -293,9 +293,12 @@ Gods in the registry: 3
 ```
 plus
 ```js
-{ kind: "source", mustInclude: ["Poseidon", "len("],
+{ kind: "source", raw: true, mustInclude: ["Poseidon", "len("],
   message: { he: "פוסידון חייב להיות רשום בפנקס, והמספר חייב לבוא מ־len",
              en: "Poseidon must be in the registry, and the count must come from len" } }
+```
+`raw: true` is required here: `"Poseidon"` is a string literal, and a stripped
+skeleton would never contain it.
 ```
 
 **hints**
@@ -343,9 +346,13 @@ Gods on the list: 4
 ```
 plus
 ```js
-{ kind: "source", mustExclude: ["\"Poseidon\": 7", "'Poseidon': 7"],
+{ kind: "source", raw: true,
+  mustExclude: ["\"Poseidon\": 7", "'Poseidon': 7"],
   message: { he: "המספר 7 צריך להיווצר מחישוב — 5 ועוד 2 — ולא להיכתב לתוך המילון",
              en: "The 7 must be computed — 5 plus 2 — not written into the dict" } }
+```
+`raw: true` again: the forbidden text is a key literal paired with a number, so
+the check has to see the source as written.
 ```
 
 **hints**
@@ -614,5 +621,11 @@ camp necklace.)
 - e2's `source` check uses `mustExclude` rather than `mustInclude` so it forbids
   the one shortcut (typing `7` straight into the literal) without prescribing a
   style.
+- **e1 and e2 are the only `source` checks in this lesson that need
+  `raw: true`**, because both name string literals (`"Poseidon"`, and the
+  forbidden `"Poseidon": 7`) — a comment-and-literal-stripped skeleton would
+  never contain them, so without `raw` e1 could never pass and e2 could never
+  fail. Every other `source` check in lessons 9–12 targets syntax
+  (`for`, `.get(`, `.items()`, `min(`, `sorted(`) and works on the skeleton.
 - No `input()` in this lesson. Nothing here uses `del`, dict comprehensions, or
   `.pop()` — all of them are outside the curriculum at this point.

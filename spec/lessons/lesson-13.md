@@ -272,8 +272,8 @@ battle_cry()
 ```js
 { kind: "source", mustInclude: ["def"],
   message: { he: "המשימה הזאת דורשת פונקציה — שורה שמתחילה ב-def",
-             en: "This one needs a function — a line starting with def" } }
-{ kind: "output", mode: "normalized", expect: "FOR CAMP HALF-BLOOD!" }
+             en: "This one needs a function — a line starting with def" },
+  also: { kind: "output", mode: "normalized", expect: "FOR CAMP HALF-BLOOD!" } }
 ```
 *Deliberately almost free — a success in the first minute of training. The
 `source` check is what stops her from writing a bare `print` and moving on.*
@@ -365,9 +365,9 @@ card("Clarisse")
 ```js
 { kind: "source", mustInclude: ["def"],
   message: { he: "המשימה הזאת דורשת פונקציה אחת במקום שלוש חזרות",
-             en: "This one needs one function instead of three copies" } }
-{ kind: "output", mode: "normalized",
-  expect: "*** CAMPER CARD ***\nName: Annabeth\n*******************\n*** CAMPER CARD ***\nName: Grover\n*******************\n*** CAMPER CARD ***\nName: Clarisse\n*******************" }
+             en: "This one needs one function instead of three copies" },
+  also: { kind: "output", mode: "normalized",
+    expect: "*** CAMPER CARD ***\nName: Annabeth\n*******************\n*** CAMPER CARD ***\nName: Grover\n*******************\n*** CAMPER CARD ***\nName: Clarisse\n*******************" } }
 ```
 *Nineteen asterisks in the bottom border (the same width as the original 19
 equals signs). State the exact border strings in the brief so width is never the
@@ -412,9 +412,9 @@ for guard in guards:
 ```js
 { kind: "source", mustInclude: ["def", "for"],
   message: { he: "כאן צריך גם פונקציה (def) וגם לולאת for",
-             en: "This one needs both a function (def) and a for loop" } }
-{ kind: "output", mode: "normalized",
-  expect: "Argus reports to the Big House.\nChiron reports to the Big House.\nClarisse reports to the Big House." }
+             en: "This one needs both a function (def) and a for loop" },
+  also: { kind: "output", mode: "normalized",
+    expect: "Argus reports to the Big House.\nChiron reports to the Big House.\nClarisse reports to the Big House." } }
 ```
 
 **hints:**
@@ -471,9 +471,9 @@ print("All parts ready.")
 ```js
 { kind: "source", mustInclude: ["def", "for"],
   message: { he: "המשימה דורשת פונקציה אחת ולולאה אחת",
-             en: "The quest needs one function and one loop" } }
-{ kind: "output", mode: "normalized",
-  expect: "=== DAEDALUS WORKSHOP ===\nPart: bronze wing\nStatus: ready to build\n---\n=== DAEDALUS WORKSHOP ===\nPart: gear ring\nStatus: ready to build\n---\n=== DAEDALUS WORKSHOP ===\nPart: wax seal\nStatus: ready to build\n---\nAll parts ready." }
+             en: "The quest needs one function and one loop" },
+  also: { kind: "output", mode: "normalized",
+    expect: "=== DAEDALUS WORKSHOP ===\nPart: bronze wing\nStatus: ready to build\n---\n=== DAEDALUS WORKSHOP ===\nPart: gear ring\nStatus: ready to build\n---\n=== DAEDALUS WORKSHOP ===\nPart: wax seal\nStatus: ready to build\n---\nAll parts ready." } }
 ```
 
 **hints:**

@@ -502,7 +502,7 @@ desc (he): "עדשת זכוכית עכורה מעליית הגג. כשמסתכל
 | `print("12" > 3)` | `TypeError: '>' not supported between instances of 'str' and 'int'` | טקסט ומספר לא מושווים; זו הסיבה ל־`int(input(...))` |
 | `print(campers => 12)` | `SyntaxError: bad input on line N` | הסדר הוא `>=` ו־`<=`, הסימן הגדול קודם |
 | `print(a AND b)` | `SyntaxError: bad input on line N` | `and` / `or` / `not` באותיות קטנות תמיד |
-| `print(not(a and b))` נקרא כמו `print((not a) and b)` | לא שגיאה — פשוט תשובה אחרת | `not` נדבק חזק יותר מ־`and`; סוגריים פותרים את זה |
+| `print(not(a and b))` נקרא כמו `print((not a) and b)` | לא שגיאה — תשובה אחרת | `not` נדבק חזק יותר מ־`and`; סוגריים פותרים את זה |
 
 ## Implementation notes
 

@@ -184,7 +184,7 @@ Chiron in one callout. Annabeth asks the `.sort()` / `sorted()` question.
     ['Thalia', 'Bianca']
     []
     ```
-    פרוסה שחורגת מהגבול **לא** זורקת `IndexError`. היא פשוט מחזירה מה שיש, או
+    פרוסה שחורגת מהגבול **לא** זורקת `IndexError`. היא מחזירה את מה שיש, או
     רשימה ריקה. אינדקס בודד קפדן; פרוסה סלחנית.
 
 11. **code (runnable)** — `min`, `max`, `sum`, and an average.
