@@ -77,10 +77,23 @@ def choose_target(enemies):   # enemies: list of dicts, in tower range
     return enemies[0]         # return the one to shoot, or None to hold fire
 ```
 
-Each enemy dict: `{"kind", "hp", "max_hp", "distance", "speed", "x", "y",
+Each enemy dict: `{"id", "kind", "hp", "max_hp", "distance", "speed", "x", "y",
 "armour", "flying"}`. `distance` is how far it still has to walk — the single
 most useful number in the game, and the basis of the "target the leader"
 strategy.
+
+**The list is in spawn order**, so `enemies[0]` is whatever has been on the field
+longest — which is *not* the same as the default's furthest-along-the-path.
+Lesson 14 teaches exactly that difference, so this ordering is a contract:
+changing it silently breaks those levels.
+
+**What actually beats the default.** Targeting the leader is genuinely good. Its
+exploitable flaw is that it never *commits* — it switches the instant anything
+overtakes, so damage is spread and nothing dies. Lesson 14 is built on
+committing to a target, 15 on splash geometry with `math.sqrt`, and 16 on
+recursive selection. Every "her strategy decides this battle" claim in the
+lesson specs is backed by a measured leak count against a bank of eleven
+degenerate strategies plus the default.
 
 ### Class phase (lesson 19+)
 

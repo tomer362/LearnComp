@@ -177,7 +177,13 @@ to read anyway.
 
 **`source` `mustInclude`/`mustExclude` match bare identifiers as whole words**, so
 excluding `sum` does not trip on `sum_total` and requiring `for` is not satisfied
-by `forest`. Anything containing punctuation (`print(`, `#`) matches literally.
+by `forest`. Anything containing punctuation or a space (`print(`, `#`, `"for "`)
+matches literally.
+
+So write `mustExclude: ["for"]`, not `["for "]`. The trailing-space form works
+but is weaker — it is a literal match, so it depends on the exact spacing she
+happens to type. Verified: bare `"for"` catches a real `for` loop and does not
+trip on `format()` or the word `before`.
 
 ## Authoring rules that the schema cannot enforce
 

@@ -194,6 +194,11 @@
         tw.cooldown -= TICK;
         if (tw.cooldown > 0) continue;
 
+        /* CONTRACT: `inRange` is built by walking `live`, which is in spawn
+         * order, so enemies[0] is the one that has been on the field longest —
+         * which is NOT the same as the default's furthest-along-the-path.
+         * Lessons 14 L1 and L2 teach exactly that difference. Do not reorder
+         * this list without re-verifying those levels. */
         var towerSpec = TOWERS[tw.kind] || TOWERS.archer;
         var inRange = [];
         var missedFlyer = false;

@@ -451,6 +451,17 @@ const checkerResults = await page.evaluate(async () => {
     await t("source: raw:true sees comments",
       { check: { kind: "source", raw: true, mustInclude: ["#"], message: { he: "", en: "" } } },
       '# a note\nprint("hi")', true),
+    /* Identifiers must match as whole words, or a lesson banning `sum` would
+     * reject `sum_of_parts` and one requiring `for` would accept `format`. */
+    await t("source: bare identifier does not trip on a longer word",
+      { check: { kind: "source", mustExclude: ["for"], message: { he: "", en: "" } } },
+      "name = format(3)\nprint(name)", true),
+    await t("source: bare identifier still catches the real construct",
+      { check: { kind: "source", mustExclude: ["for"], message: { he: "", en: "" } } },
+      "for i in range(3):\n    print(i)", false),
+    await t("source: banning sum does not reject sum_of_parts",
+      { check: { kind: "source", mustExclude: ["sum"], message: { he: "", en: "" } } },
+      "sum_of_parts = 5\nprint(sum_of_parts)", true),
   ];
 });
 for (const r of checkerResults) check(r.ok, r.name, r.detail);
