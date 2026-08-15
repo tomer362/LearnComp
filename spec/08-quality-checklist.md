@@ -15,14 +15,19 @@ lesson's entry in `TODO.md` and tick as you go.
 - [ ] Recap has one bullet per concept, plus a teaser for lesson N+1
 - [ ] Item, XP and drachma values match the budget in `02-game-design.md`
 
-## Exercises
+## Battle levels
 
-- [ ] 3–5 training exercises, ramping from nearly-free to genuinely hard
-- [ ] One quest (or a boss with multiple test cases in lessons 4/8/12/16/20)
-- [ ] Every exercise has exactly 3 escalating hints (nudge → tool → walkthrough)
-- [ ] **Every `solution` passes its own `check`** — asserted by the smoke test
-- [ ] Every exercise is solvable using only what she has been taught
-- [ ] `output` checks use `mode: "normalized"` unless there is a stated reason
+- [ ] 3–5 training battles, ramping from nearly-free to genuinely hard
+- [ ] One great battle (a boss in lessons 4/8/12/16/20)
+- [ ] Every level has exactly 3 escalating hints (nudge → tool → walkthrough)
+- [ ] **Every `solution` WINS its battle** — asserted by `verify-python.mjs`
+- [ ] **No level can be won by writing nothing** — also asserted
+- [ ] Each level's mechanic *forces* the lesson's concept; where the map alone
+      cannot, a `check.also` `source` rule requires the construct
+- [ ] Every level is beatable using only what she has been taught, and only the
+      API available at that lesson (`spec/09-battle-game.md`)
+- [ ] No tower in a stated solution sits on the path or out of range of it
+- [ ] The level's outcome does not depend on luck (randomness is seeded)
 - [ ] Every `source` check carries a `message` explaining the requirement
 
 ## Python correctness
@@ -45,6 +50,8 @@ lesson's entry in `TODO.md` and tick as you go.
 
 - [ ] Runs from `file://` by double-click, offline, with **zero** console errors
 - [ ] Zero network requests (smoke test blocks the network and asserts none)
+- [ ] Every level draws its battlefield, and the replay controls work
+- [ ] A losing attempt is *explained* — the diagnosis names the real mistake
 - [ ] `while True:` is caught by the exec limit and shows the friendly message
 - [ ] `input()` prompts in-page and resumes correctly
 - [ ] Progress persists across reload; Export/Import round-trips

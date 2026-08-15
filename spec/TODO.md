@@ -8,9 +8,13 @@ the per-lesson boxes below are the short form of it.
 | | |
 | --- | --- |
 | Engine, hub, i18n, checker, game layer | ✅ done |
-| Lesson 1 | ✅ built, verified, playable |
-| Lessons 2–20 | 📋 fully designed in `spec/lessons/` (all 20 written), not yet built |
-| Verification tooling | ✅ `tools/verify-python.mjs`, `tools/smoke-test.mjs` |
+| **2D battle engine** (sim, Python API, canvas renderer) | ✅ done |
+| Lesson 1 | ✅ built as five playable battles, verified |
+| Lessons 2–20 | 📋 fully designed in `spec/lessons/`, not yet built |
+| Verification tooling | ✅ simulates every level headlessly |
+
+**The game is the course** — see `spec/09-battle-game.md`. Every task is a
+battle; there are no written exercises.
 
 ## Done
 
@@ -28,20 +32,29 @@ the per-lesson boxes below are the short form of it.
 - [x] Lesson 1 — content, shell, 4 training exercises + quest, all verified
 - [x] Beginner syntax diagnosis — Skulpt reports every indentation mistake as a
       flat `bad input`, so the engine works out what she actually did wrong
-- [x] `tools/verify-python.mjs` — 23 checks: every solution passes its own check,
-      and every declared error string matches what the engine really renders
-- [x] `tools/smoke-test.mjs` — 64 checks over `file://` with the network blocked
+- [x] **Battle engine** — `battle/sim.js` (deterministic headless simulation,
+      seeded RNG, snapshot recording), `battle/pyapi.js` (the Python API as
+      Skulpt builtins, plus calling her `choose_target` and tower classes back
+      from JS), `battle/play.js` (orchestration, objective, failure diagnosis),
+      `battle/render.js` (canvas replay with playback controls)
+- [x] `tools/verify-python.mjs` — **simulates every level**: asserts each
+      solution wins and that no level is winnable by writing nothing; also that
+      every declared error string matches what the engine really renders
+- [x] `tools/smoke-test.mjs` — 68 checks over `file://` with the network blocked,
+      including playing battles in a real browser
 - [x] `CLAUDE.md`, `.claude/rules/lesson-authoring.md`, `README.md`
 
 ## Lessons to build
 
 Each lesson: write `content/lesson-NN.js` from `spec/lessons/lesson-NN.md`, copy
-the shell to `lessons/lesson-NN.html`, flip `built: true` in
+the shell to `lessons/lesson-NN.html` (**including the four `battle/*.js` script
+tags**), flip `built: true` and add the item to `LC.ITEMS` in
 `assets/js/curriculum.js`, then run both tools.
 
-Per-lesson boxes: **C** content written he+en · **V** `verify-python.mjs` passes ·
-**S** `smoke-test.mjs` passes · **R** checked in both RTL and LTR · **P** no
-horizontal scroll at 390px
+Per-lesson boxes: **C** content written he+en · **V** `verify-python.mjs` passes
+(every level's solution wins, none winnable by doing nothing) · **S**
+`smoke-test.mjs` passes · **R** checked in both RTL and LTR · **P** no horizontal
+scroll at 390px
 
 ### Act I — Camp Half-Blood
 

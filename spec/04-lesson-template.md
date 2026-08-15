@@ -3,6 +3,12 @@
 **This file is the schema.** A lesson that does not match it will not render.
 Every string visible to the learner is a `{he, en}` pair — no bare strings.
 
+> **The game is the course.** The `training` and `quest` entries are **battle
+> levels**, not written exercises. Their extra fields (map, waves, gold, and
+> `check.kind: "battle"`) are defined in **`spec/09-battle-game.md`** — read
+> that alongside this file. Everything below still applies: the six beats, the
+> `{he, en}` pairs, the three-hint ladder, and the teach blocks.
+
 ## The six beats
 
 Every lesson page renders these sections in this order. Do not add, remove or
@@ -13,9 +19,9 @@ reading the content.
 | --- | --- | --- | --- |
 | 1 | **Prophecy** | הנבואה | Story hook. Why this lesson exists, in-world. 3–6 lines. No code. |
 | 2 | **Chiron Teaches** | כירון מלמד | The concept. Prose + runnable examples + callouts. |
-| 3 | **Try It** | נסי בעצמך | One free-play editor, pre-filled, no grading. Safe experimentation. |
-| 4 | **Training** | אימונים | 3–5 graded exercises, easiest first. |
-| 5 | **Quest** | המשימה | One larger graded task combining the lesson. Boss fight in lessons 4/8/12/16/20. |
+| 3 | **Training Ground** | מגרש האימונים | One free-play editor, pre-filled, no grading. The game words work here too, against a practice field. |
+| 4 | **The Battles** | הקרבות | 3–5 graded battle levels, easiest first. |
+| 5 | **The Great Battle** | הקרב הגדול | One larger battle combining the lesson. A boss in lessons 4/8/12/16/20. |
 | 6 | **Reward & Recap** | שכר וסיכום | XP, item, bullet recap, teaser for the next lesson. |
 
 ## Content object

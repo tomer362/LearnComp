@@ -8,9 +8,15 @@ paths:
 # Lesson authoring rules
 
 Loaded only when you are actually editing lesson content, so it can afford to be
-specific. The full design is in `spec/04-lesson-template.md` (schema) and
-`spec/06-authoring-guide.md` (voice). The deep design for the lesson you are
-building is in `spec/lessons/lesson-NN.md` — read that one first.
+specific. The deep design for the lesson you are building is in
+`spec/lessons/lesson-NN.md` — read that one first.
+
+**The game is the course.** Every task is a battle, not an exercise. The level
+schema, the Python API she has available, and which control model each lesson
+uses all live in `spec/09-battle-game.md` — read it before writing a level.
+`content/lesson-01.js` is the working reference. Voice rules are in
+`spec/06-authoring-guide.md`; the surrounding lesson structure is in
+`spec/04-lesson-template.md`.
 
 ## Before you write a line
 
@@ -34,9 +40,25 @@ building is in `spec/lessons/lesson-NN.md` — read that one first.
   `` `print` `` rather than hand-writing markup.
 - `**bold**` works in prose. Nothing else does; everything else is escaped.
 
+## Battle levels
+
+- **A level must force the lesson's concept.** If she can beat it by placing
+  towers by hand when the lesson is about loops, the level is broken. Either the
+  map makes the concept necessary (twenty spots, one wave format she must read),
+  or you add `check.also` with a `source` rule requiring the construct.
+- **A level must be unwinnable by writing nothing** — `verify-python.mjs`
+  asserts this. The default objective is a *perfect* defense: campHp must not
+  drop at all unless the level sets `check.campHpAtLeast` lower.
+- Towers cannot stand on the path, and one further than about 2.6 cells from it
+  never fires. Check your coordinates against your own path list.
+- Only the API available at that lesson: build-script calls through lesson 13,
+  `choose_target` from 14, classes from 19.
+- Randomness is seeded per level, so a battle plays identically every time —
+  never write a level whose outcome depends on luck.
+
 ## Exercises
 
-- 3–5 training exercises, ramping. Exercise 1 should be nearly free.
+- 3–5 training battles, ramping. The first should be nearly free.
 - Exactly **three** hints: a nudge that asks a question, then one that names the
   tool, then one that walks through the reasoning. Never give the answer at
   rung 1; never still be cryptic at rung 3.
