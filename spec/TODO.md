@@ -10,7 +10,7 @@ the per-lesson boxes below are the short form of it.
 | Engine, hub, i18n, checker, game layer | ✅ done |
 | **2D battle engine** (sim, Python API, canvas renderer) | ✅ done |
 | Lesson 1 | ✅ built as five playable battles, verified |
-| Lessons 2–20 | 📋 fully designed in `spec/lessons/`, not yet built |
+| Lessons 2–20 | 📋 **designed as battle levels** in `spec/lessons/`, every level verified winnable by simulation, not yet built as `content/` files |
 | Verification tooling | ✅ simulates every level headlessly |
 
 **The game is the course** — see `spec/09-battle-game.md`. Every task is a
@@ -91,6 +91,18 @@ scroll at 390px
 - [ ] **20** Battle for Olympus — **CAPSTONE**, staged build + "real Python next" · C V S R P
 
 ## Known gaps and follow-ups
+
+- [ ] **Building lesson N is now a transcription job, not a design job.** Each
+      `spec/lessons/lesson-NN.md` carries complete level definitions — map,
+      path, gold, campHp, waves, starter, solution, hints, exact `check` — all
+      verified by simulation. Transcribe into `content/lesson-NN.js`, then run
+      `node tools/verify-python.mjs content/lesson-NN.js`; it re-simulates and
+      will catch any transcription slip.
+- [ ] **Three engine behaviours were tightened after some specs were written**
+      (rocks unbuildable, cannons blind to flyers, constraint failures
+      explained). The specs were re-verified against the first two, but if a
+      level fails when you build it, check these before assuming the spec is
+      wrong.
 
 - [ ] **The XP budget lands within ~10 points of the Olympian threshold.** The 20
       lesson specs total roughly 4210 core XP against a 4200 level-7 floor, so she
