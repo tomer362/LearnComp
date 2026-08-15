@@ -31,7 +31,9 @@ window.LC = window.LC || {};
     debugger:    { icon: "🔧", name: { he: "מנפה באגים",      en: "Debugger" },        desc: { he: "תיקנת שגיאה והרצת שוב בהצלחה",     en: "You fixed an error and got it running" } },
     persistent:  { icon: "🪨", name: { he: "עקשנית",          en: "Persistent" },      desc: { he: "פתרת תרגיל אחרי חמישה ניסיונות",   en: "You solved an exercise after five tries" } },
     noHints:     { icon: "🎯", name: { he: "בלי רמזים",       en: "No Hints Needed" }, desc: { he: "סיימת שיעור שלם בלי רמז אחד",      en: "You finished a whole lesson with no hints" } },
-    firstLesson: { icon: "📿", name: { he: "חניכה",           en: "Initiated" },       desc: { he: "סיימת את השיעור הראשון",           en: "You finished your first lesson" } }
+    firstLesson: { icon: "📿", name: { he: "חניכה",           en: "Initiated" },       desc: { he: "סיימת את השיעור הראשון",           en: "You finished your first lesson" } },
+    namer:        { icon: "🏷️", name: { he: "קוראת בשמות",    en: "Namer of Things" }, desc: { he: "יצרת והדפסת משתנה בפעם הראשונה",   en: "You created and printed a variable for the first time" } },
+    typeDetective:{ icon: "🔍", name: { he: "בלשית טיפוסים",   en: "Type Detective" },  desc: { he: "הרצת קרב עם שלוש קריאות type() או יותר", en: "You ran a battle with three or more type() calls" } }
   };
 
   function levelFor(xp) {
@@ -155,12 +157,17 @@ window.LC = window.LC || {};
       '<div class="hud-xp">' +
         '<div class="hud-xp-label"><span>' + LC.esc(LC.t(lvl.title)) +
           '</span><span dir="ltr">' + s.xp + " XP</span></div>" +
-        '<div class="xpbar"><div class="xpbar-fill" style="width:' + pct + '%"></div></div>' +
+        '<div class="xpbar"><div class="xpbar-fill"></div></div>' +
       "</div>" +
       '<div class="hud-res">' +
         '<span class="res" dir="ltr" title="' + LC.esc(LC.s("drachmas")) + '">🪙 ' + s.drachmas + "</span>" +
         '<span class="res" dir="ltr" title="' + LC.esc(LC.s("ambrosia")) + '">🍯 ' + s.ambrosia + "</span>" +
       "</div>";
+
+    /* Set through CSSOM, not an HTML style="" attribute — CSP style-src can
+     * then drop 'unsafe-inline' without breaking the XP bar. */
+    var fill = host.querySelector(".xpbar-fill");
+    if (fill) fill.style.width = pct + "%";
 
     if (cabin) document.documentElement.style.setProperty("--cabin", cabin.accent);
   }

@@ -150,7 +150,7 @@ window.LC = window.LC || {};
           (!unlocked ? " is-locked" : ""));
 
         var node = playable ? el("a", "stop-link") : el("div", "stop-link");
-        if (playable) node.setAttribute("href", "lessons/lesson-" + l.id + ".html");
+        if (playable) node.setAttribute("href", LC.href.lesson(l.id));
 
         node.appendChild(el("span", "stop-icon", done ? "✓" : (unlocked ? l.icon : "🔒")));
         var text = el("div", "stop-text");
@@ -228,6 +228,32 @@ window.LC = window.LC || {};
       area.focus();
       area.select();
     });
+    bar.appendChild(out);
+
+    /* A shareable link only makes sense with a real origin to share — on
+     * file:// there is nothing to send anyone. See spec/10-deployment.md. */
+    if (LC.env.hosted) {
+      var link = el("button", "btn btn-ghost", LC.esc(LC.s("copyProgressLink")));
+      link.type = "button";
+      link.addEventListener("click", function () {
+        var url = window.location.origin + "/?progress=" + LC.store.encodeProgress();
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(url).then(function () {
+            LC.Game.toast(LC.esc(LC.s("linkCopied")));
+          }, function () {
+            area.value = url;
+            area.focus();
+            area.select();
+          });
+        } else {
+          area.value = url;
+          area.focus();
+          area.select();
+        }
+      });
+      bar.appendChild(link);
+    }
+
     var inBtn = el("button", "btn btn-ghost", LC.esc(LC.s("importSave")));
     inBtn.type = "button";
     inBtn.addEventListener("click", function () {
@@ -245,7 +271,7 @@ window.LC = window.LC || {};
       LC.store.update(function (s) { s.claimed = false; });
       LC.Hub.mount();
     });
-    bar.appendChild(out); bar.appendChild(inBtn); bar.appendChild(reroll);
+    bar.appendChild(inBtn); bar.appendChild(reroll);
     box.appendChild(bar);
     box.appendChild(area);
     root.appendChild(box);
