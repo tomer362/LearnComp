@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>קוד של חצי־אל · Demigod Code</title>
+  <meta name="description" content="ללמוד פייתון במחנה חצי־דם — Learn Python at Camp Half-Blood">
+  <link rel="stylesheet" href="assets/css/theme.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>%E2%9A%A1</text></svg>">
+</head>
+<body class="hub-page">
+  <div id="app"></div>
+
+  <!-- Load order is load-ready: no modules, no fetch. See spec/01-architecture.md -->
+  <script src="assets/js/store.js"></script>
+  <script src="assets/js/i18n.js"></script>
+  <script src="assets/js/curriculum.js"></script>
+  <script src="assets/js/game.js"></script>
+  <script src="assets/js/hub.js"></script>
+  <script>LC.i18n.init(); LC.Hub.mount();</script>
+</body>
+</html>
