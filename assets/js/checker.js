@@ -164,12 +164,21 @@ window.LC = window.LC || {};
           }
         }
 
+        /* Her strategy function threw mid-battle. She MUST see the real
+         * traceback — "you lost" with full camp HP and no error would be
+         * unexplainable, and lesson 18 is built on reading these. */
+        var strategyErr = null, strategyWhy = null;
+        if (r.sim && r.sim.strategyError) {
+          strategyErr = LC.Engine.describeError(r.sim.strategyError);
+          strategyWhy = LC.Engine.explain(strategyErr, source);
+        }
+
         return {
           pass: verdict.pass,
           sim: r.sim,
           runs: [r],
-          error: null,
-          explanation: null,
+          error: strategyErr,
+          explanation: strategyWhy,
           reason: verdict.pass ? null : (LC.Battle.diagnose(r.sim, exercise) || {
             he: "ההגנה לא החזיקה. הריצי שוב וצפי איפה הן עוברות.",
             en: "The defense did not hold. Run it again and watch where they get through."

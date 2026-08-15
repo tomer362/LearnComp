@@ -233,6 +233,29 @@ check(/TimeLimit/i.test(limitErr), "an infinite loop is stopped by the exec limi
 /* Skulpt reports every indentation mistake as a flat "bad input", which is
  * useless to a beginner and would sink lesson 6. The engine diagnoses these
  * from the source; if that regresses, lesson 6 becomes unteachable. */
+/* Lesson 18 is built on reading a traceback from a strategy function that
+ * crashed mid-battle. If the error is swallowed she sees "you lost" with full
+ * camp HP and no explanation. */
+section("A crashing strategy surfaces its real error");
+const crash = await page.evaluate(async () => {
+  const level = {
+    map: { cols: 10, rows: 6, path: [[0,4],[1,4],[2,4],[3,4],[4,4],[5,4],[6,4],[7,4],[8,4],[9,4]] },
+    gold: 200, campHp: 3, seed: 1, allowed: ["archer"],
+    waves: [{ delay: 0, enemies: [{ kind: "satyr", count: 3, gap: 1 }] }],
+    check: { kind: "battle" },
+  };
+  const res = await LC.Checker.check(level,
+    'place_tower("archer", 2, 3)\ndef choose_target(enemies):\n    return enemies[99]');
+  return {
+    pass: res.pass,
+    err: res.error ? res.error.text : null,
+    why: res.explanation ? res.explanation.en : null,
+  };
+});
+check(crash.pass === false, "a crashing strategy loses the battle");
+check(/IndexError/.test(crash.err || ""), "the real Python error is surfaced", crash.err);
+check(!!crash.why, "and it is explained in her language", crash.why);
+
 section("Beginner error diagnosis");
 const diagnoses = await page.evaluate(async () => {
   const cases = [

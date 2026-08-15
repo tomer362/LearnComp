@@ -110,8 +110,8 @@
       en: "You did not build any towers, so nothing stopped them. Use place_tower." };
 
     if (sim.strategyError) return {
-      he: "הקוד שלך נעצר עם שגיאה באמצע הקרב.",
-      en: "Your code stopped with an error in the middle of the battle." };
+      he: "הפונקציה שלך נעצרה עם שגיאה באמצע הקרב, והמגדלים הפסיקו לירות. השגיאה האמיתית למטה.",
+      en: "Your function stopped with an error in the middle of the battle, and the towers stopped firing. The real error is below." };
 
     /* Held fire vs never saw anything are completely different mistakes. */
     var held = sim.towers.filter(function (t) { return t.shots === 0 && t.heldFire > 0; });
