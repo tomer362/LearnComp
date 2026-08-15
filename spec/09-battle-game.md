@@ -139,6 +139,32 @@ way every time. She can reason about it; we can verify it.
 Damage per hit is `max(1, damage - armour)`, so armour makes fast weak towers
 much worse and is what forces her to think about matchups.
 
+**Damage per second per 100 gold**, which is the number a level designer should
+actually reason about:
+
+| Tower | vs armour 0 | vs 2 | vs 5 | vs 8 | vs 12 |
+| --- | --- | --- | --- | --- | --- |
+| archer | **32.0** | 25.6 | 16.0 | 6.4 | 3.2 |
+| cannon | 18.7 | 17.3 | 15.3 | **13.3** | **10.7** |
+| ice | 5.7 | 2.9 | 1.4 | 1.4 | 1.4 |
+| lightning (3 targets) | 36.0 | 32.0 | 26.0 | 20.0 | 12.0 |
+| lightning (1 target) | 12.0 | 10.7 | 8.7 | 6.7 | 4.0 |
+
+The roles that fall out of this are the levers for level design:
+
+- **archer** — the best value against unarmoured swarms, and nearly useless
+  against a boss. Three times better than a cannon against satyrs, five times
+  worse against a minotaur.
+- **cannon** — flat and reliable. The only affordable answer to heavy armour,
+  and blind to anything flying.
+- **lightning** — the best tower in the game *if* three enemies are in range,
+  and worse than an archer against a lone target. Rewards reading the wave.
+- **ice** — negligible damage; it is a support tower that buys the others time.
+  Never design a level winnable by ice alone.
+
+A level that wants her to *think* should present a wave the obvious tower loses
+to.
+
 **The cannon cannot hit flying enemies.** This is the mechanical reason lesson 6
 needs `if`/`elif`/`else`: "which tower counters which monster" has to be a real
 decision, not flavour text. A cannon that watched harpies fly past says so
