@@ -9,7 +9,7 @@ the per-lesson boxes below are the short form of it.
 | --- | --- |
 | Engine, hub, i18n, checker, game layer | ✅ done |
 | Lesson 1 | ✅ built, verified, playable |
-| Lessons 2–20 | 📋 designed in `spec/lessons/`, not yet built |
+| Lessons 2–20 | 📋 fully designed in `spec/lessons/` (all 20 written), not yet built |
 | Verification tooling | ✅ `tools/verify-python.mjs`, `tools/smoke-test.mjs` |
 
 ## Done
@@ -26,8 +26,11 @@ the per-lesson boxes below are the short form of it.
 - [x] `hub.js` + `index.html` — claiming flow, quest map, export/import
 - [x] `theme.css` — one stylesheet, both directions, logical properties
 - [x] Lesson 1 — content, shell, 4 training exercises + quest, all verified
-- [x] `tools/verify-python.mjs` — asserts every solution passes its own check
-- [x] `tools/smoke-test.mjs` — 39 checks over `file://` with the network blocked
+- [x] Beginner syntax diagnosis — Skulpt reports every indentation mistake as a
+      flat `bad input`, so the engine works out what she actually did wrong
+- [x] `tools/verify-python.mjs` — 23 checks: every solution passes its own check,
+      and every declared error string matches what the engine really renders
+- [x] `tools/smoke-test.mjs` — 64 checks over `file://` with the network blocked
 - [x] `CLAUDE.md`, `.claude/rules/lesson-authoring.md`, `README.md`
 
 ## Lessons to build
@@ -75,6 +78,13 @@ horizontal scroll at 390px
 - [ ] **20** Battle for Olympus — **CAPSTONE**, staged build + "real Python next" · C V S R P
 
 ## Known gaps and follow-ups
+
+- [ ] **The XP budget lands within ~10 points of the Olympian threshold.** The 20
+      lesson specs total roughly 4210 core XP against a 4200 level-7 floor, so she
+      reaches Olympian on the final award of the capstone and not before — which
+      is the intent, but it means **any XP retuning must be rechecked against
+      `spec/02-game-design.md`'s level table**. If a lesson's values change, sum
+      the specs again and adjust lesson 20's completion bonus to absorb it.
 
 - [ ] **Mirror each new item into `LC.ITEMS`** in `assets/js/curriculum.js` when
       you build a lesson. The hub does not load content files (that would mean
