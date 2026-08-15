@@ -60,6 +60,8 @@ window.LC = window.LC || {};
     lessonDone:     { he: "השיעור הושלם",         en: "Lesson complete" },
     nextLesson:     { he: "לשיעור הבא",           en: "Next lesson" },
     whatsNext:      { he: "מה הלאה?",             en: "What's next?" },
+    nextBattle:     { he: "לקרב הבא",             en: "Next battle" },
+    lockedNote:     { he: "נפתח כשתנצחי בקרב שלפניו", en: "Opens when you win the battle before it" },
 
     /* hub */
     yourQuest:      { he: "המסע שלך",             en: "Your Quest" },
@@ -73,6 +75,11 @@ window.LC = window.LC || {};
     exportSave:     { he: "גיבוי התקדמות",        en: "Export progress" },
     importSave:     { he: "טעינת גיבוי",          en: "Import progress" },
     saveWarning:    { he: "הדפדפן הזה לא שומר התקדמות. גבי אותה ידנית.", en: "This browser will not save progress. Export it manually." },
+    copyProgressLink: { he: "העתקת קישור התקדמות", en: "Copy progress link" },
+    linkCopied:     { he: "הקישור הועתק.",         en: "Link copied." },
+    confirmProgressLoad: { he: "לטעון התקדמות מהקישור הזה? זה יחליף את מה ששמור כרגע במחשב הזה.",
+                            en: "Load progress from this link? This will replace what is currently saved on this device." },
+    invalidProgressLink: { he: "הקישור הזה לא תקין.", en: "That link is not valid." },
 
     /* claiming */
     claimTitle:     { he: "מי את?",               en: "Who are you?" },
@@ -167,9 +174,19 @@ window.LC = window.LC || {};
     setLang: setLang,
     toggle: function () { setLang(lang === "he" ? "en" : "he"); },
     onChange: function (fn) { listeners.push(fn); },
-    /** Read the saved language and apply it. Call before first render. */
+    /** Read the saved language and apply it. Call before first render.
+     * A ?lang= in the URL is a one-time initializer: it wins on this load
+     * AND is written into the save, so the save stays the single source of
+     * truth for every load after. See spec/03-i18n-and-rtl.md. */
     init: function () {
-      setLang(LC.store.get().lang || "he", { persist: false });
+      var fromUrl = null;
+      try {
+        var q = new URLSearchParams(window.location.search).get("lang");
+        if (q === "he" || q === "en") fromUrl = q;
+      } catch (e) { /* no query string support — fall through to the save */ }
+
+      if (fromUrl) setLang(fromUrl, { persist: true });
+      else setLang(LC.store.get().lang || "he", { persist: false });
     }
   };
 

@@ -18,7 +18,7 @@ window.LC = window.LC || {};
 
   LC.CURRICULUM = [
     { id: "01", act: 1, built: true,  boss: false, icon: "📿", title: { he: "המילה הראשונה",    en: "The First Word" },        teaches: { he: "print, טקסט, הערות",        en: "print, strings, comments" } },
-    { id: "02", act: 1, built: false, boss: false, icon: "🧿", title: { he: "שרשרת המחנה",      en: "The Camp Necklace" },     teaches: { he: "משתנים וסוגים",             en: "variables and types" } },
+    { id: "02", act: 1, built: true,  boss: false, icon: "🧿", title: { he: "שרשרת המחנה",      en: "The Camp Necklace" },     teaches: { he: "משתנים וסוגים",             en: "variables and types" } },
     { id: "03", act: 1, built: false, boss: false, icon: "🗣️", title: { he: "שיחה עם כירון",    en: "Speaking with Chiron" },  teaches: { he: "input ו-f-strings",         en: "input and f-strings" } },
     { id: "04", act: 1, built: false, boss: true,  icon: "🐂", title: { he: "מס המינוטאור",     en: "The Minotaur's Toll" },   teaches: { he: "פעולות חשבון",              en: "arithmetic" } },
 
@@ -48,7 +48,8 @@ window.LC = window.LC || {};
    * is built so the inventory can show a real name and icon.
    * Keyed by the item id used in the content file. */
   LC.ITEMS = {
-    "camp-bead": { icon: "📿", name: { he: "חרוז המחנה", en: "Camp Bead" } }
+    "camp-bead": { icon: "📿", name: { he: "חרוז המחנה", en: "Camp Bead" } },
+    "leather-cord": { icon: "🪢", name: { he: "רצועת העור", en: "The Leather Cord" } }
   };
 
   LC.itemMeta = function (id) {

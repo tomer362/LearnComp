@@ -81,9 +81,37 @@ window.LC = window.LC || {};
     }
   }
 
+  /* UTF-8 safe base64url, for a shareable ?progress= link — plain btoa()
+   * throws on Hebrew text, and a URL cannot carry raw "+/=" safely. */
+  function utf8ToBase64Url(str) {
+    var bytes = new TextEncoder().encode(str);
+    var binary = "";
+    for (var i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+    return window.btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  }
+
+  function base64UrlToUtf8(b64url) {
+    var b64 = String(b64url).replace(/-/g, "+").replace(/_/g, "/");
+    while (b64.length % 4) b64 += "=";
+    var binary = window.atob(b64);
+    var bytes = new Uint8Array(binary.length);
+    for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return new TextDecoder().decode(bytes);
+  }
+
   LC.store = {
     get: load,
     save: save,
+    /** A shareable link payload: the whole save, base64url-encoded. */
+    encodeProgress: function () {
+      try { return utf8ToBase64Url(JSON.stringify(load())); }
+      catch (e) { return ""; }
+    },
+    /** @returns {string|null} the decoded JSON text, or null if unreadable */
+    decodeProgress: function (payload) {
+      try { return base64UrlToUtf8(payload); }
+      catch (e) { return null; }
+    },
     /** Mutate state through a function, then persist. */
     update: function (fn) {
       var s = load();

@@ -9,9 +9,10 @@ the per-lesson boxes below are the short form of it.
 | --- | --- |
 | Engine, hub, i18n, checker, game layer | ✅ done |
 | **2D battle engine** (sim, Python API, canvas renderer) | ✅ done |
-| Lesson 1 | ✅ built as five playable battles, verified |
-| Lessons 2–20 | 📋 **designed as battle levels** in `spec/lessons/`, every level verified winnable by simulation, not yet built as `content/` files |
+| Lessons 1–2 | ✅ built as five playable battles each, verified |
+| Lessons 3–20 | 📋 **designed as battle levels** in `spec/lessons/`, every level verified winnable by simulation, not yet built as `content/` files |
 | Verification tooling | ✅ simulates every level headlessly |
+| **Vercel Hobby deployment** | ✅ done — `spec/10-deployment.md`, dual-mode: `file://` unchanged, hosted lane adds PWA install, progressive reveal, shareable progress links |
 
 **The game is the course** — see `spec/09-battle-game.md`. Every task is a
 battle; there are no written exercises.
@@ -58,7 +59,7 @@ scroll at 390px
 
 ### Act I — Camp Half-Blood
 
-- [ ] **02** The Camp Necklace — variables, `str`/`int`/`float`, `type()` · C V S R P
+- [x] **02** The Camp Necklace — variables, `str`/`int`/`float`, `type()` · C V S R P
 - [ ] **03** Speaking with Chiron — `input()`, conversion, f-strings · C V S R P
 - [ ] **04** The Minotaur's Toll — arithmetic · **BOSS** · C V S R P
 
@@ -119,8 +120,14 @@ scroll at 390px
       (`spec/05-visual-design.md`). Revisit only with a vendorable editor.
 - [ ] **Skip-ahead affordance** described in `spec/02-game-design.md` is not
       built. Lessons unlock strictly in order today.
-- [ ] **Achievements** `persistent`, `debugger`, `noHints` are wired but only
-      lesson 1 can currently trigger them.
+- [x] **Progressive reveal within a lesson** — battles now unlock one at a
+      time as she wins them (a queue, not a skip: locked battles render as an
+      inert strip, never a hidden one). See `assets/js/lesson.js` and
+      `spec/10-deployment.md`. This is separate from lesson-to-lesson
+      unlocking above, which is still strictly in order.
+- [x] **Achievements** `persistent`, `debugger`, `noHints` can now trigger
+      from either built lesson. Two new ones — `namer` and `typeDetective` —
+      were added for lesson 2; wire the pattern forward as more lessons ship.
 - [ ] **Only tested in Chromium.** The smoke test uses the one browser installed
       in this environment. Before giving her the folder, open it once in the
       browser she actually uses — especially Safari, where `localStorage` on

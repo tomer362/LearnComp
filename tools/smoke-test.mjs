@@ -11,6 +11,7 @@ import path from "node:path";
 import fs from "node:fs";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { chromium } from "/opt/node22/lib/node_modules/playwright/index.mjs";
+import { startServer } from "./serve.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const shots = process.argv.includes("--shots");
@@ -72,7 +73,7 @@ check(await page.locator(".map").isVisible(), "quest map renders after claiming"
 check((await page.locator(".stop").count()) === 20, "map shows all 20 stops",
   "found " + (await page.locator(".stop").count()));
 check((await page.locator(".hud-name").textContent()).includes("Tamar"), "her name shows in the HUD");
-check((await page.locator(".stop.is-soon").count()) === 19, "19 stops marked coming soon");
+check((await page.locator(".stop.is-soon").count()) === 18, "18 stops marked coming soon");
 check(await page.locator('.stop a[href*="lesson-01"]').isVisible(), "lesson 1 is playable from the map");
 
 if (shots) await page.screenshot({ path: path.join(shotDir, "hub-he.png"), fullPage: true });
@@ -116,8 +117,10 @@ check(outDir === "ltr", "output stays dir=ltr in Hebrew mode", "got " + outDir);
 
 /* ---- exercise: wrong answer, hint ladder, right answer ----------------- */
 
-section("Battle rendering");
-check((await page.locator(".battle-canvas").count()) === 5, "every level renders a battlefield canvas",
+section("Battle rendering — progressive reveal");
+/* Only the reachable battle renders a canvas/editor on first paint; the rest
+ * are locked strips. See spec/02-game-design.md: no skip-ahead mid-lesson. */
+check((await page.locator(".battle-canvas").count()) === 1, "only the reachable battle renders a canvas",
   "found " + (await page.locator(".battle-canvas").count()));
 const boardPainted = await page.evaluate(() => {
   const c = document.querySelector(".battle-canvas");
@@ -127,11 +130,39 @@ const boardPainted = await page.evaluate(() => {
   return painted;
 });
 check(boardPainted > 10, "the board is actually drawn, not blank", "opaque samples: " + boardPainted);
-check((await page.locator(".battle-controls .btn").count()) >= 15, "each battle has playback controls");
-check((await page.locator(".battle-canvas[aria-label]").count()) === 5,
-  "every battlefield is labelled for screen readers");
-check((await page.locator('.verdict[role="status"][aria-live]').count()) === 5,
-  "outcomes are announced, not conveyed by colour alone");
+check((await page.locator(".battle-controls .btn").count()) >= 3, "the open battle has playback controls");
+check((await page.locator(".battle-canvas[aria-label]").count()) === 1,
+  "the open battlefield is labelled for screen readers");
+check((await page.locator('.verdict[role="status"][aria-live]').count()) === 1,
+  "the open outcome is announced, not conveyed by colour alone");
+check((await page.locator(".exercise-locked").count()) === 4, "the other four battles start locked");
+check((await page.locator(".exercise-locked").first().getAttribute("aria-disabled")) === "true",
+  "a locked battle is marked aria-disabled");
+check((await page.locator(".locked-note").count()) === 4, "each locked battle explains why it is locked");
+check((await page.locator(".rail-current").count()) === 1, "the progress rail marks exactly one battle current");
+check((await page.locator(".rail-locked").count()) === 4, "the progress rail marks the rest locked");
+check((await page.locator(".rail-solved").count()) === 0, "nothing is solved yet");
+
+section("Progressive reveal — winning opens the next battle");
+const b1 = page.locator(".exercise").nth(0);
+await b1.locator(".editor-area").fill('place_tower("archer", 2, 3)');
+await b1.locator(".btn-run").click();
+await page.waitForFunction(
+  () => document.querySelectorAll(".exercise")[0]?.className.includes("is-solved"),
+  { timeout: 30000 }
+);
+check((await b1.getAttribute("class")).includes("is-solved"), "b1 is solved");
+check(await page.locator(".exercise").nth(1).locator(".editor-area").count() === 1,
+  "b2 unlocks immediately, in place, once b1 is won");
+check((await page.locator(".exercise-locked").count()) === 3, "three battles remain locked");
+const nextBtnVisible = await page.locator(".next-battle-btn").isVisible().catch(() => false);
+check(nextBtnVisible, "a focused 'next battle' button appears on the win");
+const focusedClass = await page.evaluate(() => document.activeElement && document.activeElement.className);
+check(/next-battle-btn/.test(focusedClass || ""), "the next-battle button receives focus", focusedClass);
+await page.click(".next-battle-btn");
+const focusedAfterClick = await page.evaluate(() => document.activeElement && document.activeElement.className);
+check(/editor-area/.test(focusedAfterClick || ""), "clicking it focuses the newly opened battle's editor",
+  focusedAfterClick);
 
 section("Battle flow — lose, diagnose, win");
 const e2 = page.locator(".exercise").nth(1); // b2: needs three towers
@@ -196,6 +227,8 @@ check(await page.locator("#lesson-complete.show").isVisible(),
   "the reward panel appears when every exercise is solved");
 const itemName = await page.locator(".item-name").textContent();
 check(itemName.trim().length > 0, "the earned item is named", itemName);
+check(await page.locator('.next-box a[href*="lesson-02"]').isVisible(),
+  "the recap now links to lesson 2, since it is built");
 
 await page.goto(url("index.html"));
 await page.waitForSelector(".map");
@@ -498,6 +531,70 @@ const enEditorDir = await page.locator(".editor").first().getAttribute("dir");
 check(enEditorDir === "ltr", "editor is still LTR in English");
 if (shots) await page.screenshot({ path: path.join(shotDir, "lesson-en.png"), fullPage: true });
 
+/* ---- lesson 2 ----------------------------------------------------------- */
+
+section("Lesson 2 — variables, types, and new achievements");
+await page.goto(url("lessons/lesson-02.html"));
+await page.waitForSelector(".beat-teach");
+check((await page.locator(".exercise").count()) === 5, "lesson 2: 4 training exercises + 1 quest render",
+  "found " + (await page.locator(".exercise").count()));
+check((await page.locator(".battle-canvas").count()) === 1,
+  "lesson 2 also starts with only the first battle open");
+
+/* Triggers the "Namer of Things" achievement: an assignment plus a print(),
+ * run from an ungraded teach block. */
+const l2firstRun = page.locator(".beat-teach .runner").first();
+await l2firstRun.locator(".btn-run").click();
+await page.waitForFunction(
+  () => document.querySelector(".beat-teach .runner .output-body")?.textContent?.includes("Annabeth"),
+  { timeout: 30000 }
+);
+
+/* The declared solutions from content/lesson-02.js. verify-python.mjs already
+ * proves these win headlessly; this proves the page agrees, in order, through
+ * progressive reveal. b3's solution also carries three type() calls, which
+ * should unlock "Type Detective". */
+const l2solutions = [
+  'kind = "archer"\nrow = 3\nplace_tower(kind, 2, row)',
+  'kind = "archer"\nrow = 3\nplace_tower(kind, 1, row)\nplace_tower(kind, 4, row)\n' +
+    'place_tower(kind, 7, row)\nplace_tower(kind, 10, row)',
+  'kind = "archer"\ngold = get_gold()\ntower_range = 2.6\n\n' +
+    'print(kind)\nprint(gold)\nprint(tower_range)\n' +
+    'print(type(kind))\nprint(type(gold))\nprint(type(tower_range))\n\n' +
+    'place_tower(kind, 2, 3)\nplace_tower(kind, 5, 3)\nplace_tower(kind, 8, 3)',
+  'kind = "archer"\nrow = 2\nplace_tower(kind, 2, row)\nplace_tower(kind, 4, row)\n' +
+    'row = 4\nplace_tower(kind, 7, row)\nplace_tower(kind, 10, row)',
+  '# The Necklace of Towers\nkind = "archer"\nrow = 1\n' +
+    'place_tower(kind, 2, row)\nplace_tower(kind, 3, row)\nrow = 4\n' +
+    'place_tower(kind, 5, row)\nplace_tower(kind, 6, row)\n' +
+    'place_tower(kind, 7, row)\nplace_tower(kind, 8, row)',
+];
+for (let i = 0; i < l2solutions.length; i++) {
+  const card = page.locator(".exercise").nth(i);
+  await card.locator(".editor-area").fill(l2solutions[i]);
+  await card.locator(".btn-run").click();
+  await page.waitForFunction(
+    (n) => document.querySelectorAll(".exercise")[n].className.includes("is-solved"),
+    i, { timeout: 30000 }
+  ).catch(() => {});
+  check((await card.getAttribute("class")).includes("is-solved"), `lesson 2 battle ${i + 1} of 5 won`);
+}
+check(await page.locator("#lesson-complete.show").isVisible(), "lesson 2 completes");
+
+await page.goto(url("index.html"));
+await page.waitForSelector(".map");
+/* Not an exact pack-item count: an earlier synthetic test (lesson "99", the
+ * boss-bar check) also wins its battle and grants its own placeholder item
+ * in this same browser session. Check for the specific new item instead. */
+const packNames = await page.locator(".pack-item .pack-name").allTextContents();
+check(packNames.some((t) => /Leather Cord|רצועת העור/.test(t)), "the inventory shows the lesson 2 item",
+  packNames.join(" | "));
+const achChips = await page.locator(".ach").allTextContents();
+check(achChips.some((t) => /Namer|קוראת בשמות/.test(t)), "the Namer of Things achievement unlocked",
+  achChips.join(" | "));
+check(achChips.some((t) => /Type Detective|בלשית טיפוסים/.test(t)), "the Type Detective achievement unlocked",
+  achChips.join(" | "));
+
 /* ---- mobile ----------------------------------------------------------- */
 
 section("Phone width (390px)");
@@ -526,6 +623,116 @@ check(networkAttempts.length === 0, "zero network requests attempted",
 check(consoleErrors.length === 0, "zero console errors",
   consoleErrors.slice(0, 5).join(" | "));
 
+/* ========================================================================
+ * The hosted lane — everything above proves the file:// copy. This proves
+ * the delivery differences only: PWA install surface, clean URLs, the
+ * service worker, offline-after-first-visit, and the ?lang=/?progress= URL
+ * state. It does not re-litigate lesson content — that is what the file://
+ * pass and verify-python.mjs already do. See spec/10-deployment.md.
+ * ======================================================================== */
+
+section("Hosted lane — starting a local server matching vercel.json");
+const { url: base, close: closeServer } = await startServer();
+check(true, "dev server started", base);
+
+const hostedCtx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+const thirdPartyAttempts = [];
+await hostedCtx.route("**", (route) => {
+  const u = new URL(route.request().url());
+  const isSameOrigin = u.origin === base || u.protocol === "data:" || u.protocol === "about:";
+  if (isSameOrigin) return route.continue();
+  thirdPartyAttempts.push(u.href);
+  return route.abort();
+});
+const hostedErrors = [];
+const hostedPage = await hostedCtx.newPage();
+hostedPage.on("console", (m) => { if (m.type() === "error") hostedErrors.push(m.text()); });
+hostedPage.on("pageerror", (e) => hostedErrors.push("PAGEERROR: " + e.message));
+
+await hostedPage.goto(base + "/");
+await hostedPage.waitForSelector(".hero");
+check(await hostedPage.evaluate(() => LC.env.hosted === true), "LC.env.hosted is true over http");
+
+section("Hosted lane — manifest and service worker");
+check((await hostedPage.locator('link[rel="manifest"]').count()) === 1,
+  "a manifest link is injected");
+const manifestJson = await hostedPage.evaluate(() =>
+  fetch("/manifest.webmanifest").then((r) => r.json()));
+check(manifestJson.name && manifestJson.icons && manifestJson.icons.length > 0,
+  "the manifest is valid JSON with icons", JSON.stringify(manifestJson.icons));
+const swActive = await hostedPage.evaluate(() =>
+  navigator.serviceWorker.ready.then((r) => !!r.active).catch(() => false));
+check(swActive, "the service worker installs and activates");
+
+section("Hosted lane — clean URLs and the 404 page");
+await hostedPage.goto(base + "/lessons/lesson-02");
+await hostedPage.waitForSelector(".beat-teach");
+check((await hostedPage.locator(".exercise").count()) === 5,
+  "a clean URL (no .html) renders the lesson");
+const notFound = await hostedPage.goto(base + "/this-page-does-not-exist");
+check(notFound.status() === 404, "an unknown route responds 404",
+  "got " + notFound.status());
+check(await hostedPage.locator(".claim-symbol").isVisible(), "the themed 404 page renders");
+/* The 404 itself logs a "failed to load resource" console message — that is
+ * the deliberate point of this section, not an app bug. Do not let it count
+ * against the "zero console errors" assertion below. */
+hostedErrors.length = 0;
+
+section("Hosted lane — ?lang= deep link");
+await hostedPage.goto(base + "/lessons/lesson-02?lang=en");
+await hostedPage.waitForSelector(".beat-teach");
+check((await hostedPage.getAttribute("html", "dir")) === "ltr",
+  "?lang=en renders LTR immediately, no flash of RTL");
+
+section("Hosted lane — solving a battle over http");
+await hostedPage.goto(base + "/lessons/lesson-01");
+await hostedPage.waitForSelector(".beat-teach");
+const hb1 = hostedPage.locator(".exercise").nth(0);
+await hb1.locator(".editor-area").fill('place_tower("archer", 2, 3)');
+await hb1.locator(".btn-run").click();
+await hostedPage.waitForFunction(
+  () => document.querySelectorAll(".exercise")[0]?.className.includes("is-solved"),
+  { timeout: 30000 }
+);
+check((await hb1.getAttribute("class")).includes("is-solved"), "a battle can still be won over http");
+
+section("Hosted lane — offline after first visit");
+await hostedPage.reload(); // now controlled by the active worker
+await hostedPage.waitForSelector(".beat-teach");
+await hostedCtx.setOffline(true);
+await hostedPage.reload();
+const offlineOk = await hostedPage.waitForSelector(".beat-teach", { timeout: 15000 })
+  .then(() => true).catch(() => false);
+check(offlineOk, "the lesson still renders offline, from the service worker cache");
+await hostedCtx.setOffline(false);
+
+section("Hosted lane — a shared progress link");
+await hostedPage.goto(base + "/");
+await hostedPage.waitForSelector(".hero");
+await hostedPage.fill(".claim-input", "Bianca");
+await hostedPage.click(".claim-name .btn-run");
+for (let i = 0; i < 5; i++) await hostedPage.locator(".claim-option").first().click();
+await hostedPage.click(".claim-result .btn-run");
+await hostedPage.waitForSelector(".map");
+const progressPayload = await hostedPage.evaluate(() => LC.store.encodeProgress());
+
+const importCtx = await browser.newContext();
+const importPage = await importCtx.newPage();
+importPage.on("dialog", (d) => d.accept());
+await importPage.goto(base + "/?progress=" + progressPayload);
+await importPage.waitForSelector(".hud-name");
+const importedName = await importPage.evaluate(() => LC.store.get().name);
+check(importedName === "Bianca", "a ?progress= link imports the shared save", importedName);
+check(!/progress=/.test(importPage.url()), "the ?progress= param is stripped from the URL after import");
+await importCtx.close();
+
+check(thirdPartyAttempts.length === 0, "zero third-party requests in the hosted lane",
+  thirdPartyAttempts.slice(0, 5).join(", "));
+check(hostedErrors.length === 0, "zero console errors in the hosted lane",
+  hostedErrors.slice(0, 5).join(" | "));
+
+await hostedCtx.close();
+await closeServer();
 await browser.close();
 
 console.log(`\n${pass}/${pass + fail} checks passed`);

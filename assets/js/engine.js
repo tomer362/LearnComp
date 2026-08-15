@@ -113,7 +113,10 @@ window.LC = window.LC || {};
       en: "Python 3 needs brackets around what you print: `print(\"hi\")`, not `print \"hi\"`." },
     raggedIndent: {
       he: "ההזחה לא עקבית — השורה הזאת לא מיושרת עם אף בלוק פתוח. השתמשי בארבעה רווחים לכל רמה, תמיד באותו מספר.",
-      en: "The indentation is inconsistent — this line does not line up with any open block. Use four spaces per level, always the same amount." }
+      en: "The indentation is inconsistent — this line does not line up with any open block. Use four spaces per level, always the same amount." },
+    assignmentSyntax: {
+      he: "בדקי שאין רווח בשם, ושהשם נמצא משמאל ל-`=`.",
+      en: "Check that the name has no space in it, and that the name sits to the left of `=`." }
   };
 
   function indentWidth(s) {
@@ -144,6 +147,13 @@ window.LC = window.LC || {};
     if (/^\s*(if|elif|else|for|while|def|class|try|except|finally)\b[^:]*$/.test(cur)) return "missingColon";
     if (opensBlock && cur.trim() && indentWidth(cur) <= indentWidth(prev)) return "missingIndent";
     if (!opensBlock && prev.trim() && cur.trim() && indentWidth(cur) > indentWidth(prev)) return "unexpectedIndent";
+
+    /* Lesson 2's three assignment traps (a name starting with a digit, a
+     * space inside a name, the arrow reversed) all render as CPython errors
+     * with useful text, but Skulpt flattens every one of them to the same
+     * generic "bad input" — so a line with a bare `=` is the fallback catch.
+     * See spec/lessons/lesson-02.md. */
+    if (/[^=!<>]=(?!=)/.test(cur)) return "assignmentSyntax";
     return null;
   }
 

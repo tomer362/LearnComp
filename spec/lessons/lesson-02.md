@@ -683,11 +683,12 @@ containing `=` to the Hebrew hint "בדקי שאין רווח בשם, ושהשם
   plain build script plus a battle. `input()` arrives in lesson 3.
 - **Every level is `check.kind: "battle"`.** Four of the five carry a `source`
   rule in `check.also` naming the variables, and b3 carries an `output` rule
-  instead. `checker.js` already supports both shapes of `also`; note that
-  `verify-python.mjs` currently only re-checks `also` when it is a `source` rule,
-  so **b3's output requirement is not covered by the verifier until that is
-  extended** (one line in `runBattleCheck`). Do it while building this lesson —
-  lessons 3 and 4 depend on it much more heavily.
+  instead. `checker.js` supports both shapes of `also`, and so does
+  `tools/verify-python.mjs`'s `runBattleCheck` — it already passes the
+  battle's captured `output` into `runAlso` alongside `source`, so b3's output
+  requirement is covered by the verifier with no changes needed. (An earlier
+  draft of this note claimed otherwise; it was wrong — checked directly
+  against `tools/verify-python.mjs` while building this lesson.)
 - **`mustInclude: ["kind"]` matches whole words**, so `tower_kind` does not
   satisfy it and `top_row` does not satisfy `row`. That is deliberate: the brief
   names the two variables, and the failure message repeats them.

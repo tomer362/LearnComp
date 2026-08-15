@@ -49,7 +49,12 @@ lesson's entry in `TODO.md` and tick as you go.
 ## Behaviour
 
 - [ ] Runs from `file://` by double-click, offline, with **zero** console errors
-- [ ] Zero network requests (smoke test blocks the network and asserts none)
+- [ ] The `file://` lane makes **zero network requests** (smoke test blocks the
+      network and asserts none) — this is the folder-handoff distribution and
+      it must never gain a network dependency
+- [ ] The hosted lane (`spec/10-deployment.md`) makes zero **third-party**
+      requests — everything it loads is same-origin; its own asset/API calls
+      to its own origin are expected and are not a violation of rule 1
 - [ ] Every level draws its battlefield, and the replay controls work
 - [ ] A losing attempt is *explained* — the diagnosis names the real mistake
 - [ ] `while True:` is caught by the exec limit and shows the friendly message
