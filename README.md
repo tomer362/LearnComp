@@ -131,9 +131,10 @@ tools/                  Dev-only verification (never loaded by a page)
 ### Verifying
 
 ```bash
-node tools/verify-python.mjs      # every code sample + every solution, headless Skulpt
-node tools/smoke-test.mjs         # full file:// browser test with the network blocked
-node tools/smoke-test.mjs --shots # ...plus screenshots into .screenshots/
+node tools/verify-python.mjs             # simulate every level headlessly
+node tools/try-level.mjs lvl.json sol.py # play one level while you are designing it
+node tools/smoke-test.mjs                # full file:// browser test, network blocked
+node tools/smoke-test.mjs --shots        # ...plus screenshots into .screenshots/
 ```
 
 `verify-python.mjs` runs the real vendored Skulpt in Node, loads the same battle

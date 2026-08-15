@@ -204,8 +204,9 @@ resize. Nothing is fetched.
   the repo diffable and means no asset can fail to load.
 - 60fps `requestAnimationFrame`, interpolating between the 10Hz simulation
   snapshots so movement is smooth without the simulation being frame-dependent.
-- Controls: play/pause, restart, speed (1× / 2× / 4×), and a scrubber. She will
-  want to watch a leak again in slow motion — that is debugging.
+- Controls: play/pause, restart, and speed (1× / 2× / 4×). She will want to
+  watch a leak again — that is debugging. `view.seek()` exists for a scrubber if
+  one is ever added; nothing renders it today.
 - HUD above the canvas: wave counter, camp HP hearts, gold, and the outcome
   banner.
 - `prefers-reduced-motion: reduce` jumps straight to the outcome and draws the

@@ -38,8 +38,10 @@ this repo is made for her, not for a generic learner. Details:
 ## Commands
 
 ```bash
-node tools/verify-python.mjs             # every code sample + every solution, headless Skulpt
+node tools/verify-python.mjs             # simulates every level: solutions must win,
+                                         # and no level may be winnable by doing nothing
 node tools/verify-python.mjs content/lesson-02.js
+node tools/try-level.mjs lvl.json sol.py # iterate on ONE level while designing it
 node tools/smoke-test.mjs                # full file:// browser test, network blocked
 node tools/smoke-test.mjs --shots        # ...plus screenshots into .screenshots/
 ```
