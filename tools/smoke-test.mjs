@@ -142,6 +142,49 @@ await page.waitForFunction(
 check(true, "the correct answer is accepted");
 check((await e2.getAttribute("class")).includes("is-solved"), "the exercise is marked solved");
 
+/* ---- complete the whole lesson ---------------------------------------- */
+
+section("Completing lesson 1");
+const solutions = [
+  'print("Annabeth")',
+  'print("I am a demigod")\nprint("I am not afraid")\nprint("(mostly)")',
+  'print("Riptide is a pen")\nprint("Its also a sword")',
+  '# my first quest\nprint("Day one at Camp Half-Blood")\nprint("I survived")',
+  'print("Campers, gather!")\nprint("A new demigod has arrived.")\n' +
+    'print("She outran a monster to reach these gates.")\n' +
+    'print("Tonight, we find out who her parent is.")\n' +
+    'print("Welcome to Camp Half-Blood.")',
+];
+for (let i = 0; i < solutions.length; i++) {
+  const card = page.locator(".exercise").nth(i);
+  await card.locator(".editor-area").fill(solutions[i]);
+  await card.locator(".btn-run").click();
+  await page.waitForFunction(
+    (n) => document.querySelectorAll(".exercise")[n].className.includes("is-solved"),
+    i, { timeout: 30000 }
+  ).catch(() => {});
+  check((await card.getAttribute("class")).includes("is-solved"),
+    `exercise ${i + 1} of 5 accepted`);
+}
+
+check(await page.locator("#lesson-complete.show").isVisible(),
+  "the reward panel appears when every exercise is solved");
+const itemName = await page.locator(".item-name").textContent();
+check(itemName.trim().length > 0, "the earned item is named", itemName);
+
+await page.goto(url("index.html"));
+await page.waitForSelector(".map");
+check((await page.locator(".stop").first().getAttribute("class")).includes("is-done"),
+  "lesson 1 shows as completed on the map");
+const packName = await page.locator(".pack-item .pack-name").first().textContent();
+check(!/camp-bead/.test(packName) && packName.trim().length > 0,
+  "the inventory shows a real item name, not a raw id", packName);
+check(await page.locator('.stop a[href*="lesson-01"]').isVisible(),
+  "a completed lesson is still replayable");
+
+await page.goto(url("lessons/lesson-01.html"));
+await page.waitForSelector(".beat-teach");
+
 /* ---- error handling and the exec limit -------------------------------- */
 
 section("Errors and the execution limit");

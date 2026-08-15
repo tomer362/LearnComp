@@ -86,7 +86,9 @@ Two new files plus one flag — nothing else:
 1. `content/lesson-NN.js` — the content object, following `spec/04-lesson-template.md`
    and the deep design in `spec/lessons/lesson-NN.md`.
 2. `lessons/lesson-NN.html` — copy the previous shell, change the two numbers.
-3. Flip `built: true` for that lesson in `assets/js/curriculum.js`.
+3. In `assets/js/curriculum.js`: flip `built: true` for that lesson **and** add
+   its item to `LC.ITEMS` — the hub reads item names from there, not from
+   content files.
 
 Then run both tools and tick `spec/08-quality-checklist.md`.
 

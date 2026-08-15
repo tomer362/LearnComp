@@ -183,12 +183,11 @@ window.LC = window.LC || {};
       box.appendChild(el("p", "muted", LC.esc(LC.s("emptyPack"))));
     } else {
       var grid = el("div", "pack-grid");
-      /* Items are declared by lessons; we only know the ones already earned,
-       * so render from the curriculum icons as a stable stand-in. */
       s.items.forEach(function (id) {
+        var item = LC.itemMeta(id);
         var chip = el("div", "pack-item");
-        chip.appendChild(el("span", "pack-icon", "📿"));
-        chip.appendChild(el("span", "pack-name", LC.esc(id)));
+        chip.appendChild(el("span", "pack-icon", item.icon));
+        chip.appendChild(el("span", "pack-name", LC.esc(LC.t(item.name))));
         grid.appendChild(chip);
       });
       box.appendChild(grid);

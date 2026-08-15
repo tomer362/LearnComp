@@ -43,6 +43,18 @@ window.LC = window.LC || {};
     { id: "20", act: 5, built: false, boss: true,  icon: "⚡", title: { he: "הקרב על אולימפוס", en: "Battle for Olympus" },    teaches: { he: "פרויקט מסכם",               en: "the capstone project" } }
   ];
 
+  /* Items are declared in each lesson's content file, but the hub does not load
+   * those (it would mean pulling in all 20). Mirror the item here when a lesson
+   * is built so the inventory can show a real name and icon.
+   * Keyed by the item id used in the content file. */
+  LC.ITEMS = {
+    "camp-bead": { icon: "📿", name: { he: "חרוז המחנה", en: "Camp Bead" } }
+  };
+
+  LC.itemMeta = function (id) {
+    return LC.ITEMS[id] || { icon: "🎒", name: { he: id, en: id } };
+  };
+
   LC.lessonMeta = function (id) {
     for (var i = 0; i < LC.CURRICULUM.length; i++) {
       if (LC.CURRICULUM[i].id === id) return LC.CURRICULUM[i];

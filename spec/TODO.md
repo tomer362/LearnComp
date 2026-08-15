@@ -76,10 +76,10 @@ horizontal scroll at 390px
 
 ## Known gaps and follow-ups
 
-- [ ] **Inventory names are placeholders.** `hub.js` renders earned items from
-      their id with a generic 📿 icon, because item metadata lives in the lesson
-      content file, which the hub does not load. Move the item table into
-      `curriculum.js` when lesson 2 lands and the second item exists.
+- [ ] **Mirror each new item into `LC.ITEMS`** in `assets/js/curriculum.js` when
+      you build a lesson. The hub does not load content files (that would mean
+      pulling in all 20), so it reads item names and icons from that table.
+      An unmirrored item falls back to a 🎒 and its raw id.
 - [ ] **No syntax highlighting** in the editor — deliberate for v1
       (`spec/05-visual-design.md`). Revisit only with a vendorable editor.
 - [ ] **Skip-ahead affordance** described in `spec/02-game-design.md` is not
