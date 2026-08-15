@@ -121,7 +121,7 @@ Then run both tools and tick `spec/08-quality-checklist.md`.
 
 ## Definition of done for a lesson
 
-- Six beats in order: Prophecy → Chiron Teaches → Training Ground → Battles →
+- Five beats in order: Chiron Teaches → Training Ground → Battles →
   Great Battle → Recap
 - Every learner-visible string is a `{he, en}` pair — no bare strings
 - 3–5 training battles ramping from nearly-free to genuinely hard, plus one great battle

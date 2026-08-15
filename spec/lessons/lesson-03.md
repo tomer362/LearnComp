@@ -43,14 +43,6 @@ into a lesson: a program that only speaks is a speech. A program that asks is a
 conversation. Then he mentions, far too casually, that the thing under the old
 bridge asks questions too — and that it is very particular about numbers.
 
-The Prophecy panel (5 lines, no code):
-
-> את מוצאת את גרובר בפינת החצר, עם בקבוק מים ומטבע, מקלל חרש על קשת שלא עונה.
-> "המים בסדר. המטבע בסדר. והיא בכל זאת לא עונה לי."
-> כירון מרים גבה. "תוכנית שרק מדברת היא נאום. תוכנית ששואלת היא שיחה."
-> "עד היום התוכניות שלך דיברו. היום הן ילמדו להקשיב."
-> ואז, כאילו בדרך אגב: "אגב, הדבר שמתחת לגשר הישן גם שואל שאלות. כדאי שתתאמני."
-
 Cast: Grover (the failing Iris-message, comic relief), Chiron (the lesson),
 Annabeth in a `warn` callout with the `int(input(...))` inside-out reading. The
 closing line plants the lesson 4 boss.

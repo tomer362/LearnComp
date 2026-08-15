@@ -59,14 +59,6 @@ your cannons are paid for before he arrives.
 Chiron does not come. He says one line from the porch of the Big House and lets
 her walk down alone, which is how a boss fight should feel.
 
-The Prophecy panel (5 lines, no code):
-
-> הגשר הישן יוצא מהמחנה אל הכביש. מתחתיו נשמעת נשימה כבדה.
-> "מס," נוהם המינוטאור. "מי שעובר — משלם."
-> אנבת' לוחשת: "הוא לא בא לאכול אותנו. הוא בא לספור."
-> "וכשהחשבון שלו לא מסתדר, הוא זורק אותך לנהר."
-> כירון, מהמרפסת, בלי לזוז: "היום את לא צריכה חרב. את צריכה מספרים."
-
 Cast: Annabeth (briefs her on the rules — she is the one who states the toll
 formula, which makes the boss brief in-world rather than a homework sheet),
 Chiron (one line, from a distance), the Minotaur (grunts numbers), Grover in a

@@ -39,23 +39,7 @@ LC.registerLesson({
     }
   },
 
-  /* ---- 1. Prophecy ---------------------------------------------------- */
-  prophecy: {
-    lines: [
-      { he: "הגעת אל המחנה. השערים נסגרים מאחורייך, ומה שרדף אחרייך נשאר בחוץ.",
-        en: "You reach the camp. The gates close behind you, and whatever was chasing you stays outside." },
-      { he: "כירון מחכה ליד הבית הגדול, ולא שואל אם את בסדר. הוא כבר יודע.",
-        en: "Chiron is waiting by the Big House, and does not ask if you are all right. He already knows." },
-      { he: "\"עוד מעט יגיעו עוד,\" הוא אומר. \"הרבה יותר. ואת תעצרי אותן.\"",
-        en: "\"More are coming,\" he says. \"Many more. And you are going to stop them.\"" },
-      { he: "\"לא בחרב. חרב זה קל. את תעצרי אותן במילים.\"",
-        en: "\"Not with a sword. A sword would be the simple way. You will stop them with words.\"" },
-      { he: "\"לכל גיבורה יש מילה ראשונה. בואי נלמד את שלך.\"",
-        en: "\"Every hero has a first word. Let us learn yours.\"" }
-    ]
-  },
-
-  /* ---- 2. Chiron Teaches ---------------------------------------------- */
+  /* ---- 1. Chiron Teaches ------------------------------------------------ */
   teach: [
     { type: "prose", text: {
       he: "תוכנית היא רשימת הוראות. המחשב קורא אותן מלמעלה למטה, אחת אחרי השנייה, ועושה **בדיוק** מה שכתוב — לא מנחש ולא משלים חסר. זה נשמע כמו חיסרון, אבל זה מה שהופך אותו לבן ברית: אם כתבת נכון, הוא יעשה נכון בכל פעם.",
@@ -136,7 +120,7 @@ LC.registerLesson({
       caption: { he: "ההערות לא מופיעות בפלט. הן רק בשבילך.", en: "Comments never appear in the output. They are only for you." } }
   ],
 
-  /* ---- 3. Training ground (ungraded) ---------------------------------- */
+  /* ---- 2. Training ground (ungraded) ---------------------------------- */
   tryIt: {
     intro: {
       he: "מגרש האימונים. אין כאן מפלצות ואף אחד לא נותן ציון — נסי דברים, שברי אותם, ראי מה קורה.",
@@ -145,7 +129,7 @@ LC.registerLesson({
     starter: 'print("I am a demigod")\nprint("and I just arrived at camp")\n'
   },
 
-  /* ---- 4. The battles -------------------------------------------------- */
+  /* ---- 3. The battles -------------------------------------------------- */
   training: [
     {
       id: "b1",
@@ -240,7 +224,7 @@ LC.registerLesson({
     }
   ],
 
-  /* ---- 5. The great battle -------------------------------------------- */
+  /* ---- 4. The great battle -------------------------------------------- */
   quest: {
     id: "q1",
     xp: 55, drachmas: 14,
@@ -271,7 +255,7 @@ LC.registerLesson({
     check: { kind: "battle" }
   },
 
-  /* ---- 6. Recap -------------------------------------------------------- */
+  /* ---- 5. Recap -------------------------------------------------------- */
   recap: {
     bullets: [
       { he: "פקודה נראית ככה: **שם**, סוגריים, ומה שהיא מקבלת בפנים.", en: "A command looks like this: **a name**, brackets, and what it receives inside." },

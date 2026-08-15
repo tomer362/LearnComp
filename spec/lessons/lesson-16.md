@@ -60,15 +60,6 @@ shape that keeps containing itself.
 Chiron is not here. Nobody is here. But there is a ball of red thread in her
 pocket, and Ariadne's trick was never about being brave.
 
-The Prophecy panel (6 lines, no code):
-
-> הדלת נסגרת מאחורייך, והמחנה נעלם.
-> מסדרון. בסופו חדר. בתוך החדר דלת, ומאחוריה מסדרון.
-> "המבוך לא בנוי מחדרים," לוחשת אנבת'. "הוא בנוי מעצמו."
-> כירון לא כאן. אף אחד לא כאן.
-> בכיס שלך יש פקעת חוט אדום.
-> את יודעת בדיוק מה עושים איתה.
-
 Cast: Annabeth (in the dark with her, says the line that names the concept),
 Grover (holds the end of the thread at the entrance and does not let go — he is
 the base case, and the lesson may say that outright, as a joke that is also true).

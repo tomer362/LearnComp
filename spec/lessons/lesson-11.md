@@ -51,14 +51,6 @@ messengers and record-keeping. He will open the gate for anyone who can read his
 book. The book has no page numbers and no rows. It has names, and beside each
 name, what that god rules.
 
-The Prophecy panel (5 lines, no code):
-
-> בשער של ים המפלצות עומדת דמות עם כובע מכונף.
-> "אני הרמס," הוא אומר. "כל אל בעולם רשום אצלי בפנקס."
-> "אם תדעי לקרוא בפנקס, השער ייפתח לך."
-> הוא מושיט לך ספר עבה. אין בו מספרים ואין בו שורות ממוספרות.
-> יש בו רק שמות — ולצד כל שם, מה שהוא שולט עליו.
-
 Cast: Hermes (fast-talking, amused, keeps excellent records), Annabeth (asks the
 `.get()` question), Grover (causes the `KeyError` by spelling "Zeus" with a
 small z and getting rained on).

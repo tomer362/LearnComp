@@ -61,14 +61,6 @@ She has a prophecy she decoded herself, a method for fixing what breaks, and a
 mold she cast in the forge. That is the whole inventory. It turns out to be
 enough.
 
-The Prophecy panel (3–6 lines, no code):
-
-> אולימפוס ריק. שנים־עשר כיסאות, ואף אל.
-> מהמדרגות עולה קול של שעון שהולך אחורה.
-> כירון לא יכול לעלות. אנבת' מחזיקה את הלובי. אין מי שיגיד לך מה לעשות.
-> יש לך נבואה שפענחת, שיטה לתקן מה שנשבר, ותבנית שיצקת.
-> "זה מספיק," את אומרת בקול רם, ומגלה שזה נכון.
-
 Cast: Kronos (never speaks in the first person — he speaks through the log of the
 battle she writes), Annabeth and Chiron in the closing scene, the twelve empty
 thrones.
@@ -394,20 +386,17 @@ The new part:
 ```python
 THREAT = {"harpy": 4, "satyr": 3, "hellhound": 2}
 
-
 def threat_of(enemy):
     try:
         return THREAT[enemy["kind"]]
     except KeyError:
         return 0
 
-
 def effort(enemy):
     try:
         return enemy["hp"] / enemy["armour"]
     except ZeroDivisionError:
         return 0
-
 
 def choose_target(enemies):
     best = enemies[0]
@@ -511,12 +500,10 @@ class Watchtower:
                 best = enemy
         return best
 
-
 class Siege(Watchtower):
     def __init__(self):
         super().__init__()
         self.priority = ["satyr", "hellhound", "cyclops", "harpy"]
-
 
 register_tower("archer", Watchtower)
 register_tower("cannon", Siege)
@@ -696,12 +683,10 @@ class Watchtower:
         self.shots = 0
     …rank and fire as in M4…
 
-
 class Siege(Watchtower):
     def __init__(self):
         super().__init__()
         self.priority = ["kronos", "cyclops", "hellhound", "satyr", "harpy"]
-
 
 register_tower("archer", Watchtower)
 register_tower("cannon", Siege)

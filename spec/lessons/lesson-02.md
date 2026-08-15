@@ -46,14 +46,6 @@ He makes the point that will carry the whole lesson: the camp does not remember
 people, it remembers **names with things attached to them**. Python works the
 same way.
 
-The Prophecy panel (5 lines, no code):
-
-> הבוקר הראשון שלך במחנה. הרצועה על הצוואר שלך כמעט ריקה — חרוז אחד.
-> כירון פורש על השולחן מגילה ארוכה: כל מי שעבר פה, שורה אחרי שורה.
-> "אלפי שמות," הוא אומר, "ואף אחד מהם לא הלך לאיבוד."
-> "כי לכל דבר במחנה יש שם, והשם מחזיק את מה שיש בפנים."
-> "אתמול לימדתי אותך לדבר. היום את לומדת לזכור."
-
 Cast: Chiron (registry, the arrow metaphor). Grover appears in a `tip` callout,
 having named all his variables `a`, `b` and `c` and now unable to read his own
 notes. Annabeth appears in the `myth` callout with the true-name idea.

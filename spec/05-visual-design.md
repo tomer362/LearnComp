@@ -58,8 +58,6 @@ Hebrew.
 
 ## Components
 
-- **Scroll panel** — the Prophecy. Papyrus-toned background, bronze rule top and
-  bottom, display type, generous leading.
 - **Chiron card** — teaching prose. Dark panel, left/inline-start bronze border,
   small centaur mark.
 - **Code block** — `--ink` background, bronze top rule, monospace, `dir=ltr`,

@@ -46,14 +46,6 @@ sit the Hunters of Artemis: silver bows, no patience, and a quartermaster named
 Zoë who has been counting arrows for two thousand years. Supplies for the rest
 of the voyage are available — after the storeroom is in order.
 
-The Prophecy panel (5 lines, no code):
-
-> הספינה עוגנת ליד אי שאין לו שם.
-> על החוף בוערת מדורה, וסביבה יושבות הציידות של ארטמיס.
-> "אתן רוצות אספקה?" שואלת זואי. "קודם תסדרי לנו את המחסן."
-> "כל חץ, כל חבל, כל בקבוק נקטר — צריך לדעת מה יש, מה חסר, ומה הכי כבד."
-> גרובר לוחש לך: "היא בודקת אותך. אני חושב שאני אשמור על הספינה."
-
 Cast: Zoë Nightshade (dry, exacting, quietly approving), Grover (avoiding work),
 Chiron in one callout. Annabeth asks the `.sort()` / `sorted()` question.
 

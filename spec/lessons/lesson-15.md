@@ -49,15 +49,6 @@ Then the Moirai are mentioned, and the room gets a degree colder: three sisters
 who spin, measure and cut the thread of every life, and who tell nobody in
 advance.
 
-The Prophecy panel (6 lines, no code):
-
-> כירון מוציא שק עור קטן מהשרוול ומנער אותו על השולחן.
-> שתי קוביות עצם מצהיבות מתגלגלות ונעצרות.
-> "עד עכשיו ידעת בדיוק מה התוכנית שלך תעשה, לפני שהרצת אותה."
-> "זה יתרון. זה גם משעמם."
-> "המוירות, שלוש האחיות שטוות את חוטי החיים, לא מגלות מראש."
-> "היום את מלמדת את הקוד שלך לגלגל קובייה."
-
 Cast: Chiron (the dice), Grover (bets a drachma on the Sphinx, immediately
 regrets it), Annabeth (does the arithmetic on the odds and is annoyed that luck
 exists).

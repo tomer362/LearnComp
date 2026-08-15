@@ -55,15 +55,6 @@ only question that matters is *until when*.
 Cast: Annabeth (asks the question that becomes the loop condition), Grover
 (rows, complains, counts out loud), the Sirens (heard, never seen).
 
-**Prophecy panel**:
-
-> הדרך שבחרת מסתיימת במים.
-> אנאבת' מצביעה על המצר הצר בין שני הצוקים: "שם שרות הסירנות."
-> "אי אפשר לעבור בחתירה אחת," אומר גרובר, "צריך לחתור. שוב. ושוב. ושוב."
-> "עד מתי?" את שואלת.
-> אנאבת' מחייכת: "זו בדיוק השאלה הנכונה."
-> "לולאה בלי השאלה הזאת לא נעצרת לעולם."
-
 ## Chiron Teaches — block by block
 
 1. **prose** — נניח שצריך להדפיס "Row." שלושים פעם. אפשר להעתיק שורה שלושים

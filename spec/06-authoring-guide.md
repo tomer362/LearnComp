@@ -108,7 +108,8 @@ makes reading her own code more fun.
   happened in N-1.
 - Recurring cast: **Chiron** (teacher), **Grover** (nervous friend, comic
   relief), **Annabeth** (competent peer who asks good questions), the **Oracle**
-  (delivers each act's prophecy).
+  (appears occasionally in-story; there is no dedicated prophecy beat — the
+  battle itself sets the vibe).
 - Her name and cabin from the save file appear in the text — use `LC.hero()` and
   `LC.cabin()` rather than hard-coding "Percy".
 - **Keep it book-canon-flavoured, not book-canon-bound.** Invent freely; do not

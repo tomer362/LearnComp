@@ -1,5 +1,7 @@
 /* lesson.js — renders a lesson page from its content object.
- * The six beats are fixed; see spec/04-lesson-template.md.
+ * The five beats are fixed; see spec/04-lesson-template.md. Rendered as
+ * single-screen steps via LC.Steps: one beat, or one exercise within
+ * Training/the Great Battle, is visible at a time.
  */
 window.LC = window.LC || {};
 (function (LC) {
@@ -9,22 +11,13 @@ window.LC = window.LC || {};
   LC.registerLesson = function (obj) { LC.LESSONS[obj.id] = obj; };
 
   var current = null;   // the mounted lesson object
-  var widgets = [];     // re-rendered on language change
+  var stepsCtl = null;  // the active LC.Steps controller for this render
 
   function el(tag, cls, html) {
     var n = document.createElement(tag);
     if (cls) n.className = cls;
     if (html !== undefined) n.innerHTML = html;
     return n;
-  }
-
-  function prefersReducedMotion() {
-    return !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
-  }
-
-  function scrollToCard(node) {
-    if (!node) return;
-    node.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" });
   }
 
   /* ---- output panel ---------------------------------------------------- */
@@ -261,8 +254,6 @@ window.LC = window.LC || {};
     return el("div", "", "");
   }
 
-  /* ---- exercises ------------------------------------------------------- */
-
   /* ---- the battle panel attached to a level ---------------------------- */
 
   function battlePanel(card, level) {
@@ -305,9 +296,7 @@ window.LC = window.LC || {};
       speedBtn.textContent = next + "×";
     });
 
-    /* Boss bar. The old version counted `check.cases`, which battle bosses do
-     * not have — it always drew a single segment. Track the boss monster's own
-     * HP from the simulation instead. */
+    /* Boss bar. Tracks the boss monster's own HP from the simulation. */
     var bossBar = null, bossFill = null, bossSeen = 0;
     if (level.boss) {
       var boss = el("div", "boss");
@@ -321,8 +310,8 @@ window.LC = window.LC || {};
 
     var startHp = level.campHp === undefined ? 10 : level.campHp;
     view.onUpdate(function (snap) {
-      hudHp.textContent = "🏛️ " + snap.campHp + "/" + startHp;
-      hudGold.textContent = "🪙 " + snap.gold;
+      hudHp.innerHTML = LC.icon("shield") + " " + snap.campHp + "/" + startHp;
+      hudGold.innerHTML = LC.icon("coin") + " " + snap.gold;
       hudWave.textContent = "👾 " + snap.enemies.length;
 
       if (bossFill) {
@@ -342,29 +331,12 @@ window.LC = window.LC || {};
         }
       }
     });
-    hudHp.textContent = "🏛️ " + startHp + "/" + startHp;
-    hudGold.textContent = "🪙 " + level.gold;
+    hudHp.innerHTML = LC.icon("shield") + " " + startHp + "/" + startHp;
+    hudGold.innerHTML = LC.icon("coin") + " " + level.gold;
     hudWave.textContent = "👾 0";
 
     window.addEventListener("resize", function () { view.relayout(); });
     return { view: view, playBtn: playBtn };
-  }
-
-  /* A future battle, not yet reached. No editor, no canvas, no simulation —
-   * she cannot skip ahead to it, but she is never told nothing is coming.
-   * See spec/02-game-design.md: a skip-ahead affordance may never appear
-   * mid-lesson. This is the opposite of that: a locked stop she cannot open
-   * early, not an escape hatch past one she has not earned yet. */
-  function renderLockedCard(ex, index, isQuest) {
-    var card = el("section", "exercise exercise-locked" + (isQuest ? " exercise-quest" : ""));
-    card.setAttribute("aria-disabled", "true");
-    card.setAttribute("tabindex", "-1");
-    var head = el("header", "exercise-head");
-    head.appendChild(el("span", "exercise-num", "🔒"));
-    head.appendChild(el("h3", "exercise-title", LC.esc(LC.t(ex.title))));
-    card.appendChild(head);
-    card.appendChild(el("p", "prose locked-note", LC.esc(LC.s("lockedNote"))));
-    return card;
   }
 
   function renderExercise(ex, index, isQuest, opts) {
@@ -381,7 +353,7 @@ window.LC = window.LC || {};
     head.appendChild(el("h3", "exercise-title", LC.esc(LC.t(ex.title))));
     /* Numbers + Latin units in RTL prose reverse without isolation:
      * "+25 XP · 8" renders as "8 · XP 25+". See spec/03-i18n-and-rtl.md. */
-    var reward = el("span", "exercise-reward", "+" + ex.xp + " XP · " + ex.drachmas + " 🪙");
+    var reward = el("span", "exercise-reward", "+" + ex.xp + " XP · " + ex.drachmas + " " + LC.icon("coin"));
     reward.setAttribute("dir", "ltr");
     head.appendChild(reward);
     card.appendChild(head);
@@ -413,16 +385,13 @@ window.LC = window.LC || {};
       onRun: doCheck,
       label: LC.t(ex.title)
     });
-    /* Exposed so a "next battle" button on another card can focus THIS
-     * card's editor once it has been revealed. */
-    card.lcFocusEditor = function () { editor.focus(); };
 
     var bar = el("div", "runner-bar");
     var checkBtn = el("button", "btn btn-run", LC.esc(isBattle ? LC.s("fight") : LC.s("check")));
     checkBtn.type = "button";
     var resetBtn = el("button", "btn btn-ghost", LC.esc(LC.s("reset")));
     resetBtn.type = "button";
-    var hintBtn = el("button", "btn btn-hint", "💡 " + LC.esc(LC.s("hint")));
+    var hintBtn = el("button", "btn btn-hint", LC.icon("lamp") + " " + LC.esc(LC.s("hint")));
     hintBtn.type = "button";
     bar.appendChild(checkBtn);
     bar.appendChild(resetBtn);
@@ -524,7 +493,7 @@ window.LC = window.LC || {};
 
         if (res.pass) {
           verdict.className = "verdict is-pass";
-          verdict.innerHTML = "<strong>✓ " + LC.esc(isBattle ? LC.s("campHolds") : LC.s("correct")) + "</strong>";
+          verdict.innerHTML = "<strong>" + LC.icon("tick") + " " + LC.esc(isBattle ? LC.s("campHolds") : LC.s("correct")) + "</strong>";
           var already = LC.Game.markExerciseDone(lessonId, ex.id);
           if (!already) {
             LC.Game.award(ex.xp, ex.drachmas);
@@ -535,21 +504,19 @@ window.LC = window.LC || {};
             if (isBattle && typeCalls >= 3) LC.Game.unlock("typeDetective");
           }
           card.classList.add("is-solved");
-          maybeCompleteLesson();
 
-          /* Reveal the next locked battle, if there is one, and hand her a
-           * focused way to reach it — the reveal itself already happened,
-           * this button is purely a convenience jump. See
-           * spec/02-game-design.md: no skip-ahead affordance mid-lesson. */
+          /* Tell the step navigator the next step may now be reachable, and
+           * offer a direct jump to it. See spec/02-game-design.md: no
+           * skip-ahead affordance — this only ever advances by one step, and
+           * only after this exercise is solved. */
           if (opts.onWin) {
-            var revealed = opts.onWin();
-            if (revealed) {
+            var hasNext = opts.onWin();
+            if (hasNext) {
               var nextBtn = el("button", "btn next-battle-btn",
                 "⚔ " + LC.esc(LC.s("nextBattle")) + " →");
               nextBtn.type = "button";
               nextBtn.addEventListener("click", function () {
-                scrollToCard(revealed.el);
-                if (revealed.el.lcFocusEditor) revealed.el.lcFocusEditor();
+                if (opts.goNext) opts.goNext();
               });
               verdict.appendChild(nextBtn);
               nextBtn.focus();
@@ -579,33 +546,6 @@ window.LC = window.LC || {};
     return list;
   }
 
-  function maybeCompleteLesson() {
-    var all = allExercises();
-    for (var i = 0; i < all.length; i++) {
-      if (!LC.Game.isExerciseDone(current.id, all[i].id)) return;
-    }
-    var first = LC.Game.completeLesson(current.id, current.item, 30);
-    var panel = document.getElementById("lesson-complete");
-    if (panel) {
-      panel.classList.add("show");
-      /* Only jump on the FIRST completion — replaying an already-finished
-       * lesson should not yank her down the page every time. */
-      if (first) {
-        scrollToCard(panel);
-        var cta = panel.parentNode && panel.parentNode.querySelector(".next-box .btn-run");
-        if (cta) {
-          cta.focus();
-        } else {
-          panel.setAttribute("tabindex", "-1");
-          panel.focus();
-        }
-      }
-    }
-    if (first && current.item) {
-      LC.Game.toast(current.item.icon + " " + LC.t({ he: "קיבלת", en: "You earned" }) + " " + LC.t(current.item.name), "item");
-    }
-  }
-
   /* ---- page ------------------------------------------------------------ */
 
   function section(titleKey, extraClass) {
@@ -614,151 +554,7 @@ window.LC = window.LC || {};
     return s;
   }
 
-  /* Chrome, not a beat: a row of stops under the title, not one of the six
-   * fixed sections. Only solved and current stops are live links — a locked
-   * one is inert, so this never becomes the skip-ahead affordance
-   * spec/02-game-design.md rules out. */
-  function renderRail(orderedAll, firstOpenIdx) {
-    if (orderedAll.length < 2) return null;
-    var rail = el("nav", "ex-rail");
-    rail.setAttribute("aria-label", LC.s("secTraining"));
-    orderedAll.forEach(function (ex, i) {
-      var solved = LC.Game.isExerciseDone(current.id, ex.id);
-      var isQuestItem = !!(current.quest && ex.id === current.quest.id);
-      var state = solved ? "solved" : (i === firstOpenIdx ? "current" : "locked");
-      var dot = el(state === "locked" ? "span" : "a", "rail-dot rail-" + state,
-        isQuestItem ? "★" : String(i + 1));
-      var labelKey = state === "solved" ? "solvedAlready" : (state === "current" ? "startHere" : "locked");
-      dot.setAttribute("aria-label", LC.t(ex.title) + " — " + LC.s(labelKey));
-      if (state !== "locked") {
-        dot.setAttribute("href", "#ex-" + ex.id);
-        dot.addEventListener("click", function (e) {
-          e.preventDefault();
-          scrollToCard(document.getElementById("ex-" + ex.id));
-        });
-      }
-      rail.appendChild(dot);
-    });
-    return rail;
-  }
-
-  function render() {
-    var root = document.getElementById("app");
-    root.innerHTML = "";
-    var meta = LC.lessonMeta(current.id);
-    var next = LC.nextLesson(current.id);
-
-    /* header + HUD */
-    var header = el("header", "topbar");
-    var back = el("a", "btn btn-ghost btn-back");
-    back.setAttribute("href", LC.href.home());
-    back.textContent = "◂ " + LC.s("backToMap");
-    header.appendChild(back);
-    var hud = el("div", "hud");
-    hud.setAttribute("data-hud", "");
-    header.appendChild(hud);
-    var langBtn = el("button", "btn btn-ghost btn-lang", LC.esc(LC.s("langToggle")));
-    langBtn.type = "button";
-    langBtn.addEventListener("click", function () { LC.i18n.toggle(); });
-    header.appendChild(langBtn);
-    root.appendChild(header);
-
-    /* title */
-    var title = el("div", "lesson-title");
-    title.appendChild(el("div", "lesson-eyebrow",
-      LC.esc(LC.t({ he: "שיעור", en: "Lesson" }) + " " + parseInt(current.id, 10) + " · " +
-             LC.t(LC.ACTS[(meta ? meta.act : 1) - 1].title))));
-    title.appendChild(el("h1", "", LC.esc(LC.t(current.title))));
-    if (current.subtitle) title.appendChild(el("p", "lesson-sub", LC.esc(LC.t(current.subtitle))));
-    root.appendChild(title);
-
-    /* Reveal order: training battles in written order, then the quest. A
-     * battle is open if it is solved, or it is the first unsolved one —
-     * everything after that renders as a locked strip. A queue, not a skip:
-     * nothing can be reached out of order. See spec/02-game-design.md. */
-    var orderedAll = (current.training || []).slice();
-    if (current.quest) orderedAll.push(current.quest);
-    var firstOpenIdx = orderedAll.length;
-    for (var oi = 0; oi < orderedAll.length; oi++) {
-      if (!LC.Game.isExerciseDone(current.id, orderedAll[oi].id)) { firstOpenIdx = oi; break; }
-    }
-    var slots = [];
-
-    function revealNext(globalIndex) {
-      var nextIdx = globalIndex + 1;
-      if (nextIdx >= orderedAll.length) return null;
-      var slot = slots[nextIdx];
-      if (!slot || slot.open) return slot || null;
-      var card = renderExercise(slot.ex, slot.indexInGroup, slot.isQuest,
-        { onWin: function () { return revealNext(nextIdx); } });
-      card.id = "ex-" + slot.ex.id;
-      slot.container.replaceChild(card, slot.el);
-      slot.el = card;
-      slot.open = true;
-      return slot;
-    }
-
-    var rail = renderRail(orderedAll, firstOpenIdx);
-    if (rail) root.appendChild(rail);
-
-    /* 1 — prophecy */
-    var proph = section("secProphecy", "beat-prophecy");
-    var scroll = el("div", "scroll");
-    (current.prophecy.lines || []).forEach(function (line) {
-      scroll.appendChild(el("p", "scroll-line", LC.rich(line)));
-    });
-    proph.appendChild(scroll);
-    root.appendChild(proph);
-
-    /* 2 — teach */
-    var teach = section("secTeach", "beat-teach");
-    (current.teach || []).forEach(function (block) {
-      teach.appendChild(renderTeachBlock(block));
-    });
-    root.appendChild(teach);
-
-    /* 3 — try it */
-    if (current.tryIt) {
-      var tryIt = section("secTryIt", "beat-try");
-      if (current.tryIt.intro) tryIt.appendChild(el("p", "prose", LC.rich(current.tryIt.intro)));
-      tryIt.appendChild(runnerWidget({
-        code: current.tryIt.starter || "",
-        editable: true,
-        label: LC.s("secTryIt")
-      }).el);
-      root.appendChild(tryIt);
-    }
-
-    /* 4 — training */
-    var training = section("secTraining", "beat-training");
-    (current.training || []).forEach(function (ex, i) {
-      var solved = LC.Game.isExerciseDone(current.id, ex.id);
-      var open = solved || i === firstOpenIdx;
-      var node = open
-        ? renderExercise(ex, i, false, { onWin: function () { return revealNext(i); } })
-        : renderLockedCard(ex, i, false);
-      node.id = "ex-" + ex.id;
-      training.appendChild(node);
-      slots.push({ ex: ex, isQuest: false, indexInGroup: i, container: training, el: node, open: open });
-    });
-    root.appendChild(training);
-
-    /* 5 — quest / boss */
-    if (current.quest) {
-      var qIdx = (current.training || []).length;
-      var solvedQ = LC.Game.isExerciseDone(current.id, current.quest.id);
-      var openQ = solvedQ || qIdx === firstOpenIdx;
-      var quest = section(current.quest.boss ? "secBoss" : "secQuest", "beat-quest");
-      var qnode = openQ
-        ? renderExercise(current.quest, 0, true, { onWin: function () { return revealNext(qIdx); } })
-        : renderLockedCard(current.quest, 0, true);
-      qnode.id = "ex-" + current.quest.id;
-      quest.appendChild(qnode);
-      root.appendChild(quest);
-      slots.push({ ex: current.quest, isQuest: true, indexInGroup: 0, container: quest, el: qnode, open: openQ });
-    }
-
-    /* 6 — recap */
+  function buildRecapPanel(panel, next) {
     var recap = section("secRecap", "beat-recap");
     var done = el("div", "complete", "");
     done.id = "lesson-complete";
@@ -793,30 +589,149 @@ window.LC = window.LC || {};
       }
       recap.appendChild(nextBox);
     }
-    root.appendChild(recap);
+    panel.appendChild(recap);
+  }
+
+  function render(preferredStart) {
+    var root = document.getElementById("app");
+    root.innerHTML = "";
+    var meta = LC.lessonMeta(current.id);
+    var next = LC.nextLesson(current.id);
+
+    /* header + HUD */
+    var header = el("header", "topbar");
+    var back = el("a", "btn btn-ghost btn-back");
+    back.setAttribute("href", LC.href.home());
+    back.textContent = "◂ " + LC.s("backToMap");
+    header.appendChild(back);
+    var hud = el("div", "hud");
+    hud.setAttribute("data-hud", "");
+    header.appendChild(hud);
+    var langBtn = el("button", "btn btn-ghost btn-lang", LC.esc(LC.s("langToggle")));
+    langBtn.type = "button";
+    langBtn.addEventListener("click", function () { LC.i18n.toggle(); });
+    header.appendChild(langBtn);
+    root.appendChild(header);
+
+    /* title */
+    var title = el("div", "lesson-title");
+    title.appendChild(el("div", "lesson-eyebrow",
+      LC.esc(LC.t({ he: "שיעור", en: "Lesson" }) + " " + parseInt(current.id, 10) + " · " +
+             LC.t(LC.ACTS[(meta ? meta.act : 1) - 1].title))));
+    title.appendChild(el("h1", "", LC.esc(LC.t(current.title))));
+    if (current.subtitle) title.appendChild(el("p", "lesson-sub", LC.esc(LC.t(current.subtitle))));
+    root.appendChild(title);
+
+    /* Reveal order: training battles in written order, then the quest. A
+     * battle is reachable if it is solved, or every battle before it is
+     * solved — nothing can be reached out of order. See spec/02-game-design.md. */
+    var orderedAll = (current.training || []).slice();
+    if (current.quest) orderedAll.push(current.quest);
+
+    function firstOpenIdx() {
+      for (var i = 0; i < orderedAll.length; i++) {
+        if (!LC.Game.isExerciseDone(current.id, orderedAll[i].id)) return i;
+      }
+      return orderedAll.length;
+    }
+
+    var steps = [];
+
+    /* 1 — teach */
+    steps.push({ build: function (panel) {
+      var teach = section("secTeach", "beat-teach");
+      (current.teach || []).forEach(function (block) {
+        teach.appendChild(renderTeachBlock(block));
+      });
+      panel.appendChild(teach);
+    } });
+
+    /* 2 — try it */
+    if (current.tryIt) {
+      steps.push({ build: function (panel) {
+        var tryIt = section("secTryIt", "beat-try");
+        if (current.tryIt.intro) tryIt.appendChild(el("p", "prose", LC.rich(current.tryIt.intro)));
+        tryIt.appendChild(runnerWidget({
+          code: current.tryIt.starter || "",
+          editable: true,
+          label: LC.s("secTryIt")
+        }).el);
+        panel.appendChild(tryIt);
+      } });
+    }
+
+    /* 3/4 — one step per training battle, then the quest/boss */
+    var exerciseStepOffset = steps.length;
+    orderedAll.forEach(function (ex, oi) {
+      var isQuest = !!(current.quest && ex.id === current.quest.id);
+      steps.push({
+        build: function (panel) {
+          var titleKey = isQuest ? (ex.boss ? "secBoss" : "secQuest") : "secTraining";
+          var beat = section(titleKey, isQuest ? "beat-quest" : "beat-training");
+          var indexInGroup = isQuest ? 0 : oi;
+          var card = renderExercise(ex, indexInGroup, isQuest, {
+            onWin: function () {
+              stepsCtl.refreshNav();
+              maybeCompleteLesson();
+              return oi < orderedAll.length - 1;
+            },
+            goNext: function () { stepsCtl.next(); }
+          });
+          card.id = "ex-" + ex.id;
+          beat.appendChild(card);
+          panel.appendChild(beat);
+        },
+        locked: function () { return oi > firstOpenIdx(); }
+      });
+    });
+
+    /* 5 — recap */
+    var recapIndex = steps.length;
+    steps.push({ build: function (panel) { buildRecapPanel(panel, next); } });
+
+    function maybeCompleteLesson() {
+      var all = allExercises();
+      for (var i = 0; i < all.length; i++) {
+        if (!LC.Game.isExerciseDone(current.id, all[i].id)) return;
+      }
+      var first = LC.Game.completeLesson(current.id, current.item, 30);
+      if (first) {
+        stepsCtl.goTo(recapIndex);
+        var panel = document.querySelector(".step .next-box .btn-run");
+        if (panel) panel.focus();
+        if (current.item) {
+          LC.Game.toast(current.item.icon + " " + LC.t({ he: "קיבלת", en: "You earned" }) + " " + LC.t(current.item.name), "item");
+        }
+      }
+    }
+
+    /* Deep link to one battle (#ex-b3): land there if it is reachable. If
+     * it is locked or missing, land on the first open battle instead —
+     * she followed a link expecting to reach the exercises. */
+    var start = preferredStart;
+    if (start === undefined) {
+      start = 0;
+      var hash = window.location.hash;
+      if (hash && hash.indexOf("#ex-") === 0) {
+        var exId = hash.slice(4);
+        var oi2 = -1;
+        for (var i = 0; i < orderedAll.length; i++) {
+          if (orderedAll[i].id === exId) { oi2 = i; break; }
+        }
+        if (oi2 >= 0) {
+          var openIdx = Math.min(firstOpenIdx(), orderedAll.length - 1);
+          start = exerciseStepOffset + (oi2 <= firstOpenIdx() ? oi2 : openIdx);
+        }
+      }
+    }
+    start = Math.max(0, Math.min(start, steps.length - 1));
+
+    var stepHost = el("div", "step-host");
+    root.appendChild(stepHost);
+    stepsCtl = LC.Steps.create(stepHost, steps, { startIndex: start });
 
     LC.Game.renderHud();
     LC.i18n.apply(root);
-  }
-
-  /* A deep link to one battle (#ex-b3): land there if it is open. If it is
-   * locked or missing, land on the current battle instead of the top of the
-   * page — she followed a link expecting to reach the exercises. Never acts
-   * on a plain page load with no hash. */
-  function scrollToHash() {
-    var hash = window.location.hash;
-    if (!hash || hash.indexOf("#ex-") !== 0) return;
-    var target = document.getElementById(hash.slice(1));
-    if (target && !target.classList.contains("exercise-locked")) {
-      scrollToCard(target);
-      return;
-    }
-    var open = document.querySelector(".exercise:not(.exercise-locked):not(.is-solved)");
-    if (!open) {
-      var all = document.querySelectorAll(".exercise");
-      open = all[all.length - 1];
-    }
-    scrollToCard(open);
   }
 
   LC.Lesson = {
@@ -827,15 +742,12 @@ window.LC = window.LC || {};
         return;
       }
       render();
-      scrollToHash();
       /* Re-render on language change: content strings live in the objects, not
        * in data-i18n attributes, so a full re-render is the honest approach.
-       * Editor contents are intentionally NOT preserved — see notes in
-       * spec/03-i18n-and-rtl.md; we keep scroll position instead. */
+       * We keep her on the same step rather than the same scroll position. */
       LC.i18n.onChange(function () {
-        var y = window.scrollY;
-        render();
-        window.scrollTo(0, y);
+        var keep = stepsCtl ? stepsCtl.current() : 0;
+        render(keep);
       });
     }
   };

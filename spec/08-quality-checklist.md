@@ -5,12 +5,11 @@ lesson's entry in `TODO.md` and tick as you go.
 
 ## Content
 
-- [ ] Follows the six beats in `04-lesson-template.md`, in order
+- [ ] Follows the five beats in `04-lesson-template.md`, in order
 - [ ] Every learner-visible string is a `{he, en}` pair — no bare strings
 - [ ] Hebrew is feminine second person; none of the banned words
       (`simply`, `just`, `easy`, `obviously`) appear in either language
 - [ ] Only concepts from lessons 1..N-1 are used (`07-curriculum.md`)
-- [ ] Prophecy is 3–6 lines and contains no code
 - [ ] At least one `error` block: real broken code, real error, real explanation
 - [ ] Recap has one bullet per concept, plus a teaser for lesson N+1
 - [ ] Item, XP and drachma values match the budget in `02-game-design.md`

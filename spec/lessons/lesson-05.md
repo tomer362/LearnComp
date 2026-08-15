@@ -54,17 +54,9 @@ trophies and dust.
 The Oracle will help. But she does not tell stories, and she does not explain.
 She answers questions, and every answer she gives is one of exactly two words.
 
-Cast: Chiron (brings her up the stairs), the Oracle (delivers the act's
-prophecy), Annabeth in a callout — she has been asking the Oracle questions for
-years and knows the trick is asking a question with only two possible answers.
-
-**Prophecy panel** (rendered as `prophecy.lines`, no code):
-
-> הבוקר הזה התחיל עם רעם בלי ענן אחד בשמיים.
-> הברק הראשי של זאוס — הנשק שהרעם עצמו נולד ממנו — נגנב מאולימפוס.
-> כירון מוביל אותך במדרגות החורקות אל עליית הגג של הבית הגדול.
-> שם יושבת האורקל, ולה יש כלל אחד: היא לא מספרת סיפורים.
-> "שאלי אותי שאלה," היא לוחשת, "ואני אענה במילה אחת בלבד."
+Cast: Chiron (brings her up the stairs), the Oracle, Annabeth in a callout —
+she has been asking the Oracle questions for years and knows the trick is
+asking a question with only two possible answers.
 > "True. או False. הברק חייב לחזור לפני היפוך הקיץ — אז שאלי נכון."
 
 English mirror for the `en` side of each line, same six lines, same rhythm.

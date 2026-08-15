@@ -6,23 +6,23 @@ Every string visible to the learner is a `{he, en}` pair — no bare strings.
 > **The game is the course.** The `training` and `quest` entries are **battle
 > levels**, not written exercises. Their extra fields (map, waves, gold, and
 > `check.kind: "battle"`) are defined in **`spec/09-battle-game.md`** — read
-> that alongside this file. Everything below still applies: the six beats, the
+> that alongside this file. Everything below still applies: the five beats, the
 > `{he, en}` pairs, the three-hint ladder, and the teach blocks.
 
-## The six beats
+## The five beats
 
 Every lesson page renders these sections in this order. Do not add, remove or
 reorder them; consistency is what lets her stop reading the furniture and start
-reading the content.
+reading the content. The battle itself sets the vibe — there is no separate
+story-hook beat before it.
 
 | # | Section | he | Purpose |
 | --- | --- | --- | --- |
-| 1 | **Prophecy** | הנבואה | Story hook. Why this lesson exists, in-world. 3–6 lines. No code. |
-| 2 | **Chiron Teaches** | כירון מלמד | The concept. Prose + runnable examples + callouts. |
-| 3 | **Training Ground** | מגרש האימונים | One free-play editor, pre-filled, no grading. The game words work here too, against a practice field. |
-| 4 | **The Battles** | הקרבות | 3–5 graded battle levels, easiest first. |
-| 5 | **The Great Battle** | הקרב הגדול | One larger battle combining the lesson. A boss in lessons 4/8/12/16/20. |
-| 6 | **Reward & Recap** | שכר וסיכום | XP, item, bullet recap, teaser for the next lesson. |
+| 1 | **Chiron Teaches** | כירון מלמד | The concept. Prose + runnable examples + callouts. |
+| 2 | **Training Ground** | מגרש האימונים | One free-play editor, pre-filled, no grading. The game words work here too, against a practice field. |
+| 3 | **The Battles** | הקרבות | 3–5 graded battle levels, easiest first. |
+| 4 | **The Great Battle** | הקרב הגדול | One larger battle combining the lesson. A boss in lessons 4/8/12/16/20. |
+| 5 | **Reward & Recap** | שכר וסיכום | XP, item, bullet recap, teaser for the next lesson. |
 
 ## Content object
 
@@ -43,10 +43,6 @@ LC.registerLesson({
     icon: "📿",
     name: { he: "חרוז המחנה",  en: "Camp Bead" },
     desc: { he: "…",           en: "…" },
-  },
-
-  prophecy: {
-    lines: [ { he: "…", en: "…" }, … ],   // 3–6 lines
   },
 
   teach: [ …blocks… ],                    // see "Teach blocks"

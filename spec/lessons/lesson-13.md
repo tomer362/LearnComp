@@ -51,15 +51,6 @@ cedar chest holds sheets of vellum covered in Daedalus' handwriting. Daedalus
 built a maze nobody escapes — and he built it from drawings he made **once** and
 used **hundreds of times**.
 
-The Prophecy panel (6 lines, no code):
-
-> שלושה ימים את מעתיקה את אותן שורות, שוב ושוב.
-> כירון מביט במסך שלך ולא אומר מילה.
-> אחר כך הוא פותח תיבת ארז ישנה ומוציא ממנה גיליון קלף.
-> "דדלוס בנה מבוך שאיש לא יצא ממנו. הוא לא בנה אותו פעמיים."
-> "הוא צייר שרטוט אחד, ואז השתמש בו שוב ושוב ושוב."
-> "היום את לומדת לצייר שרטוט."
-
 Cast: Chiron (teaches), Annabeth (copying scrolls, the one who feels the pain
 first), Grover (offers to hold the scrolls, drops them).
 

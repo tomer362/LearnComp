@@ -1,4 +1,6 @@
 /* hub.js — the quest map on index.html: claiming, progress, inventory.
+ * Rendered as single-screen steps via LC.Steps — one act / inventory /
+ * progress panel visible at a time, paged with Next/Back.
  * See spec/02-game-design.md.
  */
 window.LC = window.LC || {};
@@ -11,6 +13,8 @@ window.LC = window.LC || {};
     if (html !== undefined) n.innerHTML = html;
     return n;
   }
+
+  var lastStepIndex = 0;
 
   /* ---- claiming -------------------------------------------------------- */
 
@@ -117,65 +121,56 @@ window.LC = window.LC || {};
     draw();
   }
 
-  /* ---- map ------------------------------------------------------------- */
+  /* ---- map (one step per act) ------------------------------------------ */
 
-  function renderMap(root) {
-    var byAct = {};
-    LC.CURRICULUM.forEach(function (l) {
-      (byAct[l.act] = byAct[l.act] || []).push(l);
+  function buildActPanel(act, byAct, panel) {
+    var lessons = byAct[act.n] || [];
+    var actBox = el("section", "act");
+    var head = el("header", "act-head");
+    head.appendChild(el("span", "act-num", String(act.n)));
+    var headText = el("div", "act-head-text");
+    headText.appendChild(el("h2", "act-title", LC.esc(LC.t(act.title))));
+    headText.appendChild(el("div", "act-scene", LC.esc(LC.t(act.scene))));
+    head.appendChild(headText);
+    actBox.appendChild(head);
+
+    var stops = el("ol", "stops");
+    lessons.forEach(function (l) {
+      var done = LC.Game.isLessonDone(l.id);
+      var unlocked = LC.Game.isUnlocked(l.id);
+      var playable = unlocked && l.built;
+
+      var li = el("li", "stop" +
+        (done ? " is-done" : "") +
+        (playable ? " is-open" : "") +
+        (!l.built ? " is-soon" : "") +
+        (!unlocked ? " is-locked" : ""));
+
+      var node = playable ? el("a", "stop-link") : el("div", "stop-link");
+      if (playable) node.setAttribute("href", LC.href.lesson(l.id));
+
+      node.appendChild(el("span", "stop-icon", done ? LC.icon("tick") : (unlocked ? l.icon : LC.icon("lock"))));
+      var text = el("div", "stop-text");
+      text.appendChild(el("div", "stop-title",
+        LC.esc(parseInt(l.id, 10) + ". " + LC.t(l.title)) + (l.boss ? ' <span class="boss-tag">BOSS</span>' : "")));
+      text.appendChild(el("div", "stop-teaches", LC.esc(LC.t(l.teaches))));
+      node.appendChild(text);
+
+      var status = el("span", "stop-status");
+      if (done) status.innerHTML = LC.icon("tick");
+      else if (!l.built) status.textContent = LC.s("comingSoon");
+      else if (!unlocked) status.textContent = LC.s("locked");
+      else status.textContent = LC.s("startHere");
+      node.appendChild(status);
+
+      li.appendChild(node);
+      stops.appendChild(li);
     });
-
-    var map = el("div", "map");
-    LC.ACTS.forEach(function (act) {
-      var lessons = byAct[act.n] || [];
-      var actBox = el("section", "act");
-      var head = el("header", "act-head");
-      head.appendChild(el("span", "act-num", String(act.n)));
-      var headText = el("div", "act-head-text");
-      headText.appendChild(el("h2", "act-title", LC.esc(LC.t(act.title))));
-      headText.appendChild(el("div", "act-scene", LC.esc(LC.t(act.scene))));
-      head.appendChild(headText);
-      actBox.appendChild(head);
-
-      var stops = el("ol", "stops");
-      lessons.forEach(function (l) {
-        var done = LC.Game.isLessonDone(l.id);
-        var unlocked = LC.Game.isUnlocked(l.id);
-        var playable = unlocked && l.built;
-
-        var li = el("li", "stop" +
-          (done ? " is-done" : "") +
-          (playable ? " is-open" : "") +
-          (!l.built ? " is-soon" : "") +
-          (!unlocked ? " is-locked" : ""));
-
-        var node = playable ? el("a", "stop-link") : el("div", "stop-link");
-        if (playable) node.setAttribute("href", LC.href.lesson(l.id));
-
-        node.appendChild(el("span", "stop-icon", done ? "✓" : (unlocked ? l.icon : "🔒")));
-        var text = el("div", "stop-text");
-        text.appendChild(el("div", "stop-title",
-          LC.esc(parseInt(l.id, 10) + ". " + LC.t(l.title)) + (l.boss ? ' <span class="boss-tag">BOSS</span>' : "")));
-        text.appendChild(el("div", "stop-teaches", LC.esc(LC.t(l.teaches))));
-        node.appendChild(text);
-
-        var status = el("span", "stop-status");
-        if (done) status.textContent = "✓";
-        else if (!l.built) status.textContent = LC.s("comingSoon");
-        else if (!unlocked) status.textContent = LC.s("locked");
-        else status.textContent = LC.s("startHere");
-        node.appendChild(status);
-
-        li.appendChild(node);
-        stops.appendChild(li);
-      });
-      actBox.appendChild(stops);
-      map.appendChild(actBox);
-    });
-    root.appendChild(map);
+    actBox.appendChild(stops);
+    panel.appendChild(actBox);
   }
 
-  function renderInventory(root) {
+  function buildInventoryPanel(panel) {
     var s = LC.store.get();
     var box = el("section", "pack");
     box.appendChild(el("h2", "pack-title", LC.esc(LC.s("inventory"))));
@@ -205,10 +200,10 @@ window.LC = window.LC || {};
       });
       box.appendChild(ach);
     }
-    root.appendChild(box);
+    panel.appendChild(box);
   }
 
-  function renderProgressTools(root) {
+  function buildProgressPanel(panel) {
     var box = el("section", "savebox");
     box.appendChild(el("h2", "pack-title", LC.esc(LC.s("progress"))));
     if (!LC.store.isPersistent()) {
@@ -269,12 +264,13 @@ window.LC = window.LC || {};
     reroll.type = "button";
     reroll.addEventListener("click", function () {
       LC.store.update(function (s) { s.claimed = false; });
+      lastStepIndex = 0;
       LC.Hub.mount();
     });
     bar.appendChild(inBtn); bar.appendChild(reroll);
     box.appendChild(bar);
     box.appendChild(area);
-    root.appendChild(box);
+    panel.appendChild(box);
   }
 
   /* NOTE: mount() must NOT call LC.i18n.init(). The language listener below
@@ -313,9 +309,25 @@ window.LC = window.LC || {};
     hero2.appendChild(el("h1", "", LC.esc(LC.s("yourQuest"))));
     root.appendChild(hero2);
 
-    renderMap(root);
-    renderInventory(root);
-    renderProgressTools(root);
+    var byAct = {};
+    LC.CURRICULUM.forEach(function (l) {
+      (byAct[l.act] = byAct[l.act] || []).push(l);
+    });
+
+    var steps = LC.ACTS.map(function (act) {
+      return { build: function (panel) { buildActPanel(act, byAct, panel); } };
+    });
+    steps.push({ build: buildInventoryPanel });
+    steps.push({ build: buildProgressPanel });
+
+    var start = Math.min(lastStepIndex, steps.length - 1);
+    var stepHost = el("div", "step-host");
+    root.appendChild(stepHost);
+    LC.Steps.create(stepHost, steps, {
+      startIndex: start,
+      onIndexChange: function (i) { lastStepIndex = i; }
+    });
+
     LC.Game.renderHud();
     LC.i18n.apply(root);
   }

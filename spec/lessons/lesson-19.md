@@ -51,14 +51,6 @@ Hephaestus is not interested in her prophecy. He has a defence line to build and
 not enough hands. He hands her a mold and a ladle of bronze and tells her that a
 demigod who can only make one of a thing has not learned to make anything.
 
-The Prophecy panel (3–6 lines, no code):
-
-> הדלת נפתחת והחום יוצא החוצה כמו יד.
-> הפייסטוס לא מרים את המבט מהסדן. "את זאת עם הנבואה."
-> "אני צריך שלוש מאות אוטומטונים עד הבוקר, וקיבלתי אותך."
-> הוא דוחף לעברך תבנית יציקה. "לא בונים שלוש מאות דברים."
-> "בונים דבר אחד שיודע לצאת שלוש מאות פעם. שבי."
-
 Cast: Hephaestus (blunt, practical, respects work), Chiron in callouts,
 Annabeth in the side quest.
 
@@ -337,7 +329,6 @@ class Camper:
     def introduce(self):
         return f"{self.name}, cabin {self.cabin}"
 
-
 me = Camper("Percy", "Poseidon")
 print(me.introduce())
 
@@ -358,7 +349,6 @@ for every tower on the field. From here on she can define a tower type:
 class SkyWatch:
     def fire(self, enemies):
         return enemies[0]
-
 
 register_tower("archer", SkyWatch)
 ```
@@ -413,7 +403,6 @@ class SkyWatch:
             if enemy["flying"]:
                 return enemy
         return enemies[0]
-
 
 # the mold is finished. connect it to the archers,
 # then build the line below.
@@ -484,7 +473,6 @@ class Doctrine:
     # whose kind matches. if nothing matches, return enemies[0].
     pass
 
-
 register_tower("archer", Doctrine)
 
 place_tower("cannon", 4, 3)
@@ -506,7 +494,6 @@ class Doctrine:
                 if enemy["kind"] == kind:
                     return enemy
         return enemies[0]
-
 
 register_tower("archer", Doctrine)
 … the five towers …
@@ -576,11 +563,9 @@ class SkyWatch:
     # archers: anything flying, first. otherwise whatever leads.
     pass
 
-
 class Breaker:
     # cannons: the LEAST armoured enemy in range.
     pass
-
 
 register_tower("archer", SkyWatch)
 register_tower("cannon", Breaker)
@@ -602,7 +587,6 @@ class SkyWatch:
                 return enemy
         return enemies[0]
 
-
 class Breaker:
     def fire(self, enemies):
         best = enemies[0]
@@ -610,7 +594,6 @@ class Breaker:
             if enemy["armour"] < best["armour"]:
                 best = enemy
         return best
-
 
 register_tower("archer", SkyWatch)
 register_tower("cannon", Breaker)
@@ -711,7 +694,6 @@ class Sentry:
             if self.rank(enemy) < self.rank(best):
                 best = enemy
         return best
-
 
 register_tower("archer", Sentry)
 register_tower("cannon", Sentry)
@@ -827,7 +809,6 @@ class SkyWatch:
                 best = enemy
         return best
 
-
 class Breaker:
     def __init__(self):
         self.shots = 0
@@ -839,7 +820,6 @@ class Breaker:
             if enemy["armour"] < best["armour"]:
                 best = enemy
         return best
-
 
 register_tower("archer", SkyWatch)
 register_tower("lightning", SkyWatch)
@@ -913,7 +893,6 @@ class Frostbite(SkyWatch):
     def __init__(self):
         super().__init__()
         self.priority = ["hellhound", "cyclops", "satyr", "harpy"]
-
 
 register_tower("archer", SkyWatch)
 register_tower("ice", Frostbite)

@@ -47,14 +47,6 @@ is not "what will you fight" — it is "who is going with you".
 
 He unrolls a blank scroll. One scroll, many names. That is a list.
 
-The Prophecy panel (5 lines, no code):
-
-> העץ על הגבעה גוסס, והמגן שמסביב למחנה נסדק.
-> האורקל פוקחת עיניים ואומרת: "מעבר לים המפלצות מחכה גיזה של זהב."
-> "לא תצאי לבד. אף גיבורה לא יצאה לבד וחזרה."
-> כירון פורש על השולחן מגילה ריקה.
-> "כתבי עליה את החבורה. שם אחד, ואחריו עוד אחד, ועוד אחד — כולם על מגילה אחת."
-
 Cast: Chiron, the Oracle. Annabeth appears in the zero-based callout (she is the
 one who explains it properly). Grover appears in the `IndexError` recovery.
 

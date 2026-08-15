@@ -56,14 +56,6 @@ And they are not patient about it. Below her the road to the camp is open, and
 every one of these battles is fought with a defense that stops the moment her
 function does.
 
-The Prophecy panel (3–6 lines, no code):
-
-> שלוש כנפיים חוסמות את השמיים מעל מנהטן.
-> אלקטו נוחתת על מסילת הברזל ומטה את הראש. "טעית," היא אומרת.
-> "אני יודעת שטעיתי," את עונה. "אני לא יודעת איפה."
-> "אז נלמד אותך," אומר כירון בשקט מאחורייך. "לפוריות אין סבלנות לניחושים —"
-> "— אבל יש להן כבוד עצום לתשובה מדויקת."
-
 Cast: Chiron (teaches the method), Alecto (the antagonist who is technically on
 her side), Grover in a `tip` callout guessing wildly and being wrong.
 
@@ -233,13 +225,11 @@ her side), Grover in a `tip` callout guessing wildly and being wrong.
     DANGER = {"satyr": 4, "harpy": 3, "hellhound": 2}
     wave = [{"kind": "satyr"}, {"kind": "cyclops"}, {"kind": "harpy"}]
 
-
     def danger_of(enemy):
         try:
             return DANGER[enemy["kind"]]
         except KeyError:
             return 0
-
 
     for enemy in wave:
         print(enemy["kind"], danger_of(enemy))
@@ -334,7 +324,6 @@ place_tower("archer", 8, 3)
 place_tower("cannon", 11, 3)
 place_tower("archer", 13, 5)
 
-
 def choose_target(enemies):
     flyers = []
     for enemy in enemies:
@@ -354,7 +343,6 @@ place_tower("archer", 6, 5)
 place_tower("archer", 8, 3)
 place_tower("cannon", 11, 3)
 place_tower("archer", 13, 5)
-
 
 def choose_target(enemies):
     flyers = []
@@ -424,9 +412,7 @@ place_tower("cannon", 8, 3)
 place_tower("cannon", 12, 2)
 place_tower("archer", 15, 2)
 
-
 DANGER = {"satyr": 4, "harpy": 3, "hellhound": 2}
-
 
 def choose_target(enemies):
     best = enemies[0]
@@ -489,7 +475,6 @@ Starter (broken on purpose):
 ```python
 … the same five towers …
 
-
 def choose_target(enemies):
     best = enemies[0]
     for enemy in enemies:
@@ -506,13 +491,11 @@ Solution:
 ```python
 … the same five towers …
 
-
 def effort(enemy):
     try:
         return enemy["hp"] / enemy["armour"]
     except ZeroDivisionError:
         return 0
-
 
 def choose_target(enemies):
     best = enemies[0]
@@ -581,17 +564,13 @@ Starter (broken on purpose — two bugs, and Python reveals one at a time):
 ```python
 … the same five towers …
 
-
 DANGER = {"satyr": 4, "harpy": 3, "hellhound": 2}
-
 
 def danger_of(enemy):
     return DANGER[enemy["kind"]]
 
-
 def effort(enemy):
     return enemy["hp"] / enemy["armour"]
-
 
 def choose_target(enemies):
     best = enemies[0]
@@ -607,20 +586,17 @@ Solution:
 ```python
 DANGER = {"satyr": 4, "harpy": 3, "hellhound": 2}
 
-
 def danger_of(enemy):
     try:
         return DANGER[enemy["kind"]]
     except KeyError:
         return 0
 
-
 def effort(enemy):
     try:
         return enemy["hp"] / enemy["armour"]
     except ZeroDivisionError:
         return 0
-
 
 def choose_target(enemies):
     …unchanged…
@@ -696,7 +672,6 @@ place_tower("cannon", 14, 5)
 
 DANGER = {"harpy": 4, "satyr": 3, "hellhound": 2}
 
-
 def choose_target(enemies):
     flyers = []
     for enemy in enemis:
@@ -734,20 +709,17 @@ Solution:
 
 DANGER = {"harpy": 4, "satyr": 3, "hellhound": 2}
 
-
 def danger_of(enemy):
     try:
         return DANGER[enemy["kind"]]
     except KeyError:
         return 0
 
-
 def effort(enemy):
     try:
         return enemy["hp"] / enemy["armour"]
     except ZeroDivisionError:
         return 0
-
 
 def choose_target(enemies):
     flyers = []

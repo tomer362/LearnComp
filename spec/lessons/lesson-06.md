@@ -59,15 +59,6 @@ exactly one program running and it has no way to choose.
 Cast: Grover (wants the safe road and a snack), Annabeth (points out the sign is
 a decision tree), Hermes in the myth callout.
 
-**Prophecy panel**:
-
-> יצאתם מהמחנה לפני עלות השחר, ותשעה ימים על השעון.
-> אחרי שעתיים הדרך נגמרת בלי אזהרה — ומתפצלת לשלוש.
-> על עמוד עץ ישן חרוט סמל של הרמס, ומתחתיו שלוש שורות:
-> "הדרך הימנית מהירה. הדרך השמאלית בטוחה. הדרך האמצעית — תלוי."
-> גרובר מסתכל עלייך: "תלוי במה?"
-> אנאבת' מחייכת: "בדיוק. עכשיו את צריכה תוכנית שיודעת להחליט."
-
 ## Chiron Teaches — block by block
 
 1. **prose** — כל תוכנית שכתבת עד היום רצה מלמעלה למטה, כל שורה, תמיד. זה מה

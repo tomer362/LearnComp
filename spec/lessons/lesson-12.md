@@ -55,14 +55,6 @@ head with its own hit points and its own weakness, and it grows while you fight
 it. Chiron's advice, shouted over the noise, is to stop swinging and start
 reading.
 
-The Prophecy panel (5 lines, no code):
-
-> המים לפני השער רותחים.
-> מתוכם עולה ההידרה — לא ראש אחד, ולא שניים.
-> כירון צועק אלייך מעל הרעש: "אל תנופפי בחרב!"
-> "כל ראש שתכרתי — שניים יצמחו במקומו."
-> "את לא מנצחת אותה בכוח. את מנצחת אותה בזה שאת יודעת בדיוק מה עומד מולך."
-
 Cast: Chiron (from the deck, shouting), Annabeth (does the arithmetic out loud
 and reaches the same conclusion), Grover (counting heads, losing count).
 

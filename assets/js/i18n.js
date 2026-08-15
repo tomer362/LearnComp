@@ -17,9 +17,10 @@ window.LC = window.LC || {};
     level:          { he: "דרגה",                 en: "Level" },
     drachmas:       { he: "דרכמות",               en: "Drachmas" },
     ambrosia:       { he: "אמברוסיה",             en: "Ambrosia" },
+    stepBack:       { he: "הקודם",                en: "Back" },
+    stepNext:       { he: "הבא",                  en: "Next" },
 
     /* lesson sections */
-    secProphecy:    { he: "הנבואה",               en: "The Prophecy" },
     secTeach:       { he: "כירון מלמד",           en: "Chiron Teaches" },
     secTryIt:       { he: "מגרש האימונים",        en: "The Training Ground" },
     secTraining:    { he: "הקרבות",               en: "The Battles" },

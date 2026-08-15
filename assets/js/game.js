@@ -21,7 +21,7 @@ window.LC = window.LC || {};
     hermes:     { icon: "⚕️", accent: "#a9b6c4", name: { he: "הרמס",    en: "Hermes" },     trait: { he: "מהירות, תחבולות, קיצורי דרך",        en: "speed, tricks, shortcuts" } },
     apollo:     { icon: "☀️", accent: "#e6b422", name: { he: "אפולו",   en: "Apollo" },     trait: { he: "אור, מוזיקה, נבואה",                 en: "light, music, prophecy" } },
     hephaestus: { icon: "⚒️", accent: "#d2762c", name: { he: "הפייסטוס", en: "Hephaestus" }, trait: { he: "לבנות, לתקן, מכונות",               en: "building, fixing, machines" } },
-    ares:       { icon: "⚔️", accent: "#c1483f", name: { he: "ארס",     en: "Ares" },       trait: { he: "כוח, אומץ, להסתער קדימה",            en: "force, courage, charging in" } },
+    ares:       { icon: "⚔️", accent: "#db6350", name: { he: "ארס",     en: "Ares" },       trait: { he: "כוח, אומץ, להסתער קדימה",            en: "force, courage, charging in" } },
     demeter:    { icon: "🌾", accent: "#6aa84f", name: { he: "דמטר",    en: "Demeter" },    trait: { he: "צמיחה, סבלנות",                      en: "growth, patience" } },
     aphrodite:  { icon: "🕊️", accent: "#d98ca6", name: { he: "אפרודיטה", en: "Aphrodite" }, trait: { he: "קסם, יופי, אנשים",                   en: "charm, beauty, people" } }
   };
@@ -151,7 +151,7 @@ window.LC = window.LC || {};
 
     host.innerHTML =
       '<div class="hud-identity">' +
-        '<span class="hud-cabin" title="' + LC.esc(cabin ? LC.t(cabin.name) : "") + '">' + (cabin ? cabin.icon : "🏛️") + "</span>" +
+        '<span class="hud-cabin" title="' + LC.esc(cabin ? LC.t(cabin.name) : "") + '">' + (cabin ? cabin.icon : LC.icon("shield")) + "</span>" +
         '<span class="hud-name">' + LC.esc(s.name || LC.t({ he: "חצי־אלה", en: "Demigod" })) + "</span>" +
       "</div>" +
       '<div class="hud-xp">' +
@@ -160,8 +160,8 @@ window.LC = window.LC || {};
         '<div class="xpbar"><div class="xpbar-fill"></div></div>' +
       "</div>" +
       '<div class="hud-res">' +
-        '<span class="res" dir="ltr" title="' + LC.esc(LC.s("drachmas")) + '">🪙 ' + s.drachmas + "</span>" +
-        '<span class="res" dir="ltr" title="' + LC.esc(LC.s("ambrosia")) + '">🍯 ' + s.ambrosia + "</span>" +
+        '<span class="res" dir="ltr" title="' + LC.esc(LC.s("drachmas")) + '">' + LC.icon("coin") + " " + s.drachmas + "</span>" +
+        '<span class="res" dir="ltr" title="' + LC.esc(LC.s("ambrosia")) + '">' + LC.icon("vial") + " " + s.ambrosia + "</span>" +
       "</div>";
 
     /* Set through CSSOM, not an HTML style="" attribute — CSP style-src can

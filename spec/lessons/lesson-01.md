@@ -47,8 +47,7 @@ She arrives at Camp Half-Blood, out of breath, having just outrun something with
 too many teeth. Chiron meets her at the Big House and tells her that more are
 coming, and that she will stop them — not with a sword, but with words.
 
-Cast: Chiron. The Prophecy panel (5 lines, no code) is written out verbatim in
-`content/lesson-01.js`.
+Cast: Chiron.
 
 ## Chiron Teaches — block by block
 

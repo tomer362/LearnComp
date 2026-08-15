@@ -81,15 +81,6 @@ Chiron takes her to the wall and tells her the archers have been aiming
 themselves since she got here, and that this stops today. He does not hand her a
 bow. He hands her the question the archers ask, and tells her to answer it.
 
-The Prophecy panel (6 lines, no code):
-
-> אנבת' פורשת קלף ריק על השולחן ומניחה אבן בכל פינה.
-> "אני יכולה לצייר את המבוך," היא אומרת, "אם מישהו יביא לי מספרים."
-> את שולחת סייר. הוא צועק משהו מרחוק, ונבלע בחושך.
-> כירון מרים גבה. "צעקה היא לא מפה. סייר טוב חוזר, ובידיים שלו יש משהו."
-> ואז הוא מוביל אותך אל החומה. "עד היום הקשתים כיוונו לבד. די בזה."
-> "מהיום הם ישאלו אותך במי לירות. בכל פעם מחדש. תעני להם."
-
 Cast: Annabeth (needs values, not noise — she is the reason `return` matters),
 Chiron (the eyebrow, and then the wall), Grover (volunteers to be the scout, is
 talked out of it, and later asks the question everyone is thinking: "אבל מי קורא

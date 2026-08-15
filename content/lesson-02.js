@@ -34,23 +34,7 @@ LC.registerLesson({
     }
   },
 
-  /* ---- 1. Prophecy ---------------------------------------------------- */
-  prophecy: {
-    lines: [
-      { he: "הבוקר הראשון שלך במחנה. הרצועה על הצוואר שלך כמעט ריקה — חרוז אחד.",
-        en: "Your first morning at camp. The cord around your neck is almost empty — one bead." },
-      { he: "כירון פורש על השולחן מגילה ארוכה: כל מי שעבר פה, שורה אחרי שורה.",
-        en: "Chiron unrolls a long scroll on the table: everyone who ever passed through, name after name." },
-      { he: "\"אלפי שמות,\" הוא אומר, \"ואף אחד מהם לא הלך לאיבוד.\"",
-        en: "\"Thousands of names,\" he says, \"and not one of them was ever lost.\"" },
-      { he: "\"כי לכל דבר במחנה יש שם, והשם מחזיק את מה שיש בפנים.\"",
-        en: "\"Because everything at camp has a name, and the name holds what is inside it.\"" },
-      { he: "\"אתמול לימדתי אותך לדבר. היום את לומדת לזכור.\"",
-        en: "\"Yesterday I taught you to speak. Today you learn to remember.\"" }
-    ]
-  },
-
-  /* ---- 2. Chiron Teaches ---------------------------------------------- */
+  /* ---- 1. Chiron Teaches ------------------------------------------------ */
   teach: [
     { type: "prose", text: {
       he: "אתמול כל `print` אמר את שלו ומיד שכח אותו. זה בסדר למשפט אחד, וחסר תוחלת למחנה של מאתיים חניכים. תוכנית שלא זוכרת כלום לא יכולה לעשות כלום מעניין. אז: שמות.",
@@ -147,7 +131,7 @@ LC.registerLesson({
       en: "There is still an honest limitation here: each `print` shows one value on a line of its own, so your battle report looks like a shopping list. Tomorrow you will learn to weave names into a single sentence — and let the program ask **you** a question before the wave starts." } }
   ],
 
-  /* ---- 3. Training ground (ungraded) ----------------------------------- */
+  /* ---- 2. Training ground (ungraded) ----------------------------------- */
   tryIt: {
     intro: {
       he: "המגרש שלך. שני את הערכים למה שבא לך, תוסיפי משתנה משלך, ונסי גם `print(type(cabin))` כדי לראות מה פייתון חושבת שיש שם. שום דבר פה לא נבדק.",
@@ -156,7 +140,7 @@ LC.registerLesson({
     starter: 'hero = "Percy"\ncabin = "Poseidon"\nbeads = 1\n\nprint(hero)\nprint(cabin)\nprint(beads)\n\ngold = get_gold()\nprint(gold)\nprint(type(gold))\n'
   },
 
-  /* ---- 4. The battles ---------------------------------------------------- */
+  /* ---- 3. The battles ---------------------------------------------------- */
   training: [
     {
       id: "b1",
@@ -287,7 +271,7 @@ LC.registerLesson({
     }
   ],
 
-  /* ---- 5. The great battle ---------------------------------------------- */
+  /* ---- 4. The great battle ---------------------------------------------- */
   quest: {
     id: "q1",
     xp: 50, drachmas: 12,
@@ -326,7 +310,7 @@ LC.registerLesson({
     }
   },
 
-  /* ---- 6. Recap ----------------------------------------------------------- */
+  /* ---- 5. Recap ----------------------------------------------------------- */
   recap: {
     bullets: [
       { he: "משתנה הוא שם שמחזיק ערך: `beads = 4`", en: "A variable is a name that holds a value: `beads = 4`" },

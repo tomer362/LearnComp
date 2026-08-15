@@ -14,6 +14,27 @@
   var PAD = 22;            // room for the coordinate labels
   var TICK = 0.1;          // must match sim.TICK
 
+  /* Canvas can't read CSS custom properties cheaply per-frame, so the
+   * palette is duplicated here as named constants — kept in sync by hand
+   * with the :root tokens in assets/css/theme.css. See spec/05-visual-design.md. */
+  var COLOR = {
+    grassA: "#15311f",
+    grassB: "#112819",
+    path: "#8a6a42",
+    rock: "#3f4550",
+    grid: "rgba(255,255,255,.07)",
+    label: "rgba(244,241,234,.65)",
+    rangeRing: "rgba(255,209,102,.18)",   // --gold @18%
+    towerPad: "rgba(0,0,0,.35)",
+    hpTrack: "rgba(0,0,0,.55)",
+    hpGood: "#5fd68a",                    // --greek-fire
+    hpMid: "#ffd166",                     // --gold
+    hpBad: "#c1483f",                     // --blood
+    shotLightning: "rgba(255,209,102,.9)",// --gold
+    shotNormal: "rgba(232,181,99,.75)",   // --bronze-lit
+    leak: "rgba(193,72,63,.45)"           // --blood
+  };
+
   function reducedMotion() {
     return window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   }
@@ -70,25 +91,25 @@
       /* grass */
       for (var r = 0; r < m.rows; r++) {
         for (var c = 0; c < m.cols; c++) {
-          ctx.fillStyle = (r + c) % 2 === 0 ? "#20492f" : "#1d4229";
+          ctx.fillStyle = (r + c) % 2 === 0 ? COLOR.grassA : COLOR.grassB;
           ctx.fillRect(ox + c * cell, oy + r * cell, cell, cell);
         }
       }
 
       /* path */
-      ctx.fillStyle = "#8a7355";
+      ctx.fillStyle = COLOR.path;
       (m.path || []).forEach(function (p) {
         ctx.fillRect(ox + p[0] * cell, oy + p[1] * cell, cell, cell);
       });
 
       /* rocks */
       (m.rock || []).forEach(function (p) {
-        ctx.fillStyle = "#4a4a52";
+        ctx.fillStyle = COLOR.rock;
         ctx.fillRect(ox + p[0] * cell, oy + p[1] * cell, cell, cell);
       });
 
       /* grid lines */
-      ctx.strokeStyle = "rgba(255,255,255,.07)";
+      ctx.strokeStyle = COLOR.grid;
       ctx.lineWidth = 1;
       for (var i = 0; i <= m.cols; i++) {
         ctx.beginPath();
@@ -104,7 +125,7 @@
       }
 
       /* coordinate labels — she needs these to write place_tower(kind, x, y) */
-      ctx.fillStyle = "rgba(244,241,234,.65)";
+      ctx.fillStyle = COLOR.label;
       ctx.font = "11px ui-monospace, monospace";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
@@ -129,11 +150,11 @@
         /* range ring, faint */
         ctx.beginPath();
         ctx.arc(cx(t.x), cy(t.y), (t.range || (spec && spec.range) || 2) * cell, 0, Math.PI * 2);
-        ctx.strokeStyle = "rgba(255,209,102,.18)";
+        ctx.strokeStyle = COLOR.rangeRing;
         ctx.lineWidth = 1;
         ctx.stroke();
 
-        ctx.fillStyle = "rgba(0,0,0,.35)";
+        ctx.fillStyle = COLOR.towerPad;
         ctx.fillRect(ox + t.x * cell + 2, oy + t.y * cell + 2, cell - 4, cell - 4);
         ctx.font = Math.floor(cell * 0.62) + "px serif";
         ctx.fillText((spec && spec.icon) || "🗼", cx(t.x), cy(t.y));
@@ -165,9 +186,9 @@
         /* hp bar */
         var w = cell * 0.7, h = 3;
         var frac = Math.max(0, e.hp / e.maxHp);
-        ctx.fillStyle = "rgba(0,0,0,.55)";
+        ctx.fillStyle = COLOR.hpTrack;
         ctx.fillRect(px - w / 2, py - cell * 0.42, w, h);
-        ctx.fillStyle = frac > 0.5 ? "#4c9a72" : frac > 0.25 ? "#ffd166" : "#c1483f";
+        ctx.fillStyle = frac > 0.5 ? COLOR.hpGood : frac > 0.25 ? COLOR.hpMid : COLOR.hpBad;
         ctx.fillRect(px - w / 2, py - cell * 0.42, w * frac, h);
       });
     }
@@ -179,7 +200,7 @@
           ctx.beginPath();
           ctx.moveTo(cx(ev.from[0]), cy(ev.from[1]));
           ctx.lineTo(cx(ev.to[0]), cy(ev.to[1]));
-          ctx.strokeStyle = ev.kind === "lightning" ? "rgba(255,209,102,.9)" : "rgba(232,181,99,.75)";
+          ctx.strokeStyle = ev.kind === "lightning" ? COLOR.shotLightning : COLOR.shotNormal;
           ctx.lineWidth = ev.kind === "cannon" ? 3 : 1.5;
           ctx.stroke();
         } else if (ev.type === "kill") {
@@ -188,7 +209,7 @@
           ctx.textBaseline = "middle";
           ctx.fillText("💨", cx(ev.x), cy(ev.y));
         } else if (ev.type === "leak") {
-          ctx.fillStyle = "rgba(193,72,63,.45)";
+          ctx.fillStyle = COLOR.leak;
           ctx.fillRect(ox + ev.x * cell, oy + ev.y * cell, cell, cell);
         }
       });

@@ -49,14 +49,6 @@ send poetry. She sends **instructions**: the name of a tower the camp has never
 been permitted to raise, the order in which the monsters have to die, and a
 build plan written in a shorthand nobody has bothered to expand.
 
-The Prophecy panel (3–6 lines, no code):
-
-> הנבואה הגיעה. היא הגיעה שבורה.
-> אנבת' פורשת את המגילה על השולחן ומסתכלת בך.
-> "הרוח קרעה אותה. יש פה רווחים, אותיות גדולות, שורות הפוכות."
-> כירון לא מציע לתרגם. הוא אומר: "נבואה היא טקסט."
-> "וטקסט — כבר יש לך כלים לפרק אותו."
-
 Cast: Annabeth (drives the scene, asks the good question), Chiron. Grover appears
 in a `tip` callout, having eaten the corner of the scroll.
 
