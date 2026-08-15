@@ -49,13 +49,26 @@ lesson 1 teaches.
 ```python
 place_tower(kind, x, y)   # kind: "archer" | "cannon" | "ice" | "lightning"
                           # x, y: grid column and row, both starting at 0
-sell_tower(x, y)          # refunds half
+sell_tower(x, y)          # removes it and refunds in full
 get_gold()      -> int    # gold left to spend
 tower_cost(kind)-> int    # what a tower costs
 get_wave()      -> list   # [{"kind": "harpy", "hp": 30, ...}, ...] this wave
 get_map()       -> list   # list of rows, each a list of "path"/"grass"/"rock"
 camp_hp()       -> int    # lives remaining
 ```
+
+**`get_map()` is row-first: `grid[y][x]`.** `len(grid)` is the number of rows,
+`len(grid[0])` the number of columns. This is the opposite order from
+`place_tower(kind, x, y)`, which is a genuine trap — lesson 12 must teach it
+explicitly rather than hope she notices. Verified against a deliberately
+non-square map.
+
+The build phase is a script that runs once *before* the battle, so `sell_tower`
+is "change your mind while planning", not a mid-battle trade. A full refund is
+correct: she is editing her plan, not taking a loss.
+
+`tower_cost` with an unknown name raises `ValueError: unknown tower: catapult`,
+which is a usable teaching moment rather than a silent zero.
 
 ### Strategy phase (lesson 14+) — the game calls HER
 
