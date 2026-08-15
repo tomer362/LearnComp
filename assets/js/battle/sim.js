@@ -25,11 +25,15 @@
     };
   }
 
+  /* hitsFlying: the cannon is artillery — it cannot hit anything airborne.
+   * That is what makes "which tower counters which monster" a real decision
+   * rather than flavour text, and it is the mechanical reason lesson 6 needs
+   * if/elif/else. Everything else can hit both. */
   var TOWERS = {
-    archer:    { icon: "🏹", cost: 50,  range: 2.6, rate: 1.6, damage: 10, splash: 0,   slow: 0,   chain: 0 },
-    cannon:    { icon: "💣", cost: 90,  range: 2.2, rate: 0.6, damage: 28, splash: 1.1, slow: 0,   chain: 0 },
-    ice:       { icon: "❄️", cost: 70,  range: 2.4, rate: 1.0, damage: 4,  splash: 0,   slow: 0.45, chain: 0 },
-    lightning: { icon: "⚡", cost: 120, range: 3.0, rate: 0.8, damage: 18, splash: 0,   slow: 0,   chain: 3 }
+    archer:    { icon: "🏹", cost: 50,  range: 2.6, rate: 1.6, damage: 10, splash: 0,   slow: 0,    chain: 0, hitsFlying: true },
+    cannon:    { icon: "💣", cost: 90,  range: 2.2, rate: 0.6, damage: 28, splash: 1.1, slow: 0,    chain: 0, hitsFlying: false },
+    ice:       { icon: "❄️", cost: 70,  range: 2.4, rate: 1.0, damage: 4,  splash: 0,   slow: 0.45, chain: 0, hitsFlying: true },
+    lightning: { icon: "⚡", cost: 120, range: 3.0, rate: 0.8, damage: 18, splash: 0,   slow: 0,    chain: 3, hitsFlying: true }
   };
 
   var ENEMIES = {
@@ -108,7 +112,7 @@
         /* How often this tower was ready AND had something in range. Separates
          * "badly placed, never saw anything" from "saw targets but held fire",
          * which are completely different mistakes. */
-        targetsSeen: 0, heldFire: 0
+        targetsSeen: 0, heldFire: 0, flyersMissed: 0
       });
     }
     var goldSpent = level.gold - goldLeft;
@@ -182,13 +186,18 @@
         tw.cooldown -= TICK;
         if (tw.cooldown > 0) continue;
 
+        var towerSpec = TOWERS[tw.kind] || TOWERS.archer;
         var inRange = [];
+        var missedFlyer = false;
         for (var li = 0; li < live.length; li++) {
           var en = live[li];
           if (!en.alive) continue;
           var pt = pointAt(path, en.travelled);
-          if (dist(tw.x, tw.y, pt.x, pt.y) <= tw.range) inRange.push(en);
+          if (dist(tw.x, tw.y, pt.x, pt.y) > tw.range) continue;
+          if (en.flying && towerSpec.hitsFlying === false) { missedFlyer = true; continue; }
+          inRange.push(en);
         }
+        if (missedFlyer) tw.flyersMissed++;
         if (!inRange.length) continue;
         tw.targetsSeen++;
 

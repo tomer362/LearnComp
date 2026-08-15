@@ -119,6 +119,31 @@ This buys a great deal:
 **Randomness is seeded** (mulberry32, seed per level) so a battle plays the same
 way every time. She can reason about it; we can verify it.
 
+### Towers and monsters
+
+| Tower | Cost | Range | Rate | Damage | Special |
+| --- | --- | --- | --- | --- | --- |
+| 🏹 archer | 50 | 2.6 | 1.6/s | 10 | the reliable default |
+| 💣 cannon | 90 | 2.2 | 0.6/s | 28 | splash 1.1 — **cannot hit anything flying** |
+| ❄️ ice | 70 | 2.4 | 1.0/s | 4 | slows what it hits |
+| ⚡ lightning | 120 | 3.0 | 0.8/s | 18 | chains to 3 enemies |
+
+| Monster | HP | Speed | Armour | |
+| --- | --- | --- | --- | --- |
+| 🐐 satyr | 20 | 2.6 | 0 | fast and fragile |
+| 🦅 harpy | 30 | 2.0 | 0 | **flying** |
+| 🐺 hellhound | 70 | 1.4 | 2 | |
+| 👹 cyclops | 160 | 0.8 | 5 | slow and tough |
+| bosses | 300–1400 | slow | 4–12 | minotaur, medusa, hydra, kronos |
+
+Damage per hit is `max(1, damage - armour)`, so armour makes fast weak towers
+much worse and is what forces her to think about matchups.
+
+**The cannon cannot hit flying enemies.** This is the mechanical reason lesson 6
+needs `if`/`elif`/`else`: "which tower counters which monster" has to be a real
+decision, not flavour text. A cannon that watched harpies fly past says so
+explicitly rather than looking like a badly placed tower.
+
 ### Rules
 
 - Enemies walk the path at their speed toward the camp gate.

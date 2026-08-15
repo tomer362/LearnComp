@@ -119,7 +119,14 @@
       he: "המגדלים שלך ראו מפלצות אבל אף פעם לא ירו. הפונקציה choose_target מחזירה None — החזירי מפלצת מהרשימה.",
       en: "Your towers saw monsters but never fired. choose_target is returning None — return one of the monsters from the list instead." };
 
-    var blind = sim.towers.filter(function (t) { return t.targetsSeen === 0; });
+    /* A cannon that watched harpies fly past looks identical to a badly placed
+     * tower unless we say so. */
+    var grounded = sim.towers.filter(function (t) { return t.targetsSeen === 0 && t.flyersMissed > 0; });
+    if (grounded.length) return {
+      he: "המגדל במשבצת (" + grounded[0].x + ", " + grounded[0].y + ") הוא תותח, והוא לא מסוגל לפגוע במפלצות מעופפות. נגד הרפיות צריך קשת, קרח או ברק.",
+      en: "The tower at (" + grounded[0].x + ", " + grounded[0].y + ") is a cannon, and it cannot hit anything airborne. Harpies need an archer, ice or lightning." };
+
+    var blind = sim.towers.filter(function (t) { return t.targetsSeen === 0 && t.flyersMissed === 0; });
     if (blind.length === sim.towers.length) return {
       he: "אף מגדל לא ראה אפילו מפלצת אחת — כולם רחוקים מדי מהשביל. בני קרוב יותר.",
       en: "Not one tower ever saw a monster — they are all too far from the path. Build closer to it." };
