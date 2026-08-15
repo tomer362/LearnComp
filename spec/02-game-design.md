@@ -104,8 +104,8 @@ drains the monster's health bar; the bar is the progress indicator.
 | IV | The Labyrinth itself | functions and recursion |
 | V | Kronos | everything — the capstone |
 
-Partial progress is kept and shown. Losing is not possible; she simply has not
-finished yet. Defeating a boss unlocks the next act on the map with a short
+Partial progress is kept and shown. Losing is not possible; she has not finished
+yet. Defeating a boss unlocks the next act on the map with a short
 cutscene.
 
 ## Quest map (`index.html`)
