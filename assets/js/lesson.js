@@ -456,7 +456,7 @@ window.LC = window.LC || {};
           var already = LC.Game.markExerciseDone(lessonId, ex.id);
           if (!already) {
             LC.Game.award(ex.xp, ex.drachmas);
-            LC.Game.toast("+" + ex.xp + " XP");
+            LC.Game.toast(LC.Game.ltr("+" + ex.xp + " XP"));
             var fails = LC.Game.lessonState(lessonId).fails[ex.id] || 0;
             if (fails >= 5) LC.Game.unlock("persistent");
           }

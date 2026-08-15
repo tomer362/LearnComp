@@ -109,7 +109,9 @@ a { color: var(--bronze-lit); }
   border-bottom: var(--line);
   position: sticky;
   top: 0;
-  background: linear-gradient(var(--sea-deep) 75%, transparent);
+  /* Solid, not a fade: the bar wraps to two or three rows on a phone, and a
+   * gradient lets the page text show through the wrapped part. */
+  background: var(--sea-deep);
   z-index: 20;
 }
 

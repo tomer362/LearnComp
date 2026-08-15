@@ -61,6 +61,13 @@ window.LC = window.LC || {};
   /* ---- toasts ---------------------------------------------------------- */
 
   var toastTimer = null;
+
+  /* Numbers paired with a Latin unit reverse inside an RTL page: "+20 XP"
+   * renders as "XP 20+". See spec/03-i18n-and-rtl.md. */
+  function ltr(text) {
+    return '<bdi dir="ltr">' + LC.esc(text) + "</bdi>";
+  }
+
   function toast(html, kind) {
     var el = document.getElementById("lc-toast");
     if (!el) {
@@ -89,7 +96,7 @@ window.LC = window.LC || {};
     LC.Game.renderHud();
     if (after > before) {
       var lvl = levelFor(LC.store.get().xp);
-      toast("⚡ " + LC.s("level") + " " + lvl.n + " · " + LC.t(lvl.title), "level");
+      toast("⚡ " + ltr(LC.s("level") + " " + lvl.n) + " · " + LC.esc(LC.t(lvl.title)), "level");
     }
     return after > before;
   }
@@ -170,6 +177,7 @@ window.LC = window.LC || {};
   }
 
   LC.Game = {
+    ltr: ltr,
     LEVELS: LEVELS,
     CABINS: CABINS,
     ACHIEVEMENTS: ACHIEVEMENTS,
