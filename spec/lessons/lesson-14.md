@@ -13,8 +13,10 @@
 | **new vocabulary** | `return`, `None`, ערך ברירת מחדל / default, scope / תחום חיים |
 | **requires** | L13 `def` + פרמטר יחיד · L11–12 dicts ומבנים מקוננים · L9 lists · L6 `if` · L3 f-strings |
 | **item** | 🗺️ מפת המבוך / The Labyrinth Map |
-| **XP** | 20 + 20 + 25 + 30 (training) + 55 (quest) + 30 (bonus) = **180** |
-| **drachmas** | 5 + 5 + 7 + 8 + 14 = **39** 🪙 |
+| **control model** | ⭐ **THE GRADUATION** — build script → **strategy function**. From this lesson on, the game calls her code. |
+| **towers unlocked** | 🏹 archer, 💣 cannon |
+| **XP** | 20 + 25 + 30 + 30 (training battles) + 60 (great battle) + 30 (bonus) = **195** |
+| **drachmas** | 5 + 6 + 8 + 8 + 15 = **42** 🪙 |
 
 ## Teaching goal
 
@@ -22,6 +24,35 @@ By the end she can write a function that **returns** a value, store that value i
 a variable, use it in arithmetic, pass it to another function, and collect
 returns in a loop. She can also read a function and answer the question that
 separates beginners from non-beginners: *"what does this hand back?"*
+
+### This is the graduation, and it has to feel like one
+
+For thirteen lessons her program has been a **script**: it ran from top to
+bottom, it finished, and then the game did whatever the game was going to do. She
+placed towers; the towers decided for themselves who to shoot.
+
+Today that inverts. She writes `def choose_target(enemies):` — and never calls
+it. **The battle calls it.** Once per tower, every time a tower is ready to fire,
+about ten times a second, for the whole length of the fight. Her function is
+inside the engine's loop now.
+
+This is not a syntax change. It is the difference between *using* a machine and
+*being part of one*, and it is the single largest step in the course. Three
+things follow from it, and all three are load-bearing:
+
+1. **`return` stops being a nicety and becomes the interface.** A `choose_target`
+   that prints instead of returning hands the game `None`, and `None` means
+   "hold fire". Every tower she owns stands still and watches. The `None` bug is
+   no longer a wrong line of output; it is a lost battle.
+2. **Her code can now crash the game.** A strategy function that raises ends the
+   battle immediately as a defeat. Nothing she has written before could do that.
+3. **She now has to beat a competent opponent.** Left alone, the towers target
+   the enemy furthest along the path — a sensible rule. "Better than nothing" is
+   no longer the bar. "Better than the default" is.
+
+Every teaching decision in this lesson exists to make that inversion survivable:
+the scouts, the `None` callout, the scope error, and the fact that the first
+battle of the day asks for exactly one line.
 
 **The central confusion this lesson exists to kill:** a function that `print`s
 looks like it works, and then returns `None` and breaks everything downstream.
@@ -42,18 +73,32 @@ is what she does — but she needs numbers, and the numbers are inside the maze.
 
 The learner sends a scout. The scout runs to the mouth of the Labyrinth, yells
 something about "eleven, maybe twelve", and vanishes into the dark. Annabeth
-stares at the blank sheet. Chiron raises an eyebrow.
+stares at the blank sheet. Chiron raises an eyebrow. A scout who shouts is not a
+scout. A scout who **comes back, holding something** — that is a scout.
 
-The Prophecy panel (5 lines, no code):
+Then, in the second half of the lesson, the same idea walks out onto the field.
+Chiron takes her to the wall and tells her the archers have been aiming
+themselves since she got here, and that this stops today. He does not hand her a
+bow. He hands her the question the archers ask, and tells her to answer it.
+
+The Prophecy panel (6 lines, no code):
 
 > אנבת' פורשת קלף ריק על השולחן ומניחה אבן בכל פינה.
 > "אני יכולה לצייר את המבוך," היא אומרת, "אם מישהו יביא לי מספרים."
 > את שולחת סייר. הוא צועק משהו מרחוק, ונבלע בחושך.
-> כירון מרים גבה. "צעקה היא לא מפה."
-> "סייר טוב חוזר. ובידיים שלו יש משהו."
+> כירון מרים גבה. "צעקה היא לא מפה. סייר טוב חוזר, ובידיים שלו יש משהו."
+> ואז הוא מוביל אותך אל החומה. "עד היום הקשתים כיוונו לבד. די בזה."
+> "מהיום הם ישאלו אותך במי לירות. בכל פעם מחדש. תעני להם."
 
 Cast: Annabeth (needs values, not noise — she is the reason `return` matters),
-Chiron (the eyebrow), Grover (volunteers to be the scout, is talked out of it).
+Chiron (the eyebrow, and then the wall), Grover (volunteers to be the scout, is
+talked out of it, and later asks the question everyone is thinking: "אבל מי קורא
+לפונקציה הזאת?").
+
+**Staging note.** The `choose_target` half must not arrive as an afterthought in
+the last two minutes. Teach blocks 1–15 are the scout; blocks 16–19 are the wall.
+The transition between them is the beat of the lesson and should be given its own
+prose block and its own callout, not a sentence.
 
 ## Chiron Teaches — block by block
 
@@ -256,296 +301,490 @@ Intro: *"שחקי עם זה. שני את המספרים, שני את ברירת 
 *(That last suggestion is deliberate: reproducing the `None` bug on purpose, in a
 place where nothing is at stake, is how it stops being frightening.)*
 
-## Training exercises
+## The battle levels
 
-### e1 — Return the Sum · 20 XP, 5 🪙
+**Control model: strategy function.** This is the lesson where it changes. From
+here to lesson 18 her build script still runs first — but then the battle starts
+calling `choose_target(enemies)`, once per tower, every time that tower is ready
+to fire and has something in range. Ten times a second, her code decides.
 
-**brief:** כתבי פונקציה `total_drachmas` שמקבלת שני מספרים ו**מחזירה** את הסכום
-שלהם. הדפיסי את התוצאה של `total_drachmas(12, 30)`.
+What the game hands her, per enemy, is a `dict`:
+
+```python
+{"kind": "hellhound", "hp": 54, "max_hp": 70, "distance": 12.4,
+ "speed": 1.4, "armour": 2, "flying": False, "x": 8.6, "y": 7.0}
+```
+
+What it accepts back — all four of these are verified working against
+`assets/js/battle/pyapi.js`:
+
+| She returns | The game does |
+| --- | --- |
+| the enemy `dict` itself | shoots it |
+| `enemy["id"]` | shoots it |
+| an index, e.g. `0` | shoots `enemies[0]` |
+| `None` | **holds fire** — the tower does not shoot at all this round |
+
+And the fifth case, which is the one worth teaching: **a `choose_target` that
+raises ends the battle on the spot, as a loss.** Not "that tower skips a turn" —
+the whole defense stops. `sim.js` catches the exception, `play.js` reports it, and
+the real Python error is shown to her underneath. She should meet this on purpose
+in L1 rather than by accident in the great battle.
+
+### The default she is beating
+
+With no `choose_target`, every tower shoots **the enemy furthest along the path**
+— the leader. That is a good rule, and it is the reason the levels below are hard
+to design and worth playing: her code has to be *better* than a reasonable
+default, not better than nothing. The flaw in the default is that it never
+commits. The moment something overtakes the thing it was shooting, it switches,
+and the tanky monster it had been chipping away at walks free.
+
+Every level below was verified three ways: her solution wins, an empty program
+loses, **and the default targeting loses**. On top of that, every level was run
+against a bank of eleven degenerate or plausible-but-wrong strategies
+(`return 0`, `return None`, "shoot the weakest", "shoot the nearest to camp", and
+so on) to make sure she cannot pass by guessing. Results are in the
+Implementation notes.
+
+### The maps
+
+**`ROAD`** — one straight lane along row 4, 16 or 20 columns wide. Used by L1 and
+L2 so that nothing about the terrain is new on the day the control model changes.
+
+**`BEND`** (18 × 10) — down, across, up, out. Used by L3 and L4.
+
+```js
+BEND = [[0,2],[1,2],[2,2],[3,2],[4,2],[5,2],
+        [5,3],[5,4],[5,5],[5,6],[5,7],
+        [6,7],[7,7],[8,7],[9,7],[10,7],[11,7],
+        [11,6],[11,5],[11,4],[11,3],
+        [12,3],[13,3],[14,3],[15,3],[16,3],[17,3]]
+```
+
+**`GAUNTLET`** (22 × 12) — four turns, used by the great battle.
+
+---
+
+### L1 — The Game Calls You · 20 XP, 5 🪙
+
+**Why this mechanic:** the handshake. She writes a function she never calls, and
+it runs anyway — hundreds of times. Nothing else in the course has done that, and
+until she has seen it happen the rest of Act IV is guesswork.
+
+The rule itself is one line: **`return enemies[0]`** — shoot whoever has been on
+the field longest and stay on it. That beats the default here, and it is not a
+coincidence. A cyclops walks in first; six satyrs pour past it. The game's
+targeting follows whoever is furthest along, so it keeps switching to satyrs and
+the cyclops strolls to the gate with two thirds of its health. `enemies[0]` is
+the enemy that arrived first, and staying on it kills it.
+
+**brief:** ארבעת המגדלים כבר בנויים — לא נוגעים בהם. מה שחסר הוא **החלטה**.
+
+עד היום המשחק בחר לבד במי לירות: תמיד במי שהכי קרוב לשער. הריצי כך והסתכלי —
+הקיקלופ עובר. המגדלים מחליפים מטרה בכל פעם שסאטיר עוקף אותו, והוא לא מת אף פעם.
+
+עכשיו את מחליטה. כתבי פונקציה בשם `choose_target` שמקבלת `enemies` — רשימת
+המפלצות שהמגדל רואה כרגע — ו**מחזירה** את זו שצריך לירות בה. הרשימה מסודרת לפי
+מי הגיע לשדה קודם, אז `enemies[0]` היא הוותיקה מכולן.
+
+את לא קוראת לפונקציה הזאת. המשחק קורא לה.
+
+```js
+map: { cols: 16, rows: 8, path: [[0,4],[1,4], … ,[15,4]] },
+gold: 220, campHp: 3, seed: 3, allowed: ["archer"],
+waves: [
+  { delay: 0, enemies: [
+      { kind: "cyclops", count: 1, gap: 1   },
+      { kind: "satyr",   count: 6, gap: 1.1 } ] },
+],
+```
 
 **starter:**
 ```python
-def total_drachmas(a, b):
-    # return the sum here
+place_tower("archer", 2, 3)
+place_tower("archer", 4, 5)
+place_tower("archer", 6, 3)
+place_tower("archer", 8, 5)
+
+def choose_target(enemies):
+    return None
+```
+
+*(The stub returns `None`, which is legal and means "hold fire". Running the
+starter shows four towers tracking monsters and never shooting, and the engine
+says exactly that: "your towers saw monsters but never fired". That is a better
+first lesson about `None` than any paragraph.)*
+
+**solution:**
+```python
+place_tower("archer", 2, 3)
+place_tower("archer", 4, 5)
+place_tower("archer", 6, 3)
+place_tower("archer", 8, 5)
+
+def choose_target(enemies):
+    return enemies[0]
+```
+
+**check:**
+```js
+{ kind: "battle",
+  also: { kind: "source", mustInclude: ["def choose_target", "return"],
+    message: { he: "השלב הזה דורש פונקציה בשם choose_target שמחזירה מפלצת",
+               en: "This level needs a function called choose_target that returns a monster" } } }
+```
+
+**hints:**
+1. הריצי כמו שזה. המגדלים רואים מפלצות ולא יורים — מה בדיוק הפונקציה מוסרת
+   למשחק כרגע, ומה זה אומר לו?
+2. `None` פירושו "לא יורים בסיבוב הזה". במקומו צריך להחזיר מפלצת מתוך הרשימה
+   `enemies`. הרשימה מסודרת לפי סדר ההגעה לשדה.
+3. שני את שורת הגוף ל-`return enemies[0]`. זה אומר "תמיד תירו בוותיקה ביותר
+   שאתם רואים" — ומכיוון שהקיקלופ נכנס ראשון, המגדלים נשארים עליו עד שהוא נופל
+   במקום לרדוף אחרי כל סאטיר שעוקף אותו.
+
+---
+
+### L2 — The Silent Towers · 25 XP, 6 🪙
+
+**Why this mechanic:** the `None` trap, in the one place where it has teeth. In a
+`print`-based exercise a missing `return` shows up as the word `None` in the
+output. Here it shows up as **an entire defense standing still while the camp
+burns**. Same bug, and now she will remember it.
+
+**brief:** אותו רעיון, שדה ארוך יותר, וקוד שמישהו כבר כתב בשבילך — הוא רץ בלי
+שגיאה, ובכל זאת אף מגדל לא יורה.
+
+תקני את `choose_target` כך שההגנה תעבוד. שימי לב מה הפונקציה עושה עם המפלצת
+שהיא בחרה: היא מדפיסה אותה. מה היא **מוסרת** למשחק?
+
+```js
+map: { cols: 20, rows: 8, path: [[0,4],[1,4], … ,[19,4]] },
+gold: 220, campHp: 3, seed: 3, allowed: ["archer"],
+waves: [
+  { delay: 0, enemies: [
+      { kind: "cyclops", count: 1, gap: 1   },
+      { kind: "satyr",   count: 8, gap: 1.1 } ] },
+],
+```
+
+**starter:** (runs, prints a great deal, loses)
+```python
+place_tower("archer", 2, 3)
+place_tower("archer", 4, 5)
+place_tower("archer", 6, 3)
+place_tower("archer", 8, 5)
+
+def choose_target(enemies):
+    print(enemies[0])
+```
+
+**solution:**
+```python
+place_tower("archer", 2, 3)
+place_tower("archer", 4, 5)
+place_tower("archer", 6, 3)
+place_tower("archer", 8, 5)
+
+def choose_target(enemies):
+    return enemies[0]
+```
+
+**check:**
+```js
+{ kind: "battle",
+  also: { kind: "source", mustInclude: ["return enemies"],
+    message: { he: "פונקציית אסטרטגיה צריכה להחזיר מפלצת, לא רק להדפיס אותה",
+               en: "A strategy function has to return a monster, not only print it" } } }
+```
+
+**hints:**
+1. יומן הקרב מלא בשורות, אז הפונקציה כן רצה, וכן בוחרת. אז למה המגדלים שותקים?
+   מה קורה לערך שהיא בחרה אחרי שהוא הודפס?
+2. `print` שולח למסך. הפונקציה עצמה לא מחזירה כלום — כלומר `None` — והמשחק קורא
+   את זה כ"אל תירו". זה בדיוק אותו באג מהסייר הצועק, רק שהפעם רואים אותו על
+   שדה הקרב.
+3. מילה אחת: החליפי את `print(enemies[0])` ב-`return enemies[0]`. שורת ההדפסה
+   נעלמת מהיומן, וזה בסדר — הפלט היה בשבילך, הערך שחוזר הוא בשביל המשחק.
+
+---
+
+### L3 — Nothing Stops the Harpies · 30 XP, 8 🪙
+
+**Why this mechanic:** `if` inside a strategy, and `return` from the middle of a
+loop. **A cannon cannot hit anything flying** (`spec/09-battle-game.md`), so the
+three cannons on this map are blind to harpies by design. The two archers are the
+entire air defense — and if they spend their time helping the cannons finish
+hellhounds, the harpies fly over the camp wall. Her function has to say
+"anything airborne, first, always", and the way to say it is a `return` that
+leaves the function the moment it finds one.
+
+**brief:** שלושה תותחים ושתי קשתות. התותחים חזקים — 28 נזק לכל פגז — אבל תותח
+הוא ארטילריה: **הוא לא יכול לפגוע במשהו שעף**. ההרפיות שייכות לקשתות בלבד, ויש
+רק שתיים כאלה.
+
+בברירת המחדל הקשתות יורות במי שהכי קרוב לשער, וזה כמעט תמיד כלב גיהינום
+שהתותחים כבר מטפלים בו. ההרפיות עוברות.
+
+כתבי `choose_target` שבודקת קודם אם יש משהו מעופף ברשימה, ואם כן — מחזירה אותו
+מיד. אם אין, שתחזיר את `enemies[0]`.
+
+לכל מפלצת ברשימה יש מפתח `"flying"` שהערך שלו `True` או `False`.
+
+```js
+map: { cols: 18, rows: 10, path: BEND },
+gold: 380, campHp: 3, seed: 17, allowed: ["archer", "cannon"],
+waves: [
+  { delay: 0,   enemies: [{ kind: "hellhound", count: 7, gap: 0.7 }] },
+  { delay: 1.5, enemies: [{ kind: "harpy",     count: 6, gap: 0.7 }] },
+  { delay: 9,   enemies: [{ kind: "cyclops",   count: 2, gap: 2.0 }] },
+],
+```
+
+**starter:**
+```python
+place_tower("cannon", 4, 4)
+place_tower("cannon", 6, 6)
+place_tower("cannon", 9, 8)
+place_tower("archer", 2, 3)
+place_tower("archer", 9, 5)
+
+def choose_target(enemies):
+    return enemies[0]
+```
+
+**solution:**
+```python
+place_tower("cannon", 4, 4)
+place_tower("cannon", 6, 6)
+place_tower("cannon", 9, 8)
+place_tower("archer", 2, 3)
+place_tower("archer", 9, 5)
+
+def choose_target(enemies):
+    for e in enemies:
+        if e["flying"]:
+            return e
+    return enemies[0]
+```
+
+**check:**
+```js
+{ kind: "battle",
+  also: { kind: "source", mustInclude: ["flying"],
+    message: { he: "כאן צריך לבדוק את המפתח flying בתוך choose_target",
+               en: "This one needs the flying key checked inside choose_target" } } }
+```
+
+**hints:**
+1. הריצי וצפי בתותחים כשהרפיה עוברת לידם. הם לא יורים בה. מי כן יכול, וכמה כאלה
+   יש לך?
+2. עברי על `enemies` בלולאה. ברגע שמצאת אחת ש-`e["flying"]` שלה `True` — אין סיבה
+   להמשיך לחפש. `return` באמצע לולאה מסיים את הפונקציה כולה, לא רק את הסיבוב.
+3. גוף הפונקציה: `for e in enemies:` ובתוכו `if e["flying"]:` ובתוכו `return e`.
+   **אחרי** הלולאה, בשוליים של הפונקציה, `return enemies[0]` — זה מה שקורה כשאין
+   אף מעופפת ברשימה. שימי לב שיש כאן שתי שורות `return` באותה פונקציה, וזה תקין
+   לגמרי: הראשונה שמגיעים אליה היא זו שקובעת.
+
+---
+
+### L4 — The Measure of a Monster · 30 XP, 8 🪙
+
+**Why this mechanic:** a function that returns a **number**, called from inside
+another function. `threat` never touches the battle; it answers a question, and
+`choose_target` uses the answer. That is composition, and it is also scope —
+`enemy` lives inside `threat` and nowhere else.
+
+The number matters: `hp * (armour + 1)`. Damage per hit is `max(1, damage -
+armour)`, so armour is not decoration — a cyclops with 160 HP and armour 5 takes
+five damage from an arrow that does ten, and is worth roughly six times its
+health bar. Sorting by raw `hp` gets the same answer on this map; sorting by
+`threat` will still get the right answer in lesson 20, when a monster with 80 HP
+and armour 8 walks in.
+
+**brief:** חמש קשתות, ארבעה כלבי גיהינום ושני קיקלופים. בברירת המחדל המגדלים
+רודפים אחרי מי שקרוב לשער, מפזרים נזק על כולם, ולא מפילים אף אחד בזמן.
+
+חשבי כמה כל מפלצת באמת שווה. שריון מוריד מכל מכה בנפרד, אז מפלצת עם שריון סופגת
+הרבה יותר חצים מכפי שנראה בפס החיים שלה.
+
+כתבי שתי פונקציות:
+- `threat(enemy)` — **מחזירה מספר**: `hp` כפול `armour + 1`.
+- `choose_target(enemies)` — עוברת על הרשימה ומחזירה את זו עם ה-`threat` הגבוה
+  ביותר.
+
+```js
+map: { cols: 18, rows: 10, path: BEND },
+gold: 260, campHp: 3, seed: 14, allowed: ["archer"],
+waves: [
+  { delay: 0,   enemies: [{ kind: "hellhound", count: 4, gap: 1.0 }] },
+  { delay: 2.6, enemies: [{ kind: "cyclops",   count: 2, gap: 1.4 }] },
+],
+```
+
+**starter:**
+```python
+place_tower("archer", 4, 4)
+place_tower("archer", 6, 5)
+place_tower("archer", 9, 6)
+place_tower("archer", 12, 5)
+place_tower("archer", 14, 4)
+
+def threat(enemy):
     return 0
 
-print(total_drachmas(12, 30))
+def choose_target(enemies):
+    return enemies[0]
 ```
 
 **solution:**
 ```python
-def total_drachmas(a, b):
-    return a + b
+place_tower("archer", 4, 4)
+place_tower("archer", 6, 5)
+place_tower("archer", 9, 6)
+place_tower("archer", 12, 5)
+place_tower("archer", 14, 4)
 
-print(total_drachmas(12, 30))
+def threat(enemy):
+    return enemy["hp"] * (enemy["armour"] + 1)
+
+def choose_target(enemies):
+    best = enemies[0]
+    for e in enemies:
+        if threat(e) > threat(best):
+            best = e
+    return best
 ```
 
 **check:**
 ```js
-{ kind: "source", mustInclude: ["return"],
-  message: { he: "כאן הפונקציה צריכה להחזיר ערך, לא להדפיס אותו",
-             en: "This function must return a value, not print it" },
-  also: { kind: "output", mode: "normalized", expect: "42" } }
+{ kind: "battle",
+  also: { kind: "source", mustInclude: ["def threat", "threat("],
+    message: { he: "המשימה דורשת פונקציה בשם threat שמחזירה מספר, ושימוש בה בתוך choose_target",
+               en: "This needs a function called threat that returns a number, used inside choose_target" } } }
 ```
-*Note: `print` inside the function would also put `42` on the screen — the
-`source` check is the only thing that distinguishes them, and its message is
-written to teach, not to scold.*
 
 **hints:**
-1. ה-`print` כבר כתוב בשורה האחרונה. מה הפונקציה צריכה למסור לו?
-2. מילה אחת, שורה אחת מוזחת: `return` ואחריו הביטוי לחישוב.
-3. `return a + b` בתוך הפונקציה. אם תכתבי `print(a + b)` תראי 42 על המסך אבל
-   הפונקציה תחזיר `None` — והבדיקה תזהה את זה.
+1. `threat` מחזירה כרגע 0 לכל מפלצת, ולכן ההשוואה לא מבדילה בין כלום לכלום. מה
+   המספר שאמור לצאת ממנה עבור קיקלופ עם 160 חיים ושריון 5?
+2. `threat` היא שורה אחת: מחזירה `enemy["hp"]` כפול `(enemy["armour"] + 1)`.
+   ב-`choose_target` השתמשי בתבנית "השומרת על הטוב ביותר": משתנה `best` שמתחיל
+   מהאיבר הראשון, לולאה, והחלפה כשמוצאים גדול יותר.
+3. `def threat(enemy):` עם `return enemy["hp"] * (enemy["armour"] + 1)`. ואז
+   ב-`choose_target`: `best = enemies[0]`, `for e in enemies:`,
+   `if threat(e) > threat(best):`, `best = e`, ובסוף — **אחרי** הלולאה —
+   `return best`. אם ה-`return` יושב בתוך הלולאה, הפונקציה תיגמר אחרי המפלצת
+   הראשונה. ואם תכתבי `print` במקום `return` בתוך `threat`, ההשוואה תנסה להשוות
+   `None` ל-`None`, הפונקציה תזרוק שגיאה, והקרב ייגמר מיד — נסי גם את זה פעם
+   אחת, זה שווה את זה.
 
-### e2 — The Silent Scout · 20 XP, 5 🪙
+---
 
-**The debugging exercise for the core confusion.** The starter runs without an
-error and prints something wrong — the worst kind of bug, met here on purpose.
+## The great battle — "The Gauntlet" · 60 XP, 15 🪙
 
-**brief:** הקוד רץ בלי שגיאה ובכל זאת הפלט שבור: כתוב `The exit is None steps
-away`. תקני את הפונקציה כך שהשורה תהיה נכונה. הפלט הסופי צריך להיות **שורה אחת
-בלבד**.
+**Why this mechanic:** everything, and no towers given. She writes the build
+script (functions and loops, from yesterday) *and* the strategy (from today), and
+the wave is built so that each half alone is not enough: skip the cannons and the
+seven cyclopes walk through; skip the flyer rule and eight harpies do; skip the
+threat rule and the cyclopes arrive together and outlast her.
 
-**starter:**
-```python
-def find_exit(steps):
-    print(steps * 2)
+Verified: **no strategy from the degenerate bank wins this level.** Not the
+default, not `return 0`, not "shoot the weakest", not "shoot the nearest to
+camp". This one has to be reasoned.
 
-distance = find_exit(6)
-print(f"The exit is {distance} steps away")
-```
+**brief:** ארבע פניות, ארבעה גלים, 510 זהב.
 
-**solution:**
-```python
-def find_exit(steps):
-    return steps * 2
+תותח עולה 90, פוגע ב-28 ומתעלם ממה שעף. קשת עולה 50, פוגעת ב-10, ופוגעת בכול.
+הרשימות `CANNONS` ו-`ARCHERS` כבר מסמנות משבצות טובות — בני מהן, בפונקציה
+ובלולאה, כמו אתמול.
 
-distance = find_exit(6)
-print(f"The exit is {distance} steps away")
-```
+ואז כתבי `choose_target` שעושה שני דברים בסדר הזה:
+1. אם יש משהו מעופף — לירות בו. הוא בטווח של הקשתות בלבד, ולא לאורך זמן.
+2. אחרת — לירות במסוכנת ביותר, לפי `hp` כפול `armour + 1`.
 
-**check:**
 ```js
-{ kind: "output", mode: "normalized", expect: "The exit is 12 steps away" }
-```
-*A single `output` check is enough here: the broken version prints an extra `12`
-line **and** the word `None`, so it fails on both counts. The "one line only"
-sentence in the brief tells her the stray `12` must go, which is exactly what
-replacing `print` with `return` does.*
-
-**hints:**
-1. מאיפה הגיעה המילה `None` לתוך המשפט? מה בדיוק `distance` מכיל אחרי השורה
-   הרביעית?
-2. הפונקציה מדפיסה את התוצאה ולא מוסרת אותה. משתנה שמקבל תוצאה של פונקציה בלי
-   `return` מקבל `None`.
-3. שני את `print(steps * 2)` ל-`return steps * 2`. שימי לב מה קורה לשורת ה-12
-   שהופיעה קודם: היא נעלמת, כי כבר לא מדפיסים בתוך הפונקציה — וזה נכון, נשארה
-   שורה אחת.
-
-### e3 — Two Weapons · 25 XP, 7 🪙
-
-**brief:** כתבי פונקציה `attack_power` עם פרמטר `base` ופרמטר `bonus` שברירת
-המחדל שלו היא 0, שמחזירה את הסכום. הדפיסי שתי שורות: קריאה עם ארגומנט אחד
-(`50`), וקריאה עם שניים (`50` ו-`15`).
-
-**starter:**
-```python
-def attack_power(base, bonus):
-    return base + bonus
-
-print(attack_power(50))
-print(attack_power(50, 15))
-```
-*(The starter is deliberately one character away from correct and crashes with a
-`TypeError` on the first call. She must discover that a default value is what
-makes a one-argument call legal.)*
-
-**solution:**
-```python
-def attack_power(base, bonus=0):
-    return base + bonus
-
-print(attack_power(50))
-print(attack_power(50, 15))
-```
-
-**check:**
-```js
-{ kind: "source", mustInclude: ["def attack_power"],
-  message: { he: "השאירי את שם הפונקציה attack_power ואל תמחקי את שתי הקריאות",
-             en: "Keep the function named attack_power and keep both calls" },
-  also: { kind: "output", mode: "normalized", expect: "50\n65" } }
-```
-*The one-argument call is what forces a default to exist; no fragile source match
-on `bonus=0` (she might write `bonus = 0`), and no way to fake it.*
-
-**hints:**
-1. קראי את השגיאה. איזו קריאה נכשלה — הראשונה או השנייה? מה חסר לה?
-2. פרמטר יכול לקבל ערך ברירת מחדל בשורת ה-`def`, וכך הוא הופך לאופציונלי.
-3. שני את שורת ההגדרה ל-`def attack_power(base, bonus=0):`. עכשיו
-   `attack_power(50)` חוקי ומחזיר 50, ו-`attack_power(50, 15)` מחזיר 65. אל תשני
-   את הקריאות עצמן.
-
-### e4 — The Toll of the Road · 30 XP, 8 🪙
-
-**brief:** בכל צומת בדרך למבוך גובים מכס לפי מרחק. כתבי פונקציה `toll` עם
-פרמטר `distance` ופרמטר `rate` שברירת המחדל שלו 2, שמחזירה `distance * rate`.
-עברי בלולאה על הרשימה `distances`, צברי את הסכום הכולל, והדפיסי שתי שורות:
-```
-Normal toll: <סכום> drachmas
-Storm toll: <מכס על 10 בתעריף 5> drachmas
+map: { cols: 22, rows: 12,
+       path: [[0,3],[1,3],[2,3],[3,3],[4,3],[5,3],[6,3],
+              [6,4],[6,5],[6,6],[6,7],[6,8],[6,9],
+              [7,9],[8,9],[9,9],[10,9],[11,9],[12,9],[13,9],
+              [13,8],[13,7],[13,6],[13,5],[13,4],[13,3],[13,2],
+              [14,2],[15,2],[16,2],[17,2],[18,2],
+              [18,3],[18,4],[18,5],[18,6],[18,7],
+              [19,7],[20,7],[21,7]] },
+gold: 510, campHp: 4, seed: 41, allowed: ["archer", "cannon"],
+waves: [
+  { delay: 0,  enemies: [{ kind: "satyr",     count: 14, gap: 0.35 }] },
+  { delay: 5,  enemies: [{ kind: "harpy",     count: 12, gap: 0.45 }] },
+  { delay: 12, enemies: [{ kind: "hellhound", count: 10, gap: 0.5  }] },
+  { delay: 22, enemies: [{ kind: "cyclops",   count:  7, gap: 0.9  },
+                         { kind: "harpy",     count:  8, gap: 0.5  }] },
+],
 ```
 
 **starter:**
 ```python
-distances = [3, 7, 10, 4]
+CANNONS = [[4, 5], [8, 8], [11, 7]]
+ARCHERS = [[2, 2], [7, 4], [12, 5], [16, 1]]
 
-# 1. the toll function
+# 1. cannon_nest(spot) and archer_post(spot), then a loop for each list
 
-# 2. a loop that adds up the total
+# 2. threat(enemy) -> a number
 
-# 3. two output lines
+# 3. choose_target(enemies) -> flyers first, then the biggest threat
 ```
 
 **solution:**
 ```python
-distances = [3, 7, 10, 4]
+CANNONS = [[4, 5], [8, 8], [11, 7]]
+ARCHERS = [[2, 2], [7, 4], [12, 5], [16, 1]]
 
-def toll(distance, rate=2):
-    return distance * rate
+def cannon_nest(spot):
+    place_tower("cannon", spot[0], spot[1])
 
-total_toll = 0
-for leg in distances:
-    total_toll = total_toll + toll(leg)
+def archer_post(spot):
+    place_tower("archer", spot[0], spot[1])
 
-print(f"Normal toll: {total_toll} drachmas")
-print(f"Storm toll: {toll(10, 5)} drachmas")
+for spot in CANNONS:
+    cannon_nest(spot)
+
+for spot in ARCHERS:
+    archer_post(spot)
+
+def threat(enemy):
+    return enemy["hp"] * (enemy["armour"] + 1)
+
+def choose_target(enemies):
+    for e in enemies:
+        if e["flying"]:
+            return e
+    best = enemies[0]
+    for e in enemies:
+        if threat(e) > threat(best):
+            best = e
+    return best
 ```
 
 **check:**
 ```js
-{ kind: "source", mustInclude: ["def", "for", "return"],
-  message: { he: "כאן צריך פונקציה שמחזירה ערך, ולולאה שמשתמשת בו",
-             en: "This needs a function that returns, and a loop that uses it" },
-  also: { kind: "output", mode: "normalized",
-    expect: "Normal toll: 48 drachmas\nStorm toll: 50 drachmas" } }
-```
-*(3+7+10+4 = 24, ×2 = 48. The storm line is 10×5 = 50 — the same function called
-with the default overridden, so both halves of the lesson appear in one output.)*
-
-**hints:**
-1. הצבירה בלולאה היא בדיוק התבנית משיעור 7. מה משתנה עכשיו — מאיפה מגיע המספר
-   שאת מוסיפה בכל סיבוב?
-2. אתחלי `total_toll = 0` **לפני** הלולאה, ובכל סיבוב הוסיפי לו את מה שהפונקציה
-   מחזירה עבור המרחק הנוכחי.
-3. הלולאה היא `for leg in distances:` ובתוכה
-   `total_toll = total_toll + toll(leg)`.
-   שימי לב שקראת ל-`toll` עם ארגומנט אחד — ברירת המחדל 2 עושה את העבודה. בשורה
-   האחרונה קראי לאותה פונקציה עם `toll(10, 5)` כדי לדרוס את ברירת המחדל.
-
-## Quest — "The Map of the Labyrinth" · 55 XP, 14 🪙
-
-Three small functions, each returning something, composed into a report. This is
-the first time in the course she writes a function that calls another function —
-say so in the brief, because it is a milestone.
-
-**brief:** אנבת' מוכנה לצייר. יש לך רשימה של חדרים, כל חדר הוא dict עם `letter`,
-`number` ו-`monsters`. בני שלוש פונקציות:
-- `room_name(letter, number)` — מחזירה מחרוזת בצורה `A-1`
-- `is_dangerous(monsters, limit=2)` — מחזירה `True` אם מספר המפלצות גדול או שווה
-  ל-`limit`
-- `describe(room)` — מקבלת dict של חדר ומחזירה שורת תיאור. אם החדר מסוכן:
-  `A-1: DANGER (3 monsters)`. אם לא: `A-1: clear`
-
-אחר כך הדפיסי שורת תיאור לכל חדר, ובסוף בדיקה מחמירה על החדר האחרון עם `limit`
-של 1.
-
-**Expected output:**
-```
-A-1: clear
-B-4: DANGER (3 monsters)
-C-9: DANGER (2 monsters)
-D-2: clear
-Strict check on room D:
-True
-```
-
-**starter:**
-```python
-rooms = [
-    {"letter": "A", "number": 1, "monsters": 0},
-    {"letter": "B", "number": 4, "monsters": 3},
-    {"letter": "C", "number": 9, "monsters": 2},
-    {"letter": "D", "number": 2, "monsters": 1},
-]
-
-# 1. room_name(letter, number) -> returns "A-1"
-
-# 2. is_dangerous(monsters, limit=2) -> returns True or False
-
-# 3. describe(room) -> uses both of those, returns one line
-
-# 4. a loop that prints a description for every room
-
-print("Strict check on room D:")
-print(is_dangerous(rooms[3]["monsters"], 1))
-```
-
-**solution:**
-```python
-rooms = [
-    {"letter": "A", "number": 1, "monsters": 0},
-    {"letter": "B", "number": 4, "monsters": 3},
-    {"letter": "C", "number": 9, "monsters": 2},
-    {"letter": "D", "number": 2, "monsters": 1},
-]
-
-def room_name(letter, number):
-    return f"{letter}-{number}"
-
-def is_dangerous(monsters, limit=2):
-    return monsters >= limit
-
-def describe(room):
-    name = room_name(room["letter"], room["number"])
-    monsters = room["monsters"]
-    if is_dangerous(monsters):
-        return f"{name}: DANGER ({monsters} monsters)"
-    return f"{name}: clear"
-
-for room in rooms:
-    print(describe(room))
-
-print("Strict check on room D:")
-print(is_dangerous(rooms[3]["monsters"], 1))
-```
-
-**check:**
-```js
-{ kind: "source", mustInclude: ["def room_name", "def is_dangerous", "def describe", "return"],
-  message: { he: "המשימה דורשת שלוש פונקציות בשמות room_name, is_dangerous ו-describe",
-             en: "The quest needs three functions named room_name, is_dangerous and describe" },
-  also: { kind: "output", mode: "normalized",
-    expect: "A-1: clear\nB-4: DANGER (3 monsters)\nC-9: DANGER (2 monsters)\nD-2: clear\nStrict check on room D:\nTrue" } }
+{ kind: "battle",
+  also: { kind: "source",
+    mustInclude: ["def choose_target", "flying", "def threat", "for"],
+    message: { he: "הקרב הגדול דורש בנייה בלולאה, בדיקת flying, ופונקציית threat",
+               en: "The great battle needs a build loop, a flying check, and a threat function" } } }
 ```
 
 **hints:**
-1. שלוש פונקציות, וכל אחת מהן מחזירה משהו אחר: מחרוזת, ערך אמת, ושורה שלמה.
-   התחילי מהקטנה — מה `room_name("A", 1)` צריכה להחזיר בדיוק?
-2. `describe` לא מחשבת כלום בעצמה: היא שולפת מהמילון, קוראת ל-`room_name`
-   ול-`is_dangerous`, ומרכיבה מהן שורה. הערך שחוזר מ-`is_dangerous` הוא `True`
-   או `False`, כלומר בדיוק מה שאפשר לשים בתוך `if`.
-3. `room_name` היא שורה אחת: `return f"{letter}-{number}"`. `is_dangerous` היא
-   שורה אחת: `return monsters >= limit`. ב-`describe` שמרי קודם
-   `name = room_name(room["letter"], room["number"])` ו-`monsters = room["monsters"]`,
-   ואז `if is_dangerous(monsters):` מחזיר את שורת ה-DANGER, ואחריו — בלי `else` —
-   `return f"{name}: clear"`. שימי לב שחדר D עם מפלצת אחת נחשב נקי בברירת המחדל,
-   ומסוכן בבדיקה המחמירה בסוף. זה לא באג, זה בדיוק מה שברירת מחדל עושה.
-
-*(Design note: the f-strings never nest quotes — `monsters` is pulled into a
-local variable first, deliberately, since `f"{room['monsters']}"` is exactly the
-kind of quote-inside-quote that Skulpt's f-string parser is least trustworthy on
-and that a beginner cannot debug.)*
+1. חלקי את המשימה לשניים ובדקי כל חצי בנפרד. קודם בני בלי אסטרטגיה בכלל והריצי:
+   כמה מפלצות עוברות, ובאיזה גל? זה אומר לך אם הבעיה היא הבנייה או ההחלטה.
+2. הבנייה היא בדיוק התבנית מאתמול: פונקציה עם פרמטר אחד שמקבלת משבצת ומציבה
+   מגדל, ולולאה לכל רשימה. שימי לב ש-`spot` הוא רשימה של שני מספרים, ולכן
+   העמודה היא `spot[0]` והשורה `spot[1]`.
+3. ב-`choose_target` הסדר הוא כל העניין: הלולאה שמחפשת מעופפת יושבת **לפני**
+   חיפוש האיום הגדול, כי `return` מסיים את הפונקציה ברגע שמצא. אחריה `best =
+   enemies[0]` ולולאה שנייה שמשווה `threat(e) > threat(best)`, ובסוף
+   `return best`. אם הפכת את הסדר, הקיקלופים ימותו יפה וההרפיות יעברו לך מעל
+   הראש — הריצי פעם אחת הפוך רק כדי לראות את זה.
 
 ## Reward & Recap
 
