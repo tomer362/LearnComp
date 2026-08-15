@@ -85,14 +85,30 @@ strategy.
 ### Class phase (lesson 19+)
 
 ```python
-class MyTower:
-    cost = 60
-    range = 3.0
+class Doctrine:
     def fire(self, enemies):
         return enemies[0]      # same contract as choose_target
+
+register_tower("archer", Doctrine)   # every archer now thinks this way
+place_tower("archer", 2, 3)
 ```
 
-Registered with `register_tower("mine", MyTower)`, then placed like any other.
+**She is replacing a tower's mind, not inventing a new tower.** The name passed
+to `register_tower` must be one the engine already knows (`archer`, `cannon`,
+`ice`, `lightning`); an invented name is rejected as `unknownTower`. Cost, range
+and damage stay the engine's. Lesson 19 teaches this honestly rather than
+pretending she can define a tower from nothing.
+
+Verified behaviour, all of which lesson 19 depends on:
+
+- `__init__` is called with **no arguments**. A required parameter raises a
+  `TypeError` mid-battle.
+- **One instance per tower kind**, alive for the whole battle, so `self.shots`
+  accumulates across every tower of that kind. Registering one class to two
+  kinds gives two independent objects.
+- `fire` accepts the same four return forms as `choose_target`.
+- `print()` inside `fire` or `choose_target` reaches the live page log but is
+  **not** in the captured output string, so no check may test for it.
 
 ## Simulation model
 
@@ -116,8 +132,12 @@ This buys a great deal:
   code, and an infinite loop in her strategy function is caught by the exec limit
   before a single frame is drawn.
 
-**Randomness is seeded** (mulberry32, seed per level) so a battle plays the same
-way every time. She can reason about it; we can verify it.
+**The simulation uses no randomness at all.** Every battle is fully determined by
+the level and her code, which is stronger than being seeded: she can reason about
+it, and a hint can describe exactly what she will see. Levels still declare a
+`seed` and `sim.js` still carries an unused `mulberry32`, both reserved for the
+day a mechanic needs randomness. Until then, do not describe a battle as
+"seeded" — it is simply deterministic.
 
 ### Towers and monsters
 
@@ -236,6 +256,9 @@ levels: [
     allowed: ["archer"],          // tower kinds she may place in this level
     seed: 1,
 
+    /* Groups inside ONE wave entry spawn sequentially — the clock keeps
+     * accumulating across them. For two kinds arriving at once, use two wave
+     * entries with the same `delay`. */
     waves: [
       { delay: 0, enemies: [ { kind: "harpy", count: 3, gap: 1.2 } ] },
     ],

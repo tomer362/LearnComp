@@ -13,8 +13,11 @@
   var TICK = 0.1;          // seconds of simulated time per tick
   var MAX_TICKS = 3000;    // 5 simulated minutes — a hard stop, never reached in a real level
 
-  /* Seeded RNG so a battle plays out the same way every time. She can reason
-   * about it and we can verify it. */
+  /* The simulation currently uses NO randomness at all — every battle is fully
+   * deterministic from its inputs, which is stronger than being seeded. This
+   * generator is kept, unused, for the day a mechanic needs it (a crit chance,
+   * a wandering monster); `level.seed` is declared by levels for the same
+   * reason. Do not describe battles as "seeded" while this is unused. */
   function mulberry32(seed) {
     var a = seed >>> 0;
     return function () {
@@ -74,7 +77,6 @@
    */
   function run(level, placements, hooks) {
     hooks = hooks || {};
-    var rand = mulberry32(level.seed === undefined ? 1 : level.seed);
     var path = level.map.path;
     var pathLen = path.length - 1;
     var gate = path[path.length - 1];

@@ -307,6 +307,28 @@ a decision tree), Hermes in the myth callout.
     יודע לאן ללכת יזכור שמישהו כבר עבר פה. תוכנית עם `if` היא בדיוק זה: עמוד
     בצומת עם הוראות למי שיגיע.
 
+18. **prose + code · runnable** — the bridge into the battles, and the rule the
+    whole lesson turns on. Run it on the training field:
+    ```python
+    wave = "harpy"
+    if wave == "harpy":
+        place_tower("archer", 2, 3)
+    else:
+        place_tower("cannon", 2, 3)
+    print("ready")
+    ```
+    Output: `ready` — and a different tower on the board depending on one word.
+    Explain (he): עד עכשיו ה־`if` בחר איזו שורה **להדפיס**. עכשיו הוא בוחר איזה
+    **מגדל לבנות**, ולזה יש תוצאה שאפשר לראות: הרפיה עפה, ותותח יורה פגזים.
+    פגז לא פוגע במשהו שנמצא באוויר — אף פעם. קשת, קרח וברק פוגעים גם בקרקע וגם
+    באוויר; תותח פוגע בקרקע בלבד, ובתמורה הוא חזק פי הרבה נגד שריון.
+
+19. **callout · warn** — title: תותח נגד משהו שעף זה מגדל שמסתכל.
+    text: אם תבני תותח מול גל של הרפיות, הוא לא ייכשל ולא יזרוק שגיאה — הוא
+    יעמוד שם בלי לירות אף פעם. המנוע יגיד לך את זה בסוף הקרב במילים האלה: *"המגדל במשבצת
+    (2, 3) הוא תותח, והוא לא מסוגל לפגוע במפלצות מעופפות."* לכן השאלה "מי
+    מגיע?" היא לא סגנון. היא ההבדל בין הגנה לבין קישוט.
+
 ## Try It (ungraded)
 
 Intro (he): *"התור שלך לעמוד בצומת. שני את `road` ואת `danger` והריצי. יש
