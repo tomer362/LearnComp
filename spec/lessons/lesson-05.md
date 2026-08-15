@@ -475,7 +475,9 @@ tower. In two lessons the computer will evaluate it for her, over and over,
 until it flips. Nothing else in the course sets up a later lesson this exactly.
 
 ```js
-map: { cols: 14, rows: 8, path: <the same LONG road as b3> },
+map: { cols: 14, rows: 8,
+       path: [[0,5],[1,5],[2,5],[3,5],[3,4],[3,3],[3,2],[4,2],[5,2],[6,2],
+              [7,2],[8,2],[8,3],[8,4],[9,4],[10,4],[11,4],[12,4],[13,4]] },   // the same road as b3
 gold: 250, campHp: 3, seed: 14, allowed: ["archer"],
 waves: [
   { delay: 0,  enemies: [ { kind: "satyr", count: 8, gap: 0.5 } ] },

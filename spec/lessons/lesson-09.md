@@ -311,8 +311,11 @@ way to ask how long a list is. Nothing else in Python answers "how many".
 **brief** — `כירון מוסר לך את דוח הסיור. הפקודה get_wave() מחזירה רשימה — תא אחד
 לכל מפלצת שבדרך.
 
-שמרי את הרשימה במשתנה, קחי את הכמות מ־len והדפיסי אותה, ואז בני שלושה מגדלי קשת
-בשורה 3: בעמודות 3, 6 ו־9. הזהב מספיק לשלושה.`
+שמרי את הרשימה במשתנה, קחי את הכמות מ־len, והדפיסי שורה אחת בדיוק בצורה הזאת:
+
+N monsters are coming
+
+ואז בני שלושה מגדלי קשת בשורה 3: בעמודות 3, 6 ו־9. הזהב מספיק לשלושה.`
 
 **starter**
 ```python
@@ -334,9 +337,12 @@ place_tower("archer", 9, 3)
 **check**
 ```js
 { kind: "battle",
-  also: { kind: "source", mustInclude: ["get_wave(", "len("],
-          message: { he: "המספר צריך לבוא מהרשימה — get_wave ואחריו len, לא ספירה בעיניים",
-                     en: "The count must come from the list — get_wave then len, not counted by eye" } } }
+  also: [
+    { kind: "source", mustInclude: ["get_wave(", "len("],
+      message: { he: "המספר צריך לבוא מהרשימה — get_wave ואחריו len, לא ספירה בעיניים",
+                 en: "The count must come from the list — get_wave then len, not counted by eye" } },
+    { kind: "output", mode: "contains", expect: "8 monsters are coming" }
+  ] }
 ```
 
 **hints**
@@ -364,8 +370,9 @@ the pack gets through, one more and the build fails for lack of gold.
 
 **brief** — `להקה של כלבי גיהינום. אל תספרי אותם בעיניים — קחי את המספר מהרשימה.
 
-בני מגדל אחד לכל מפלצת ברשימה, כולם בשורה 3, בעמודות 0, 2, 4 וכן הלאה — כלומר
-בעמודה i * 2 בסיבוב מספר i. הזהב מספיק בדיוק למספר הזה, לא למגדל אחד יותר.`
+שמרי את הכמות במשתנה והדפיסי אותה בצורה `towers needed: N`, ואז בני מגדל אחד לכל
+מפלצת ברשימה — כולם בשורה 3, בעמודות 0, 2, 4 וכן הלאה, כלומר בעמודה i * 2 בסיבוב
+מספר i. הזהב מספיק בדיוק למספר הזה, לא למגדל אחד יותר.`
 
 **starter**
 ```python
@@ -377,25 +384,31 @@ place_tower("archer", 0, 3)
 **solution**
 ```python
 wave = get_wave()
-for i in range(len(wave)):
+needed = len(wave)
+print(f"towers needed: {needed}")
+for i in range(needed):
     place_tower("archer", i * 2, 3)
 ```
 
 **check**
 ```js
 { kind: "battle",
-  also: { kind: "source", mustInclude: ["for", "range(len(", "get_wave("],
-          message: { he: "מספר המגדלים חייב לבוא מהרשימה — לולאה על range(len(wave))",
-                     en: "The number of towers must come from the list — a loop over range(len(wave))" } } }
+  also: [
+    { kind: "source", mustInclude: ["for", "len(", "get_wave("],
+      message: { he: "מספר המגדלים חייב לבוא מהרשימה — לולאה על range(len(wave))",
+                 en: "The number of towers must come from the list — a loop over range(len(wave))" } },
+    { kind: "output", mode: "contains", expect: "towers needed: 6" }
+  ] }
 ```
 
 **hints**
 1. `אם מחר יגיעו שבעה במקום שישה, כמה שורות בקוד שלך יצטרכו להשתנות?`
 2. `` `for i in range(len(wave)):` רץ בדיוק פעם אחת לכל מפלצת. בתוך הלולאה,
    `i` הוא מספר הסיבוב — 0, 1, 2… ``
-3. `` שתי שורות: `for i in range(len(wave)):` ובתוכה, מוזחת,
-   `place_tower("archer", i * 2, 3)`. הכפל ב־2 מפזר את המגדלים לאורך השביל
-   במקום לערום אותם זה על זה — ושתי מגדלים על אותה משבצת הם שגיאת בנייה. ``
+3. `` ארבע שורות: `needed = len(wave)`, ה־print עם `towers needed: {needed}`,
+   `for i in range(needed):` ובתוכה, מוזחת, `place_tower("archer", i * 2, 3)`.
+   הכפל ב־2 מפזר את המגדלים לאורך השביל במקום לערום אותם זה על זה — ושני מגדלים
+   על אותה משבצת הם שגיאת בנייה. ``
 
 ### b3 — איפה שהדרך חוצה את הרכס · Where the Road Crosses the Ridge · 30 XP, 8 🪙
 
@@ -428,6 +441,9 @@ is for: a yes/no question about a list.
 בנייה — הקרב נגמר לפני שהתחיל.
 
 רוצי על כל שתים־עשרה העמודות, ובני בכל אחת שהיא **לא** אחת מארבע הנקודות האלה.
+ספרי תוך כדי כמה מגדלים באמת נבנו — accumulator משיעור 7 — והדפיסי בסוף שורה
+בצורה `ridge towers: N`.
+
 הזהב מספיק בדיוק לשמונה המגדלים שנשארים.`
 
 **starter**
@@ -440,25 +456,32 @@ for x in range(12):
 **solution**
 ```python
 crossings = [2, 4, 6, 8]
+built = 0
 for x in range(12):
     if x not in crossings:
         place_tower("archer", x, 3)
+        built = built + 1
+print(f"ridge towers: {built}")
 ```
 
 **check**
 ```js
 { kind: "battle",
-  also: { kind: "source", mustInclude: ["not in", "for"],
-          message: { he: "צריך לדלג על נקודות החצייה עם not in — ולא למחוק אותן מהלולאה ביד",
-                     en: "Skip the crossings with not in — not by deleting them from the loop by hand" } } }
+  also: [
+    { kind: "source", mustInclude: ["not in", "for"],
+      message: { he: "צריך לדלג על נקודות החצייה עם not in — ולא למחוק אותן מהלולאה ביד",
+                 en: "Skip the crossings with not in — not by deleting them from the loop by hand" } },
+    { kind: "output", mode: "contains", expect: "ridge towers: 8" }
+  ] }
 ```
 
 **hints**
 1. `הריצי את הקוד כמו שהוא. מה המשחק אומר לך, ולפני איזו מפלצת הוא אומר את זה?`
 2. `` `x not in crossings` מחזיר `True` כשהעמודה נקייה. `if` משיעור 6 הוא מה
    שמכניס את הבדיקה הזאת לפני הבנייה. ``
-3. `` שלוש שורות בתוך הלולאה במקום אחת: `for x in range(12):`, ואז
-   `if x not in crossings:` מוזח פנימה, ואז ה־`place_tower` מוזח עוד פנימה.
+3. `` `built = 0` לפני הלולאה. בתוכה: `for x in range(12):`, ואז
+   `if x not in crossings:` מוזח פנימה, ואז `place_tower` ו־`built = built + 1`
+   מוזחים עוד פנימה. אחרי הלולאה, **מחוץ להזחה**, ה־print של `ridge towers`.
    שמונה מגדלים ייבנו, ארבע העמודות יידלגו — וזה בדיוק מה שהזהב מכסה. ``
 
 ### b4 — רשימת המקומות · The List of Places · 30 XP, 8 🪙
@@ -486,7 +509,9 @@ list is taking the best ones.
 spots = [5, 3, 7, 1, 9, 0, 11, 2, 10]
 
 בני מגדל אחד לכל מפלצת בגל — לא יותר. את המספר קחי מהרשימה של הגל, ואת המקום
-מהרשימה של אנבת', לפי אותו i. הזהב מספיק בדיוק לכמות הזאת.`
+מהרשימה של אנבת', לפי אותו i. הדפיסי קודם את המספר בצורה `towers needed: N`.
+
+הזהב מספיק בדיוק לכמות הזאת.`
 
 **starter**
 ```python
@@ -500,16 +525,21 @@ place_tower("archer", spots[0], 3)
 ```python
 spots = [5, 3, 7, 1, 9, 0, 11, 2, 10]
 wave = get_wave()
-for i in range(len(wave)):
+needed = len(wave)
+print(f"towers needed: {needed}")
+for i in range(needed):
     place_tower("archer", spots[i], 3)
 ```
 
 **check**
 ```js
 { kind: "battle",
-  also: { kind: "source", mustInclude: ["spots[", "range(len(", "get_wave("],
-          message: { he: "המקום צריך לצאת מ־spots לפי ה־index, והכמות מ־len של הגל",
-                     en: "The place must come out of spots by index, and the count from len of the wave" } } }
+  also: [
+    { kind: "source", mustInclude: ["spots[", "for", "get_wave("],
+      message: { he: "המקום צריך לצאת מ־spots לפי ה־index, והכמות מ־len של הגל",
+                 en: "The place must come out of spots by index, and the count from len of the wave" } },
+    { kind: "output", mode: "contains", expect: "towers needed: 6" }
+  ] }
 ```
 
 **hints**
@@ -517,7 +547,8 @@ for i in range(len(wave)):
    רצה?`
 2. `` `for i in range(len(wave)):` נותן את מספר הסיבובים, ו־`spots[i]` נותן את
    העמודה של הסיבוב הזה. אותו `i` משמש לשתי המטרות. ``
-3. `` `place_tower("archer", spots[i], 3)` בתוך `for i in range(len(wave)):`.
+3. `` `needed = len(wave)`, ה־print, ואז
+   `place_tower("archer", spots[i], 3)` בתוך `for i in range(needed):`.
    אם תכתבי `range(len(spots))` — תבני תשעה מגדלים, הזהב ייגמר באמצע, וזאת
    שגיאת בנייה. אם תבני חמישה — קיקלופ אחד יגיע לשער. ``
 
@@ -553,7 +584,7 @@ answers.
 
 **brief** — `הכף הוא המקום האחרון לפני המחנה, והדרך מתפתלת בו שלוש פעמים.
 
-1. הדפיסי כמה מפלצות בגל.
+1. הדפיסי כמה מפלצות בגל, בצורה `N monsters in this assault`.
 2. בני על הרכס — שורה 3, עמודות 0 עד 11 — ודלגי על שתי נקודות החצייה: 7 ו־10.
 3. הפקודה הקבועה של כירון: **בגל של יותר מארבעים, מחזיקים גם את החוף.** אם זה
    המצב, בני גם בשורה 5, בעמודות 5, 8 ו־11.
@@ -587,9 +618,12 @@ if len(wave) > 40:
 **check**
 ```js
 { kind: "battle",
-  also: { kind: "source", mustInclude: ["not in", "len(", "for"],
-          message: { he: "הקרב הזה דורש את שלושת הכלים: len על הגל, not in לחצייה, ולולאה על הרשימה",
-                     en: "This battle needs all three: len on the wave, not in for the crossings, and a loop over the list" } } }
+  also: [
+    { kind: "source", mustInclude: ["not in", "len(", "for"],
+      message: { he: "הקרב הזה דורש את שלושת הכלים: len על הגל, not in לחצייה, ולולאה על הרשימה",
+                 en: "This battle needs all three: len on the wave, not in for the crossings, and a loop over the list" } },
+    { kind: "output", mode: "contains", expect: "52 monsters in this assault" }
+  ] }
 ```
 
 **hints**
@@ -660,6 +694,12 @@ the camp necklace.)
   She uses the list's *length* and its *positions* only; `m["kind"]` waits for
   lesson 11, which is where the entries are opened. Teach block 17 says so out
   loud rather than letting her discover a wall.
+- **Every level pairs the battle with an `also` array**: a `source` rule for the
+  construct and an `output` rule (`mode: "contains"`) for a number she can only
+  print if she actually read the wave — `8 monsters are coming`,
+  `towers needed: 6`, `ridge towers: 8`. Winning the fight is not enough; the
+  report has to be right too, which is what stops a hand-placed defense from
+  passing a level about reading data. Each brief states the exact line to print.
 - **A `source` check reads a skeleton with comments and string literals stripped.**
   `len(` written only inside an f-string is invisible to it — b1's solution
   therefore assigns `coming = len(wave)` first. Any level requiring a construct

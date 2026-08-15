@@ -240,7 +240,29 @@ Cast: Annabeth (asks the question that becomes the loop condition), Grover
     ושאלי: האם היא באמת יכולה לרוץ? אם היא בתוך `if` שלעולם לא יהיה `True`,
     קיבלת לולאה אינסופית עם תחפושת. חמש שניות ונדע.
 
-15. **callout · myth** — title: הסירנות ואודיסאוס.
+15. **prose + code · runnable** — the bridge into the battles: a loop that
+    spends. This is the shape of every level in this lesson, on the training
+    field where nothing can be lost.
+    ```python
+    towers = 0
+    while get_gold() >= tower_cost("archer"):
+        place_tower("archer", towers, 3)
+        towers = towers + 1
+    print(f"{towers} towers, {get_gold()} gold left")
+    ```
+    Output on the training field (500 gold): `10 towers, 0 gold left`.
+    Explain (he): שלושת החלקים נמצאים כאן, אבל שימי לב מי משנה את הערך:
+    **`place_tower` עצמו**. כל בנייה מורידה 50 מהקופה, ולכן `get_gold()` בשאלה
+    של ה־`while` הוא לא מספר קבוע — הוא מצב שהלולאה משנה בעצמה. `towers` הוא
+    צובר שסופר כמה נבנו, וגם משמש כמיקום. אף אחד לא אמר לך שיוצאים עשרה מגדלים.
+
+16. **callout · warn** — title: לולאה שלא מוציאה כסף לא נגמרת.
+    text: אם תמחקי את שורת ה־`place_tower` מהלולאה למעלה — או תשכחי אותה
+    בהתחלה — הזהב לא יירד לעולם, השאלה תישאר `True` לנצח, ותקבלי את הודעת חמש
+    השניות. זו לא תקלה; זו בדיוק אותה לולאה אינסופית מהבלוק למעלה, בתחפושת של
+    בנייה.
+
+17. **callout · myth** — title: הסירנות ואודיסאוס.
     text: באודיסיאה, אודיסאוס רצה לשמוע את שירת הסירנות ולהישאר בחיים. הוא אטם
     את אוזני המלחים בשעווה כדי שיוכלו לחתור, וביקש שיקשרו אותו עצמו לתורן כדי
     שיוכל לשמוע בלי לקפוץ למים. זו אחת התוכניות הראשונות בהיסטוריה שכתובה כמו
@@ -381,7 +403,11 @@ defense gets planned: the last line of towers is the one that must never be thin
 ```js
 map: { cols: 12, rows: 7, path: [[0,2],[1,2],[2,2],[3,2],[4,2],[5,2],[6,2],[7,2],[8,2],[9,2],[10,2],[11,2]] },
 gold: 250, campHp: 3, seed: 32, allowed: ["archer"],
-waves: <the same three waves as b1>
+waves: [   // the same three waves as b1
+  { delay: 0,  enemies: [ { kind: "satyr", count: 10, gap: 0.35 } ] },
+  { delay: 7,  enemies: [ { kind: "hellhound", count: 5, gap: 1.0 } ] },
+  { delay: 16, enemies: [ { kind: "harpy", count: 8, gap: 0.6 } ] },
+],
 ```
 
 **brief (he)**: אותם שלושה גלים, כביש חדש, ואותם 250 זהב — אבל הפעם בונים
@@ -435,17 +461,21 @@ so buying well matters: against armour 5 a cannon is worth nearly two archers pe
 slot, and the harpies at the end mean the cannons cannot be the whole answer.
 
 ```js
-map: { cols: 12, rows: 7, path: <the straight road from b1> },
+map: { cols: 12, rows: 7, path: [[0,4],[1,4],[2,4],[3,4],[4,4],[5,4],[6,4],[7,4],[8,4],[9,4],[10,4],[11,4]] },   // the straight road from b1
 gold: 400, campHp: 3, seed: 33, allowed: ["archer", "cannon"],
 waves: [
   { delay: 0,  enemies: [ { kind: "hellhound", count: 6, gap: 1.0 } ] },
   { delay: 12, enemies: [ { kind: "cyclops", count: 4, gap: 3.0 } ] },
   { delay: 30, enemies: [ { kind: "harpy", count: 8, gap: 0.6 } ] },
 ],
-check: { kind: "battle", maxTowers: 6, also: … },
+check: { kind: "battle", maxTowers: 6, also: [ … see below … ] },
 ```
 
-**brief (he)**: על הרכס יש מקום לשישה מגדלים בלבד — לא שבעה. ארבעה קיקלופים
+**brief (he)**: כירון רוצה גם דוח: בסוף התוכנית, שורה אחת שאומרת כמה תותחים
+וכמה קשתות נבנו, בצורה `2 cannons, 4 archers`. את המספרים אל תכתבי ביד — ספרי
+אותם עם **צובר**: משתנה שמתחיל ב־0 לפני הלולאה וגדל בכל סיבוב.
+
+על הרכס יש מקום לשישה מגדלים בלבד — לא שבעה. ארבעה קיקלופים
 מגיעים בגל השני, ולכל אחד מהם שריון 5: חץ מוריד לו 5 נקודות, פגז מוריד 23.
 ובגל השלישי מגיעות הרפיות, ופגז לא פוגע במשהו שעף.
 
@@ -459,28 +489,37 @@ check: { kind: "battle", maxTowers: 6, also: … },
 
 **starter**
 ```python
+cannons = 0
 x = 3
 
 while get_gold() >= 250:
     place_tower("cannon", x, 3)
+    cannons = cannons + 1
     x = x + 4
 ```
 
 **solution**
 ```python
+cannons = 0
 x = 3
 
 while get_gold() >= 250:
     place_tower("cannon", x, 3)
+    cannons = cannons + 1
     x = x + 4
 
+archers = 0
 y = 1
 while get_gold() >= tower_cost("archer"):
     place_tower("archer", y, 5)
+    archers = archers + 1
     y = y + 3
+
+print(f"{cannons} cannons, {archers} archers")
 ```
 Verified: cannons at (3,3) and (7,3), archers at (1,5), (4,5), (7,5), (10,5) —
-six towers, 380 of 400 gold spent, 3/3, sixteen kills. Two cannons alone are
+six towers, 380 of 400 gold spent, 3/3, sixteen kills, and the log reads
+`2 cannons, 4 archers`. Two cannons alone are
 overrun by the harpies. Eight hand-placed archers hold the wave and still fail
 the level, on `maxTowers`. Six archers leak one.
 
@@ -489,9 +528,14 @@ the level, on `maxTowers`. Six archers leak one.
 check: {
   kind: "battle",
   maxTowers: 6,
-  also: { kind: "source", mustInclude: ["while", "get_gold"],
-          message: { he: "שתי לולאות while שמסתכלות על הזהב — הראשונה על התותחים, השנייה על מה שנשאר",
-                     en: "Two while loops that watch the gold — the first for cannons, the second for what is left" } }
+  also: [
+    { kind: "source", mustInclude: ["while", "get_gold"],
+      message: { he: "שתי לולאות while שמסתכלות על הזהב — הראשונה על התותחים, השנייה על מה שנשאר",
+                 en: "Two while loops that watch the gold — the first for cannons, the second for what is left" } },
+    { kind: "output", mode: "contains", expect: "2 cannons, 4 archers",
+      message: { he: "חסר הדוח בסוף: שורה אחת עם מספר התותחים ומספר הקשתות, שנספרו בצוברים",
+                 en: "The report at the end is missing: one line with the cannon and archer counts, both counted with accumulators" } },
+  ],
 }
 ```
 
@@ -500,10 +544,13 @@ check: {
    ומה השאלה הנכונה ללולאה השנייה — אותה שאלה, או שאלה אחרת?"
 2. (he) "הלולאה השנייה נראית כמו זו של b1: `while get_gold() >= tower_cost(\"archer\"):`
    עם משתנה מיקום משלה. שני משתנים נפרדים, `x` ו־`y`, כי שתי הלולאות בונות בשתי
-   שורות שונות."
+   שורות שונות — ושני צוברים נפרדים, `cannons` ו־`archers`, כי הדוח מבדיל
+   ביניהם."
 3. (he) "אחרי הלולאה הראשונה נשארו 220 זהב — 400 פחות שני תותחים. הלולאה השנייה
    מתחילה ב־`y = 1`, בונה ב־1, 4, 7, 10, ונעצרת כשנשארים 20. ביחד: שישה מגדלים
-   בדיוק, וזה כל מה שהרכס נותן. אם תעלי את הרזרבה מ־250 ל־150 תקבלי שלושה
+   בדיוק, וזה כל מה שהרכס נותן. הדוח בסוף נכתב עם f-string משיעור 3:
+   `print(f\"{cannons} cannons, {archers} archers\")`, צמוד לשוליים, אחרי שתי
+   הלולאות. אם תעלי את הרזרבה מ־250 ל־150 תקבלי שלושה
    תותחים ופחות קשתות — נסי, וראי מי עובר."
 
 ### b4 — עד שהשעווה נגמרת / Until the Wax Runs Out · 30 XP, 9 🪙
@@ -515,9 +562,13 @@ gets built, and the camp falls. Seeing "a `break` that always fires is a loop th
 never loops" is worth more than any explanation of it.
 
 ```js
-map: { cols: 12, rows: 7, path: <the row-2 road from b2> },
+map: { cols: 12, rows: 7, path: [[0,2],[1,2],[2,2],[3,2],[4,2],[5,2],[6,2],[7,2],[8,2],[9,2],[10,2],[11,2]] },   // the row-2 road from b2
 gold: 250, campHp: 3, seed: 34, allowed: ["archer"],
-waves: <the same three waves as b1>
+waves: [   // the same three waves as b1
+  { delay: 0,  enemies: [ { kind: "satyr", count: 10, gap: 0.35 } ] },
+  { delay: 7,  enemies: [ { kind: "hellhound", count: 5, gap: 1.0 } ] },
+  { delay: 16, enemies: [ { kind: "harpy", count: 8, gap: 0.6 } ] },
+],
 ```
 
 **brief (he)**: השעווה באוזניים מספיקה בדיוק לכמה שהיא מספיקה, ואף אחד לא סופר.
@@ -604,6 +655,8 @@ board, not when the purse empties, or it walks off the map and the build fails.
    זהב. **צאי ממנה ב־`break` כשעברת את קצה הלוח**, אחרת תנסי לבנות מחוץ למפה
    והבנייה תיכשל.
 2. לולאה שנייה: עם מה שנשאר, בני קשתות בשורה 5 במשבצות זוגיות — 2, 4, 6…
+3. בסוף, שורה אחת לכירון: `10 towers hold the strait` — כשהמספר נספר בצובר
+   אחד שגדל בשתי הלולאות, ולא נכתב ביד.
 
 שש קשתות בשורה אחת לא מחזיקות את הגל הזה. גם שמונה לא.
 
@@ -618,9 +671,12 @@ while get_gold() >= tower_cost("archer"):
 
 **solution**
 ```python
+towers = 0
+
 x = 1
 while get_gold() >= tower_cost("archer"):
     place_tower("archer", x, 3)
+    towers = towers + 1
     x = x + 2
     if x > 11:
         break
@@ -628,10 +684,14 @@ while get_gold() >= tower_cost("archer"):
 y = 2
 while get_gold() >= tower_cost("archer"):
     place_tower("archer", y, 5)
+    towers = towers + 1
     y = y + 2
+
+print(f"{towers} towers hold the strait")
 ```
 Verified: six archers on row 3 (x = 1…11) and four on row 5 (y = 2, 4, 6, 8) —
-ten towers, 500 of 520 gold spent, 3/3, thirty-five kills. Six towers in one row
+ten towers, 500 of 520 gold spent, 3/3, thirty-five kills, log
+`10 towers hold the strait`. Six towers in one row
 are overrun; eight are overrun. The `break` is load-bearing: without it the first
 loop keeps going to x = 13 and beyond, and an off-map placement fails the level
 even if the defense holds.
@@ -640,9 +700,14 @@ even if the defense holds.
 ```js
 check: {
   kind: "battle",
-  also: { kind: "source", mustInclude: ["while", "break"],
-          message: { he: "הקרב הזה דורש לולאות שמוציאות את כל הזהב, ו־break שעוצר את הראשונה בקצה הלוח",
-                     en: "This one needs loops that spend the whole purse, and a break that stops the first one at the edge of the board" } }
+  also: [
+    { kind: "source", mustInclude: ["while", "break"],
+      message: { he: "הקרב הזה דורש לולאות שמוציאות את כל הזהב, ו־break שעוצר את הראשונה בקצה הלוח",
+                 en: "This one needs loops that spend the whole purse, and a break that stops the first one at the edge of the board" } },
+    { kind: "output", mode: "contains", expect: "10 towers hold the strait",
+      message: { he: "חסר הדוח בסוף — שורה אחת עם מספר המגדלים, כשהמספר נספר בצובר",
+                 en: "The closing report is missing — one line with the tower count, counted by an accumulator" } },
+  ],
 }
 ```
 
@@ -651,7 +716,8 @@ check: {
    אומר? ואיזה חלק של הלוח נשאר בלי אף מגדל?"
 2. (he) "ללולאה הראשונה יש שני תנאי עצירה: הזהב (בשאלה של ה־`while`) והקצה
    (ב־`if` עם `break` בתוך הבלוק). הלולאה השנייה צריכה משתנה מיקום משלה, `y`,
-   שמתחיל ב־2."
+   שמתחיל ב־2. הצובר `towers` מאותחל **לפני** שתיהן וגדל בשתיהן — הוא סופר
+   מגדלים, לא סיבובים של לולאה מסוימת."
 3. (he) "כך זה מתחיל:
    ```python
    x = 1
@@ -663,7 +729,9 @@ check: {
    ```
    שימי לב לשלוש רמות ההזחה: 0 ללולאה, 4 לגוף שלה, 8 ל־`break`. אחרי הלולאה
    הזאת נשארו 220 זהב, והלולאה השנייה — צמודה לשוליים, עם `y = 2` לפניה —
-   מוציאה מהם ארבע קשתות בשורה 5. עשרה מגדלים, ואת כתבת שמונה שורות."
+   מוציאה מהם ארבע קשתות בשורה 5. הוסיפי `towers = towers + 1` בשני הבלוקים,
+   ובסוף `print(f\"{towers} towers hold the strait\")`. עשרה מגדלים, ואת כתבת
+   עשר שורות."
 
 ## Reward & Recap
 
@@ -763,6 +831,19 @@ desc (he): "גוש שעווה קטן וחם מהמצר. כל עוד הוא בא�
   *"בנית N מגדלים, ולרכס הזה יש מקום ל־M בלבד."* Until that exists, b3's brief
   and hints have to carry the whole explanation — which they do, but it is the
   one place in these four lessons where the engine is quieter than it should be.
+- **`also` accepts a list, and b3 and the great battle both use one**: a `source`
+  rule for the loop plus an `output` rule for the report. `checker.js` runs them
+  in order after the battle has been won, and stops at the first failure, so she
+  gets one message at a time. Give every rule its own `message` — an unexplained
+  "you won but failed" is the worst feedback in the course.
+- **The report rules use `mode: "contains"`**, not `normalized`, so she may print
+  whatever else she likes around it. The expected strings are
+  `"2 cannons, 4 archers"` and `"10 towers hold the strait"`, both produced by
+  f-strings from lesson 3 and both verified against the simulated run.
+- **The output rule is what makes the accumulator compulsory.** Without it, the
+  battles in this lesson would exercise `while` and never touch the counter
+  pattern that teach block 10 spends its time on — and the counter is the half of
+  `while` that survives into every later lesson.
 - **`mustInclude: ["while True", "break"]`** matches `while True:` because the
   colon follows the matched substring. It does not match `while  True` with two
   spaces. The starter and every hint use the single-space form, and the failure

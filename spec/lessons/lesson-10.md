@@ -333,8 +333,14 @@ so the total is not decoration — it is the budget.
 **brief** — `זואי לא נותנת לך מחירון כתוב. הפקודה tower_cost() נותנת מחיר אחד
 בכל פעם — אספי את השלושה לרשימה אחת.
 
-הדפיסי את הזול ביותר, את היקר ביותר ואת הסכום של השלושה. תשווי את הסכום לזהב
-שיש לך: הוא בדיוק אותו מספר, כלומר יש לך אחד מכל סוג ולא יותר.
+הדפיסי שלוש שורות בדיוק בצורה הזאת:
+
+cheapest: N
+dearest: N
+the whole set: N
+
+תשווי את הסכום לזהב שיש לך: הוא בדיוק אותו מספר, כלומר יש לך אחד מכל סוג ולא
+יותר.
 
 בני קשת ב־(3, 3), קרח ב־(6, 3) ותותח ב־(8, 3).`
 
@@ -351,9 +357,9 @@ print(prices)
 cheapest = min(prices)
 dearest = max(prices)
 whole_set = sum(prices)
-print(cheapest)
-print(dearest)
-print(whole_set)
+print(f"cheapest: {cheapest}")
+print(f"dearest: {dearest}")
+print(f"the whole set: {whole_set}")
 place_tower("archer", 3, 3)
 place_tower("ice", 6, 3)
 place_tower("cannon", 8, 3)
@@ -362,9 +368,12 @@ place_tower("cannon", 8, 3)
 **check**
 ```js
 { kind: "battle",
-  also: { kind: "source", mustInclude: ["tower_cost(", "min(", "max(", "sum("],
-          message: { he: "המחירים צריכים לבוא מ־tower_cost, והדוח מ־min, max ו־sum",
-                     en: "The prices must come from tower_cost, and the report from min, max and sum" } } }
+  also: [
+    { kind: "source", mustInclude: ["tower_cost(", "min(", "max(", "sum("],
+      message: { he: "המחירים צריכים לבוא מ־tower_cost, והדוח מ־min, max ו־sum",
+                 en: "The prices must come from tower_cost, and the report from min, max and sum" } },
+    { kind: "output", mode: "contains", expect: "the whole set: 210" }
+  ] }
 ```
 
 **hints**
@@ -427,9 +436,12 @@ for x in plan:
 **check**
 ```js
 { kind: "battle",
-  also: { kind: "source", mustInclude: [".remove(", ".append(", ".sort()", "for"],
-          message: { he: "התוכנית צריכה להשתנות בקוד — remove, append ו־sort — ולא להיכתב מחדש ביד",
-                     en: "The plan must be edited in code — remove, append and sort — not retyped by hand" } } }
+  also: [
+    { kind: "source", mustInclude: [".remove(", ".append(", ".sort()", "for"],
+      message: { he: "התוכנית צריכה להשתנות בקוד — remove, append ו־sort — ולא להיכתב מחדש ביד",
+                 en: "The plan must be edited in code — remove, append and sort — not retyped by hand" } },
+    { kind: "output", mode: "contains", expect: "[2, 7, 9, 11]" }
+  ] }
 ```
 
 **hints**
@@ -470,7 +482,8 @@ three".
 המערבי מגדל אחד משקיף על שלושה קטעים של דרך בבת אחת.
 
 יש לך חמש משבצות מסומנות, spots = [9, 2, 11, 5, 7] בשורה 3, וזהב לשלושה מגדלים
-בלבד. סדרי את הרשימה, קחי את שלוש הראשונות אחרי הסידור, ובני אותן.`
+בלבד. סדרי את הרשימה, קחי את שלוש הראשונות אחרי הסידור, **הדפיסי את הפרוסה**,
+ובני אותן.`
 
 **starter**
 ```python
@@ -492,9 +505,12 @@ for x in western:
 **check**
 ```js
 { kind: "battle",
-  also: { kind: "source", mustInclude: [".sort()", "spots[0:3]"],
-          message: { he: "שלוש המשבצות צריכות לצאת מפרוסה של הרשימה המסודרת, לא להיכתב ביד",
-                     en: "The three places must come out of a slice of the sorted list, not be typed by hand" } } }
+  also: [
+    { kind: "source", mustInclude: [".sort()", "spots[0:3]"],
+      message: { he: "שלוש המשבצות צריכות לצאת מפרוסה של הרשימה המסודרת, לא להיכתב ביד",
+                 en: "The three places must come out of a slice of the sorted list, not be typed by hand" } },
+    { kind: "output", mode: "contains", expect: "[2, 5, 7]" }
+  ] }
 ```
 
 **hints**
@@ -536,6 +552,8 @@ air_hp = [30, 30, 30, 30]
 הכלל של הציידות: **תותח אחד לכל 120 נקודות חיים על הקרקע, וקשת אחת לכל 60
 נקודות חיים באוויר.** חלקי בעזרת `//` משיעור 4.
 
+הדפיסי את התוצאה בשתי שורות, בצורה `cannons: N` ו־`archers: N`.
+
 התותחים עומדים על הרכס — ridge = [2, 5, 8] בשורה 3. הקשתות על החוף —
 shore = [3, 7] בשורה 5. בני בדיוק כמה שהחשבון אומר; הזהב מספיק בדיוק לזה.
 
@@ -558,8 +576,8 @@ print(len(wave))
 
 cannons = sum(ground_hp) // 120
 archers = sum(air_hp) // 60
-print(cannons)
-print(archers)
+print(f"cannons: {cannons}")
+print(f"archers: {archers}")
 
 ridge = [2, 5, 8]
 for i in range(cannons):
@@ -573,9 +591,13 @@ for i in range(archers):
 **check**
 ```js
 { kind: "battle",
-  also: { kind: "source", mustInclude: ["sum(", "for", "//"],
-          message: { he: "מספר המגדלים חייב לצאת מ־sum ו־// על הלוח, לא להיכתב ביד",
-                     en: "The tower counts must come out of sum and // over the slate, not be typed by hand" } } }
+  also: [
+    { kind: "source", mustInclude: ["sum(", "for", "//"],
+      message: { he: "מספר המגדלים חייב לצאת מ־sum ו־// על הלוח, לא להיכתב ביד",
+                 en: "The tower counts must come out of sum and // over the slate, not be typed by hand" } },
+    { kind: "output", mode: "contains", expect: "cannons: 3" },
+    { kind: "output", mode: "contains", expect: "archers: 2" }
+  ] }
 ```
 
 **hints**
@@ -625,8 +647,9 @@ ford needs artillery. The archers alone lose this one.
 2. קו הרכס: line = [1, 5, 12, 8, 10] בשורה 3. עמודה 12 היא כביש — הוציאי אותה.
    הסיירת הוסיפה את עמודה 4 — הוסיפי אותה. סדרי, ובני קשתות על כולן.
 3. הגל הרביעי הוא הכבד: last_assault = [70, 70, 70, 70, 70, 160, 160, 160].
-   קחי את שלוש הכבדות ביותר בעזרת sorted עם reverse ופרוסה. **אם הסכום שלהן
-   גדול מ־300** — המעבר צריך תותחים: בני שניים, ב־(7, 7) וב־(9, 7).
+   קחי את שלוש הכבדות ביותר בעזרת sorted עם reverse ופרוסה, והדפיסי את הסכום
+   שלהן בצורה `heaviest three: N`. **אם הסכום גדול מ־300** — המעבר צריך תותחים:
+   בני שניים, ב־(7, 7) וב־(9, 7).
 
 הזהב מספיק בדיוק לחמש קשתות ולשני תותחים.`
 
@@ -656,7 +679,7 @@ for x in line:
 
 last_assault = [70, 70, 70, 70, 70, 160, 160, 160]
 heaviest = sorted(last_assault, reverse=True)[0:3]
-print(heaviest)
+print(f"heaviest three: {sum(heaviest)}")
 if sum(heaviest) > 300:
     place_tower("cannon", 7, 7)
     place_tower("cannon", 9, 7)
@@ -665,9 +688,13 @@ if sum(heaviest) > 300:
 **check**
 ```js
 { kind: "battle",
-  also: { kind: "source", mustInclude: [".remove(", ".append(", "sorted(", "sum(", "[0:3]"],
-          message: { he: "הקרב הזה דורש את הכלים עצמם: remove ו־append על התוכנית, ו־sorted עם פרוסה וסכום על הגל הכבד",
-                     en: "This battle needs the tools themselves: remove and append on the plan, and sorted with a slice and a sum on the heavy assault" } } }
+  also: [
+    { kind: "source", mustInclude: [".remove(", ".append(", "sorted(", "sum(", "[0:3]"],
+      message: { he: "הקרב הזה דורש את הכלים עצמם: remove ו־append על התוכנית, ו־sorted עם פרוסה וסכום על הגל הכבד",
+                 en: "This battle needs the tools themselves: remove and append on the plan, and sorted with a slice and a sum on the heavy assault" } },
+    { kind: "output", mode: "contains", expect: "heaviest three: 480" },
+    { kind: "output", mode: "contains", expect: "[1, 4, 5, 8, 10]" }
+  ] }
 ```
 
 **hints**
@@ -719,8 +746,9 @@ where the single cannon goes.
 spots = [9, 2, 11, 5, 7]
 coverage = [2, 5, 1, 4, 3]
 
-מצאי את ה־index של המשבצת עם הכיסוי הגדול ביותר, שימי שם את התותח היחיד שלך,
-ובני קשת בכל שאר המשבצות. הכול בשורה 3.`
+מצאי את ה־index של המשבצת עם הכיסוי הגדול ביותר, הדפיסי אותה בצורה
+`best spot: N`, שימי שם את התותח היחיד שלך, ובני קשת בכל שאר המשבצות. הכול
+בשורה 3.`
 
 **starter**
 ```python
@@ -739,8 +767,7 @@ best = 0
 for i in range(len(coverage)):
     if coverage[i] > coverage[best]:
         best = i
-print(best)
-print(spots[best])
+print(f"best spot: {spots[best]}")
 
 place_tower("cannon", spots[best], 3)
 for i in range(len(spots)):
@@ -751,9 +778,12 @@ for i in range(len(spots)):
 **check**
 ```js
 { kind: "battle",
-  also: { kind: "source", mustExclude: ["max(", "min(", "sorted(", ".sort("],
-          message: { he: "משימת הצד הזאת אסורה בכלים המוכנים — max, min, sorted ו־.sort מחוץ למשחק",
-                     en: "This side battle bans the ready-made tools — no max, min, sorted or .sort" } } }
+  also: [
+    { kind: "source", mustExclude: ["max(", "min(", "sorted(", ".sort("],
+      message: { he: "משימת הצד הזאת אסורה בכלים המוכנים — max, min, sorted ו־.sort מחוץ למשחק",
+                 en: "This side battle bans the ready-made tools — no max, min, sorted or .sort" } },
+    { kind: "output", mode: "contains", expect: "best spot: 2" }
+  ] }
 ```
 
 **hints**
@@ -822,6 +852,11 @@ for i in range(len(spots)):
   applies to the division-by-zero difference.
 - `round(sum(weights) / len(weights), 1)` yields exactly `3.6` and
   `round(118/5, 1)` exactly `23.6` in Skulpt; no float-formatting surprise.
+- **Every level pairs the battle with an `also` array**: a `source` rule for the
+  tool and an `output` rule (`mode: "contains"`) for a value that can only come
+  out of the data — `the whole set: 210`, `cannons: 3`, `heaviest three: 480`.
+  A defense placed by hand wins the fight and still fails the level, which is the
+  point. Each brief states the exact line to print.
 - b3's `source` check requires the literal `spots[0:3]`, so the three columns
   have to be cut out of the sorted list rather than retyped. It is a loose guard
   on purpose — combined with the battle itself it is sufficient, and it cannot

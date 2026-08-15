@@ -182,9 +182,9 @@ her side), Grover in a `tip` callout guessing wildly and being wrong.
    מה יש שם, כמה יש, ומאיזה סוג.
 
 9. **prose** — The turn in the lesson. עד עכשיו למדת לתקן שגיאות **אחרי**
-   שקרו. יש סוג אחד של שגיאה שאי אפשר לתקן מראש: שגיאה שמגיעה מבחוץ. אם
-   המשתמשת מקלידה `שבע` במקום `7`, הקוד שלך מושלם והתוכנית עדיין קורסת. בשביל
-   זה יש `try`.
+   שקרו. יש סוג אחד של שגיאה שאי אפשר לתקן מראש: שגיאה שמגיעה **מנתונים שלא
+   את כתבת**. הקוד שלך מושלם, המילון שלך מדויק, ואז נכנס לטווח סוג מפלצת
+   שהאורקל לא הזכירה — והתוכנית קורסת באמצע הקרב. בשביל זה יש `try`.
 
 10. **code (runnable)** — the smallest `try`/`except`.
     ```python
@@ -227,30 +227,33 @@ her side), Grover in a `tip` callout guessing wildly and being wrong.
     > **תפסי את הסוג שאת מצפה לו, ורק אותו.** `except ValueError` — כן.
     > `except` לבד — לא.
 
-13. **code (runnable)** — the pattern she will reuse forever: a validation loop.
-    Everything in it is already hers (`while True`, `break`, `int()`), only the
-    `try` is new.
+13. **code (runnable)** — the exact shape every battle in this lesson uses: a
+    risky lookup pulled out into its own tiny function, with a fallback value.
     ```python
-    answers = ["seven", "", "12"]
-    index = 0
-    while True:
-        raw = answers[index]
-        index = index + 1
+    DANGER = {"satyr": 4, "harpy": 3, "hellhound": 2}
+    wave = [{"kind": "satyr"}, {"kind": "cyclops"}, {"kind": "harpy"}]
+
+
+    def danger_of(enemy):
         try:
-            toll = int(raw.strip())
-            break
-        except ValueError:
-            print("The Fury hisses. Numbers only.")
-    print("Toll paid:", toll)
+            return DANGER[enemy["kind"]]
+        except KeyError:
+            return 0
+
+
+    for enemy in wave:
+        print(enemy["kind"], danger_of(enemy))
     ```
     Output:
     ```
-    The Fury hisses. Numbers only.
-    The Fury hisses. Numbers only.
-    Toll paid: 12
+    satyr 4
+    cyclops 0
+    harpy 3
     ```
-    Caption: `break` יוצא מהלולאה **רק** אם `int()` הצליח. אם הוא נכשל, ה-`break`
-    לא מגיע לרוץ בכלל, והלולאה שואלת שוב. במשימה הבאה זה יהיה `input()` אמיתי.
+    Caption: השורה המסוכנת יושבת לבד בתוך פונקציה קטנה, ו-`except KeyError`
+    מחזיר ערך שיש לו משמעות — "סוג שלא הכרתי, לא בעדיפות". שימי לב שהפונקציה
+    **תמיד מחזירה מספר**, ולכן מי שקורא לה לא צריך לדעת שמשהו כמעט נשבר. זו
+    התבנית שתחזור בכל אחד מהקרבות היום.
 
 14. **callout · myth** — הפוריות נולדו לפני האולימפיים והן לא עובדות אצל אף אחד.
     התפקיד שלהן הוא לרדוף אחרי מי שעשה עוול עד שהוא **מודה במה בדיוק** עשה.

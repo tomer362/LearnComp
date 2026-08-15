@@ -366,9 +366,11 @@ which is the one skill everything after this depends on.
 **brief** — ``הפקודה get_map() נותנת לך את הלוח עצמו: רשימה של שורות, וכל שורה
 רשימה של מחרוזות.
 
-1. הדפיסי כמה שורות יש בלוח, וכמה עמודות יש בשורה הראשונה.
-2. הדפיסי מה יש ב־grid[4][0] — כלומר שורה 4, עמודה 0.
-3. הדפיסי מה יש ב־grid[3][5].
+1. הדפיסי כמה שורות יש בלוח וכמה עמודות יש בשורה הראשונה, בצורה `rows: N`
+   ו־`columns: N`.
+2. שלפי את `grid[4][0]` — כלומר שורה 4, עמודה 0 — למשתנה, והדפיסי
+   `grid[4][0] is X`.
+3. אותו דבר עבור `grid[3][5]`: `grid[3][5] is X`.
 4. עכשיו בני שלוש קשתות בשורה 3, בעמודות 3, 5 ו־9.
 
 שימי לב להיפוך: `grid[y][x]` אבל `place_tower("archer", x, y)`.``
@@ -384,10 +386,14 @@ print(grid[3][5])
 **solution**
 ```python
 grid = get_map()
-print(len(grid))
-print(len(grid[0]))
-print(grid[4][0])
-print(grid[3][5])
+rows = len(grid)
+columns = len(grid[0])
+gate_square = grid[4][0]
+ridge_square = grid[3][5]
+print(f"rows: {rows}")
+print(f"columns: {columns}")
+print(f"grid[4][0] is {gate_square}")
+print(f"grid[3][5] is {ridge_square}")
 place_tower("archer", 3, 3)
 place_tower("archer", 5, 3)
 place_tower("archer", 9, 3)
@@ -396,9 +402,13 @@ place_tower("archer", 9, 3)
 **check**
 ```js
 { kind: "battle",
-  also: { kind: "source", mustInclude: ["get_map(", "grid["],
-          message: { he: "הקרב הזה דורש לקרוא את הלוח עם get_map ולגשת אליו עם grid[y][x]",
-                     en: "This one needs the board read with get_map and addressed as grid[y][x]" } } }
+  also: [
+    { kind: "source", mustInclude: ["get_map(", "grid["],
+      message: { he: "הקרב הזה דורש לקרוא את הלוח עם get_map ולגשת אליו עם grid[y][x]",
+                 en: "This one needs the board read with get_map and addressed as grid[y][x]" } },
+    { kind: "output", mode: "contains", expect: "grid[4][0] is path" },
+    { kind: "output", mode: "contains", expect: "grid[3][5] is grass" }
+  ] }
 ```
 
 **hints**
@@ -444,7 +454,8 @@ archers.
 **brief** — `שורה 3 היא הרכס, והדרך חוצה אותה כמה פעמים. יש עליה גם שני סלעים.
 
 אף אחד לא אומר לך הפעם איפה מה. קחי את השורה מהלוח, רוצי על כל העמודות שלה,
-ובני קשת בכל משבצת שהיא **"grass"** — לא כביש ולא סלע.
+ובני קשת בכל משבצת שהיא **"grass"** — לא כביש ולא סלע. ספרי כמה מהן היו, והדפיסי
+בסוף `free squares: N`.
 
 הזהב מספיק בדיוק למשבצות הפנויות. אם תבני על סלע, הוא ייגמר לפני הסוף.`
 
@@ -460,27 +471,34 @@ print(row)
 grid = get_map()
 row = grid[3]
 print(row)
+free = 0
 for x in range(len(row)):
     if row[x] == "grass":
         place_tower("archer", x, 3)
+        free = free + 1
+print(f"free squares: {free}")
 ```
 
 **check**
 ```js
 { kind: "battle",
-  also: { kind: "source", mustInclude: ["get_map(", "range(len(", "if"],
-          message: { he: "המשבצות צריכות לצאת מסריקה של השורה בלוח, לא מרשימה שכתבת ביד",
-                     en: "The squares must come from scanning the row in the grid, not from a list typed by hand" } } }
+  also: [
+    { kind: "source", mustInclude: ["get_map(", "range(len(", "if"],
+      message: { he: "המשבצות צריכות לצאת מסריקה של השורה בלוח, לא מרשימה שכתבת ביד",
+                 en: "The squares must come from scanning the row in the grid, not from a list typed by hand" } },
+    { kind: "output", mode: "contains", expect: "free squares: 6" }
+  ] }
 ```
 
 **hints**
 1. ``הדפיסי את `row` והסתכלי עליה. כמה ערכים יש בה, וכמה מהם `"grass"`?``
 2. `` `for x in range(len(row)):` נותן לך כל עמודה בתורה, ו־`row[x]` הוא מה שיש
    שם. ההשוואה היא `row[x] == "grass"` — עם שני סימני שווה. ``
-3. `` שלוש שורות: `for x in range(len(row)):`, בתוכה `if row[x] == "grass":`,
-   ובתוכה `place_tower("archer", x, 3)`. שימי לב שה־`x` של הלולאה הוא בדיוק
-   ה־`x` של `place_tower` — כי שניהם עמודה. אם תבדקי רק `!= "path"`, תבני גם על
-   שני הסלעים והזהב ייגמר. ``
+3. `` `free = 0` לפני הלולאה. אחר כך `for x in range(len(row)):`, בתוכה
+   `if row[x] == "grass":`, ובתוכה `place_tower("archer", x, 3)` ו־
+   `free = free + 1`. ה־print של `free squares` יושב אחרי הלולאה, בלי הזחה.
+   שימי לב שה־`x` של הלולאה הוא בדיוק ה־`x` של `place_tower` — כי שניהם עמודה.
+   אם תבדקי רק `!= "path"`, תבני גם על שני הסלעים והזהב ייגמר. ``
 
 ### b3 — לסרוק את כל הלוח · Scanning the Whole Board · 30 XP, 8 🪙
 
@@ -522,6 +540,8 @@ forgets to check the cell it is standing on.
 רוצי על כל שורה `y`, ובתוכה על כל עמודה `x`, ובני קשת כשמתקיימים שני התנאים
 יחד: `grid[y][x]` הוא `"grass"` **וגם** `grid[y + 1][x]` הוא `"path"`.
 
+ספרי כמה משבצות כאלה מצאת והדפיסי בסוף `build spots: N`.
+
 שימי לב לגבול: אם `y` יגיע לשורה האחרונה, `y + 1` יחרוג מהלוח. לכן הלולאה
 החיצונית רצה עד `len(grid) - 1`.
 
@@ -537,19 +557,25 @@ for y in range(len(grid) - 1):
 **solution**
 ```python
 grid = get_map()
+found = 0
 for y in range(len(grid) - 1):
     row = grid[y]
     for x in range(len(row)):
         if row[x] == "grass" and grid[y + 1][x] == "path":
             place_tower("archer", x, y)
+            found = found + 1
+print(f"build spots: {found}")
 ```
 
 **check**
 ```js
 { kind: "battle",
-  also: { kind: "source", mustInclude: ["get_map(", "grid[y + 1][x]", "for"],
-          message: { he: "צריך לסרוק את הלוח ולשאול גם על המשבצת שמתחת — grid[y + 1][x]",
-                     en: "The board must be scanned, and the cell below asked about too — grid[y + 1][x]" } } }
+  also: [
+    { kind: "source", mustInclude: ["get_map(", "grid[y + 1][x]", "for"],
+      message: { he: "צריך לסרוק את הלוח ולשאול גם על המשבצת שמתחת — grid[y + 1][x]",
+                 en: "The board must be scanned, and the cell below asked about too — grid[y + 1][x]" } },
+    { kind: "output", mode: "contains", expect: "build spots: 8" }
+  ] }
 ```
 
 **hints**
@@ -557,11 +583,12 @@ for y in range(len(grid) - 1):
    להיות נכון כדי שמגדל שם יירה?`
 2. `` שתי לולאות מקוננות: החיצונית על `range(len(grid) - 1)` נותנת `y`, הפנימית
    על `range(len(row))` נותנת `x`. התנאי מחבר שתי שאלות עם `and` משיעור 5. ``
-3. `` `for y in range(len(grid) - 1):` → `row = grid[y]` → `for x in
-   range(len(row)):` → `if row[x] == "grass" and grid[y + 1][x] == "path":` →
-   `place_tower("archer", x, y)`. שימי לב שה־`y` של הבנייה הוא השורה של הדשא, לא
-   של הדרך. אם תרוצי עד `len(grid)` במקום `len(grid) - 1`, השורה האחרונה תבקש
-   את `grid[7]` על לוח בן שבע שורות — `IndexError`. ``
+3. `` `found = 0` → `for y in range(len(grid) - 1):` → `row = grid[y]` →
+   `for x in range(len(row)):` → `if row[x] == "grass" and grid[y + 1][x] == "path":`
+   → `place_tower("archer", x, y)` ו־`found = found + 1`. ה־print של
+   `build spots` אחרי שתי הלולאות, בלי הזחה. שימי לב שה־`y` של הבנייה הוא השורה
+   של הדשא, לא של הדרך. אם תרוצי עד `len(grid)` במקום `len(grid) - 1`, השורה
+   האחרונה תבקש את `grid[7]` על לוח בן שבע שורות — `IndexError`. ``
 
 ### b4 — תוכנית בתוך תוכנית · A Plan Inside a Plan · 30 XP, 8 🪙
 
@@ -597,7 +624,9 @@ plan = [["cannon", 6, 4], ["archer", 2, 4], ["ice", 10, 4],
 
 אחת מהשש כבר לא תקפה — הדרך זזה מאז שהיא סימנה אותה. אל תחפשי אותה בעיניים:
 לפני כל בנייה, שאלי את הלוח אם המשבצת הזאת עדיין `"grass"`. אם כן — בני. אם לא —
-הדפיסי שורה שאומרת שדילגת עליה.
+הדפיסי בדיוק את השורה הזאת:
+
+KIND at X,Y would stand on the road
 
 הזהב מספיק בדיוק לחמש השורות התקפות.``
 
@@ -626,9 +655,12 @@ for entry in plan:
 **check**
 ```js
 { kind: "battle",
-  also: { kind: "source", mustInclude: ["get_map(", "entry[0]", "grid[y][x]"],
-          message: { he: "כל שורה בתוכנית נקראת עם entry[0], entry[1], entry[2], ונבדקת מול הלוח לפני הבנייה",
-                     en: "Each plan row is read with entry[0], entry[1], entry[2] and checked against the grid before building" } } }
+  also: [
+    { kind: "source", mustInclude: ["get_map(", "entry[0]", "grid[y][x]"],
+      message: { he: "כל שורה בתוכנית נקראת עם entry[0], entry[1], entry[2], ונבדקת מול הלוח לפני הבנייה",
+                 en: "Each plan row is read with entry[0], entry[1], entry[2] and checked against the grid before building" } },
+    { kind: "output", mode: "contains", expect: "archer at 4,3 would stand on the road" }
+  ] }
 ```
 
 **hints**
@@ -695,11 +727,15 @@ fourth wave, and artillery cannot touch them.
 brood = [["hydra", 3], ["hellhound", 14], ["harpy", 12], ["cyclops", 6]]
 
 **חלק א׳ — הדיווח.** עברי על brood, הדפיסי שורה לכל סוג בצורה `NAME x N`, וחברי
-את כל הכמויות. הדפיסי את הסכום ואת `len(get_wave())` — שני המספרים חייבים לצאת
-זהים.
+את כל הכמויות. הדפיסי שתי שורות סיכום:
+
+monsters in the brood: N
+monsters in the wave: N
+
+השנייה מגיעה מ־`len(get_wave())`, ושני המספרים חייבים לצאת זהים.
 
 **חלק ב׳ — הסריקה.** סרקי את הלוח כמו בקרב הקודם ואספי כל משבצת חוקית לתוך
-רשימה בשם spots, כל אחת כזוג [x, y]. הדפיסי כמה נמצאו.
+רשימה בשם spots, כל אחת כזוג [x, y]. הדפיסי `build spots: N`.
 
 **חלק ג׳ — הבנייה.** בני קשת בכל משבצת ברשימה, לפי spots[i][0] ו־spots[i][1].
 ואם השורה הראשונה ב־brood היא של ההידרה, הוסיפי שני מגדלי קרח ב־(11, 8)
@@ -725,8 +761,8 @@ counted = 0
 for entry in brood:
     print(f"{entry[0]} x {entry[1]}")
     counted = counted + entry[1]
-print(counted)
-print(len(get_wave()))
+print(f"monsters in the brood: {counted}")
+print(f"monsters in the wave: {len(get_wave())}")
 
 spots = []
 for y in range(len(grid) - 1):
@@ -734,7 +770,7 @@ for y in range(len(grid) - 1):
     for x in range(len(row)):
         if row[x] == "grass" and grid[y + 1][x] == "path":
             spots.append([x, y])
-print(len(spots))
+print(f"build spots: {len(spots)}")
 
 for i in range(len(spots)):
     place_tower("archer", spots[i][0], spots[i][1])
@@ -747,10 +783,14 @@ if brood[0][0] == "hydra":
 **check**
 ```js
 { kind: "battle",
-  also: { kind: "source",
-          mustInclude: ["get_map(", "spots.append(", "spots[i][0]", "brood[0][0]"],
-          message: { he: "הבוס דורש את המבנים המקוננים עצמם: סריקה שאוספת [x, y] לרשימה, וקריאה של brood לפי שני מספרים",
-                     en: "The boss needs the nested structures themselves: a scan collecting [x, y] into a list, and brood read by two indexes" } } }
+  also: [
+    { kind: "source", mustInclude: ["get_map(", "spots.append(", "spots[i][0]", "brood[0][0]"],
+      message: { he: "הבוס דורש את המבנים המקוננים עצמם: סריקה שאוספת [x, y] לרשימה, וקריאה של brood לפי שני מספרים",
+                 en: "The boss needs the nested structures themselves: a scan collecting [x, y] into a list, and brood read by two indexes" } },
+    { kind: "output", mode: "contains", expect: "monsters in the brood: 35" },
+    { kind: "output", mode: "contains", expect: "monsters in the wave: 35" },
+    { kind: "output", mode: "contains", expect: "build spots: 13" }
+  ] }
 ```
 
 ### Fight staging
@@ -821,7 +861,8 @@ coverage = [1, 5, 1, 4, 3]
 ובכל מעבר החליפי כל שני שכנים שיושבים בסדר הפוך — **ותחליפי גם ב־spots, באותו
 מקום.** הדפיסי את spots אחרי כל מעבר.
 
-בסוף, קחי את שלוש הראשונות ובני עליהן. יש זהב לשלוש בדיוק.`
+בסוף, קחי את שלוש הראשונות, הדפיסי אותן בצורה `best three: [...]`, ובני עליהן.
+יש זהב לשלוש בדיוק.`
 
 **starter**
 ```python
@@ -849,7 +890,7 @@ for p in range(len(coverage) - 1):
     print(f"pass {p + 1}: {spots}")
 
 best_three = spots[0:3]
-print(best_three)
+print(f"best three: {best_three}")
 for x in best_three:
     place_tower("archer", x, 3)
 ```
@@ -857,9 +898,12 @@ for x in best_three:
 **check**
 ```js
 { kind: "battle",
-  also: { kind: "source", mustExclude: ["sorted(", ".sort(", "max(", "min("],
-          message: { he: "כל העניין פה הוא לכתוב את המיון בעצמך — sorted, .sort, max ו־min מחוץ למשחק",
-                     en: "The whole point is writing the sort yourself — no sorted, no .sort, no max, no min" } } }
+  also: [
+    { kind: "source", mustExclude: ["sorted(", ".sort(", "max(", "min("],
+      message: { he: "כל העניין פה הוא לכתוב את המיון בעצמך — sorted, .sort, max ו־min מחוץ למשחק",
+                 en: "The whole point is writing the sort yourself — no sorted, no .sort, no max, no min" } },
+    { kind: "output", mode: "contains", expect: "best three: [2, 5, 7]" }
+  ] }
 ```
 
 **hints**
@@ -940,6 +984,13 @@ name.
   road on row 4, so any sample here stays inside those bounds — a starter that
   reads `grid[4][11]` would raise on the training ground even though it is
   correct in its own level. Keep starters inside 7 rows and 10 columns.
+- **Every level pairs the battle with an `also` array**: a `source` rule for the
+  nested access and an `output` rule (`mode: "contains"`) for a number that only
+  a real scan produces — `free squares: 6`, `build spots: 8`, `build spots: 13`,
+  `grid[4][0] is path`. This is the strongest forcing device the act has: a
+  learner who ignores `get_map()` and types thirteen coordinates wins the fight
+  and still fails the level, because she cannot print the count she never
+  computed. Each brief states the exact line to print.
 - **The simulation does not reject a tower on a `rock` cell** — it only rejects
   the path, an occupied cell, an off-map cell and one it cannot afford. Rocks are
   enforced by *gold*: b2 and b3 give exactly the grass count, so a scan that

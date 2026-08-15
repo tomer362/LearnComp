@@ -363,6 +363,8 @@ a defense and four monsters walking over it.
 בני טבלת נגד — מילון שבו המפתח הוא סוג המפלצת והערך הוא סוג המגדל שעונה עליה:
 הרפיה → "archer", כלב גיהינום → "cannon".
 
+שלפי מהטבלה את שתי התשובות והדפיסי אותן: `harpies need X` ו־`hellhounds need X`.
+
 ואז בני ארבעה מגדלים בשורה 3, בעמודות 3, 5, 7 ו־9 — **בלי לכתוב את שם המגדל
 בעצמך**. שלפי אותו מהטבלה: שניים לפי המפתח של ההרפיה, שניים לפי המפתח של הכלב.
 הזהב מספיק בדיוק לשתי קשתות ולשני תותחים.`
@@ -377,8 +379,10 @@ place_tower(counters["harpy"], 3, 3)
 **solution**
 ```python
 counters = {"harpy": "archer", "hellhound": "cannon"}
-print(counters["harpy"])
-print(counters["hellhound"])
+for_harpy = counters["harpy"]
+for_hellhound = counters["hellhound"]
+print(f"harpies need {for_harpy}")
+print(f"hellhounds need {for_hellhound}")
 place_tower(counters["harpy"], 3, 3)
 place_tower(counters["harpy"], 5, 3)
 place_tower(counters["hellhound"], 7, 3)
@@ -388,9 +392,12 @@ place_tower(counters["hellhound"], 9, 3)
 **check**
 ```js
 { kind: "battle",
-  also: { kind: "source", mustInclude: ["counters[", "place_tower(counters["],
-          message: { he: "סוג המגדל צריך לצאת מהטבלה — place_tower(counters[...]) ולא מחרוזת שכתבת ביד",
-                     en: "The tower kind must come out of the table — place_tower(counters[...]), not a string you typed" } } }
+  also: [
+    { kind: "source", mustInclude: ["counters[", "place_tower(counters["],
+      message: { he: "סוג המגדל צריך לצאת מהטבלה — place_tower(counters[...]) ולא מחרוזת שכתבת ביד",
+                 en: "The tower kind must come out of the table — place_tower(counters[...]), not a string you typed" } },
+    { kind: "output", mode: "contains", expect: "harpies need archer" }
+  ] }
 ```
 
 **hints**
@@ -426,6 +433,8 @@ divide into tower numbers, and the gold covers exactly that.
 
 הכלל של המחנה: **תותח אחד לכל שני כלבי גיהינום, קשת אחת לכל ארבעה סאטירים.**
 
+הדפיסי את התוצאה בשתי שורות, `cannons: N` ו־`archers: N`.
+
 התותחים בעמודות [2, 5, 8] בשורה 3, הקשתות בעמודות [0, 10] באותה שורה. בני בדיוק
 כמה שהספירה אומרת — הזהב מספיק בדיוק לזה.`
 
@@ -448,8 +457,9 @@ print(counts)
 
 cannons = counts["hellhound"] // 2
 archers = counts["satyr"] // 4
-print(cannons)
-print(archers)
+print(f"hellhounds: {cannons * 2}")
+print(f"cannons: {cannons}")
+print(f"archers: {archers}")
 
 ridge = [2, 5, 8]
 for i in range(cannons):
@@ -463,9 +473,13 @@ for i in range(archers):
 **check**
 ```js
 { kind: "battle",
-  also: { kind: "source", mustInclude: [".get(", "get_wave(", "counts["],
-          message: { he: "הספירה חייבת לצאת מהגל עם התבנית get(מפתח, 0) + 1 — לא מספרים שכתבת ביד",
-                     en: "The counts must come from the wave with the get(key, 0) + 1 pattern — not numbers typed by hand" } } }
+  also: [
+    { kind: "source", mustInclude: [".get(", "get_wave(", "counts["],
+      message: { he: "הספירה חייבת לצאת מהגל עם התבנית get(מפתח, 0) + 1 — לא מספרים שכתבת ביד",
+                 en: "The counts must come from the wave with the get(key, 0) + 1 pattern — not numbers typed by hand" } },
+    { kind: "output", mode: "contains", expect: "cannons: 3" },
+    { kind: "output", mode: "contains", expect: "archers: 2" }
+  ] }
 ```
 
 **hints**
@@ -514,6 +528,9 @@ spots = [2, 4, 6, 9, 11]      # כולן בשורה 4
 הקוד כבר כתוב, והוא נופל. הריצי אותו, קראי את השגיאה, ותקני אותה — בלי להוסיף
 שורות לטבלה. הטבלה נכונה; **הדרך שבה שואלים אותה** היא מה שצריך להשתנות.
 
+הוסיפי גם שורת הדפסה לכל סיבוב, בצורה `NAME -> TOWER`, כדי לראות מה הטבלה ענתה
+על כל אחד מהחמישה.
+
 הזהב מספיק בדיוק לבנייה שיוצאת מהטבלה המתוקנת.`
 
 **starter** (deliberately broken — fixing it is the task; `brokenStarter: true`)
@@ -537,16 +554,19 @@ scouted = ["harpy", "hellhound", "satyr", "harpy", "cyclops"]
 spots = [2, 4, 6, 9, 11]
 for i in range(len(scouted)):
     kind = counters.get(scouted[i], "archer")
-    print(kind)
+    print(f"{scouted[i]} -> {kind}")
     place_tower(kind, spots[i], 4)
 ```
 
 **check**
 ```js
 { kind: "battle",
-  also: { kind: "source", mustInclude: [".get(", "counters"],
-          message: { he: "התיקון הוא .get עם ברירת מחדל — לא להוסיף שורה לטבלה ולא לכתוב את הסוגים ביד",
-                     en: "The repair is .get with a default — not a new row in the table, and not typing the kinds by hand" } } }
+  also: [
+    { kind: "source", mustInclude: [".get(", "counters"],
+      message: { he: "התיקון הוא .get עם ברירת מחדל — לא להוסיף שורה לטבלה ולא לכתוב את הסוגים ביד",
+                 en: "The repair is .get with a default — not a new row in the table, and not typing the kinds by hand" } },
+    { kind: "output", mode: "contains", expect: "satyr -> archer" }
+  ] }
 ```
 
 **hints**
@@ -554,10 +574,11 @@ for i in range(len(scouted)):
 2. `` `counters.get(scouted[i], "archer")` מחזיר את הערך אם המפתח קיים, ואת
    `"archer"` אם לא — בלי לעצור את התוכנית. ``
 3. `` שינוי של שלוש מילים בשורה אחת: `counters[scouted[i]]` הופך ל־
-   `counters.get(scouted[i], "archer")`. התוצאה: קשת, תותח, קשת (ברירת המחדל
-   לסאטיר), קשת, תותח — שלוש קשתות ושני תותחים, 330 בדיוק. אפשר היה גם להוסיף
-   `"satyr": "archer"` לטבלה, וזה נכון לגמרי — אבל בקרב הבא הסיירת תדווח על סוג
-   שעוד לא ראית, ואז `.get` הוא מה שמחזיק. ``
+   `counters.get(scouted[i], "archer")`, ועוד שורת print עם `{scouted[i]} -> {kind}`.
+   התוצאה: קשת, תותח, קשת (ברירת המחדל לסאטיר), קשת, תותח — שלוש קשתות ושני
+   תותחים, 330 בדיוק. אפשר היה גם להוסיף `"satyr": "archer"` לטבלה, וזה פתרון
+   נכון לגמרי בפייתון — אבל השלב הזה דורש `.get`, כי בקרב הבא הסיירת תדווח על
+   סוג שעוד לא ראית, ואז ברירת המחדל היא מה שמחזיק. ``
 
 ### b4 — המרשם · The Bestiary · 30 XP, 8 🪙
 
@@ -590,8 +611,8 @@ number in it was typed by a human.
 
 1. עברי על הגל ובני מרשם: מפתח = סוג המפלצת, ערך = השריון שלה (`m["armour"]`).
 2. הדפיסי את המרשם שורה־שורה עם `.items()`.
-3. ספרי שני דברים: כמה מפלצות עם שריון 2 ומעלה, וכמה מפלצות מעופפות
-   (`m["flying"]`).
+3. ספרי שני דברים והדפיסי אותם בצורה `armoured: N` ו־`flyers: N`: כמה מפלצות עם
+   שריון 2 ומעלה, וכמה מפלצות מעופפות (`m["flying"]`).
 4. הכלל: **תותח אחד לכל שלוש משוריינות, קשת אחת לכל שתי מעופפות.** התותחים
    בעמודות [3, 6, 9] בשורה 2, הקשתות בעמודות [1, 5, 8] באותה שורה.
 
@@ -623,8 +644,8 @@ for m in wave:
         armoured = armoured + 1
     if m["flying"]:
         flyers = flyers + 1
-print(armoured)
-print(flyers)
+print(f"armoured: {armoured}")
+print(f"flyers: {flyers}")
 
 ridge = [3, 6, 9]
 for i in range(armoured // 3):
@@ -638,9 +659,13 @@ for i in range(flyers // 2):
 **check**
 ```js
 { kind: "battle",
-  also: { kind: "source", mustInclude: [".items()", "bestiary[", "get_wave("],
-          message: { he: "המרשם צריך להיבנות מהגל ולהיקרא עם .items() — לא להיכתב ביד",
-                     en: "The bestiary must be built from the wave and read back with .items() — not typed by hand" } } }
+  also: [
+    { kind: "source", mustInclude: [".items()", "bestiary[", "get_wave("],
+      message: { he: "המרשם צריך להיבנות מהגל ולהיקרא עם .items() — לא להיכתב ביד",
+                 en: "The bestiary must be built from the wave and read back with .items() — not typed by hand" } },
+    { kind: "output", mode: "contains", expect: "armoured: 9" },
+    { kind: "output", mode: "contains", expect: "flyers: 6" }
+  ] }
 ```
 
 **hints**
@@ -736,9 +761,13 @@ print(get_gold())
 **check**
 ```js
 { kind: "battle",
-  also: { kind: "source", mustInclude: [".get(", ".items()", "catalogue[", "counters["],
-          message: { he: "הקרב הזה דורש את שלושת הפנקסים: ספירה עם .get, דוח עם .items, ומחירים מהקטלוג",
-                     en: "This battle needs all three ledgers: counting with .get, the report with .items, and prices from the catalogue" } } }
+  also: [
+    { kind: "source", mustInclude: [".get(", ".items()", "catalogue[", "counters["],
+      message: { he: "הקרב הזה דורש את שלושת הפנקסים: ספירה עם .get, דוח עם .items, ומחירים מהקטלוג",
+                 en: "This battle needs all three ledgers: counting with .get, the report with .items, and prices from the catalogue" } },
+    { kind: "output", mode: "contains", expect: "harpy x10 -> archer" },
+    { kind: "output", mode: "contains", expect: "satyr x10 -> archer" }
+  ] }
 ```
 
 **hints**
@@ -811,6 +840,19 @@ camp necklace.)
   `scouted`, `spots`). **Rule, unchanged: never assert the printed form of a whole
   dict in a `check`** — and, in the battle model, never let the *outcome* depend
   on dict iteration order either.
+- **Every level pairs the battle with an `also` array**: a `source` rule for the
+  dict operation and an `output` rule (`mode: "contains"`) for something only the
+  tables can produce — `harpies need archer`, `cannons: 3`, `satyr -> archer`,
+  `harpy x10 -> archer`. Note what b3's rule asserts: the line the *default*
+  produced. Adding `"satyr": "archer"` to the table is a perfectly good repair in
+  real Python and produces the same line — but b3's `source` rule requires
+  `.get(` anyway, because `.get` is the tool this lesson teaches and the next
+  scouting report will name a kind nobody listed. Hint 3 says exactly that, so
+  the requirement is never a silent trap.
+- **The output rules never assert a printed dict.** `print(counts)` appears in
+  b2's solution because it is genuinely useful to look at, but nothing grades it;
+  every graded line is a single derived value. This is the lesson 11 rule applied
+  to the battle model.
 - b3 is the only level in the act with `brokenStarter: true`. `verify-python.mjs`
   skips the "starter runs" assertion for it, which is the point: the starter is
   supposed to raise.
@@ -828,16 +870,17 @@ camp necklace.)
   screen — and mention the difference in one sentence, following the honesty
   policy in `01-architecture.md`. `verify-python.mjs` fails the build on drift
   here, so do not paraphrase.
-- All output checks use `mode: "normalized"`. No expected line depends on
-  leading whitespace.
-- e2's `source` check uses `mustExclude` rather than `mustInclude` so it forbids
-  the one shortcut (typing `7` straight into the literal) without prescribing a
-  style.
-- **e1 and e2 are the only `source` checks in this lesson that need
-  `raw: true`**, because both name string literals (`"Poseidon"`, and the
-  forbidden `"Poseidon": 7`) — a comment-and-literal-stripped skeleton would
-  never contain them, so without `raw` e1 could never pass and e2 could never
-  fail. Every other `source` check in lessons 9–12 targets syntax
-  (`for`, `.get(`, `.items()`, `min(`, `sorted(`) and works on the skeleton.
-- No `input()` in this lesson. Nothing here uses `del`, dict comprehensions, or
-  `.pop()` — all of them are outside the curriculum at this point.
+- All output rules use `mode: "contains"` on a single derived line, so a learner
+  who prints extra diagnostics of her own is never punished for it.
+- **No `source` rule in this act needs `raw: true`.** Every one of them targets
+  syntax that survives the skeleton — `.get(`, `.items()`, `counters[`,
+  `bestiary[`, `place_tower(counters[` — rather than a string literal. If a
+  future level ever needs to require a literal (a monster's name, a printed
+  word), that rule must set `raw: true` or it can never pass; and a required
+  construct that appears *only* inside an f-string is invisible to the checker,
+  which is why b1's solution takes the two table lookups into variables before
+  printing them.
+- No `input()` in this lesson — `check.stdin` exists on battle levels, but a
+  pre-battle build script has nobody to ask. Nothing here uses `del`, dict
+  comprehensions, or `.pop()` — all of them are outside the curriculum at this
+  point.

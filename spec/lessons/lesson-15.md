@@ -13,8 +13,10 @@
 | **new vocabulary** | `import`, מודול / module, ספרייה / library, `random`, `math`, `seed` |
 | **requires** | L14 `return` + ברירות מחדל · L13 `def` · L7 `while` + `break` · L9–10 lists · L4 `round()` ו-`**` · L3 f-strings |
 | **item** | 🎲 קוביות הגורל / The Dice of Fate |
-| **XP** | 20 + 25 + 25 + 30 (training) + 55 (quest) + 30 (bonus) = **185** |
-| **drachmas** | 5 + 6 + 6 + 8 + 14 = **39** 🪙 |
+| **control model** | build script + **strategy function** (from L14) |
+| **towers unlocked** | 🏹 archer, 💣 cannon |
+| **XP** | 20 + 30 + 30 (training battles) + 60 (great battle) + 25 (optional side battle) + 30 (bonus) = **195** |
+| **drachmas** | 5 + 8 + 8 + 15 + 6 = **42** 🪙 |
 
 ## Teaching goal
 
@@ -22,11 +24,15 @@ By the end she can `import` a module, call a function that lives inside it with
 the dot syntax, and — the part that matters — she has **a game on her screen that
 she wants to run again**.
 
-This is the payoff lesson of Act IV. Lessons 13 and 14 were structural and quiet;
-this one is loud. Everything she has learned since lesson 1 (variables, `if`,
-`while`, `break`, lists, f-strings, `def`, `return`, defaults) assembles into
-about thirty lines of code that produce a different fight every time she presses
-Run. Nothing before this point in the course has surprised her. This does.
+This is the payoff lesson of Act IV. Lesson 13 was structural and lesson 14 was
+the graduation; this one is where the new powers get sharp. `math.sqrt` is not
+homework here — it is the difference between a cannon shell that kills one
+monster and the same shell killing three, and there is a level where measuring is
+the **only** strategy out of twelve tested that wins.
+
+`random` gets its own, clearly optional, side battle. The rule the whole course
+follows: a graded outcome may never depend on a dice roll. In that battle the
+dice pick which of three good plans she builds, and all three hold.
 
 Second goal, quieter but real: `import` is her first encounter with **code
 somebody else wrote**. Frame it honestly — she is not going to implement a square
@@ -209,309 +215,492 @@ if total == 12:
 Intro: *"גלגלי כמה פעמים. שני את הקובייה לקובייה עם 20 פאות, הוסיפי קובייה
 שלישית, שני את התנאי בסוף. כלום פה לא נבדק — תגלגלי עד שתשיגי 12."*
 
-## Training exercises
+## The battle levels
 
-### e1 — Roll the Bones · 20 XP, 5 🪙
+**Control model: build script + strategy function.** Both, now. Lesson 14 gave
+her `choose_target`; lesson 15 gives her the arithmetic to put inside it, and the
+arithmetic to size a defense before the first monster appears.
 
-**brief:** ייבאי את `random` והדפיסי גלגול אחד של קובייה רגילה — מספר שלם בין 1
-ל-6, כולל שניהם.
+`math` and `random` do different jobs here and the levels keep them apart on
+purpose:
 
-**starter:**
-```python
-# your import line here
+- **`math` is how she stops guessing.** `math.ceil` turns "roughly enough towers"
+  into a number the budget agrees with. `math.sqrt` turns "those two look close
+  together" into a distance she can compare. Both are graded.
+- **`random` is a side battle, and it is optional.** A level whose outcome
+  depends on a dice roll would be a level that can fail her for reasons she
+  cannot see, so the one `random` battle is built so that **every possible draw
+  wins** — verified against nine seeds and against all three outcomes forced by
+  hand. Nothing random is ever compared in a `check`.
 
-# and your roll here
-```
+### The one new mechanic that pays for `math.sqrt`
 
-**solution:**
-```python
-import random
+**A cannon explodes.** Splash radius 1.1 cells: everything within 1.1 of whatever
+it hits takes the full shell. Aim at the front of a column of hellhounds and one
+monster is hit. Aim at the **middle** and three are. The default targeting always
+aims at the front, because the front is furthest along the path — so on a level
+full of packed monsters the game's own rule is the worst rule on the board, and
+the only way to find the middle of a pack in code is to measure distances.
 
-print(random.randint(1, 6))
-```
+That is `math.sqrt((ax - bx) ** 2 + (ay - by) ** 2)`, applied to `x` and `y` from
+the enemy dict, and it is the single strongest strategy result in Act IV: on L2
+it is the **only** strategy out of twelve tested that wins.
 
-**check:**
+---
+
+### L1 — Count the Wave · 20 XP, 5 🪙
+
+**Why this mechanic:** `math.ceil` versus a budget. The level's gold cap is set
+to exactly the right number of archers, so guessing high fails on cost and
+guessing low fails on leaks. `math.floor` loses. Rounding is not a formatting
+detail here; it is the difference between holding and not.
+
+**brief:** לפני שבונים — סופרים. `get_wave()` מחזירה רשימה של כל המפלצות בגל
+הזה, כל אחת מילון עם `hp` משלה.
+
+הכלל של כירון: **קשת אחת לכל 160 נקודות חיים של הגל, ומעגלים כלפי מעלה.** חצי
+קשת לא עוצרת חצי מפלצת.
+
+חשבי את סך החיים, חשבי כמה קשתות צריך, והציבי בדיוק כמה שיצא — לפי הסדר ברשימה
+`SPOTS`. השלב מוגבל ל-250 זהב, אז מגדל מיותר יפסיל אותך בדיוק כמו מגדל חסר.
+
 ```js
-{ kind: "source", mustInclude: ["import random", "randint"],
-  message: { he: "כאן צריך import random ואת הפונקציה randint",
-             en: "This one needs import random and the randint function" },
-  also: { kind: "output", mode: "regex", expect: "^[1-6]\\s*$" } }
-```
-*The regex accepts only 1–6, so `randint(0, 6)` or `randint(1, 5)` will pass
-sometimes and fail sometimes — which is a real property of random code and worth
-a line in the success message: "הרצה אחת לא מוכיחה כלום. הריצי חמש."*
-
-**hints:**
-1. פייתון לא יודעת מה זה `random` עד שביקשת. מה חסר בשורה הראשונה?
-2. `random.randint(a, b)` מחזירה מספר שלם בין `a` ל-`b`, כולל שניהם. היא
-   **מחזירה** — אז צריך משהו שיציג את הערך.
-3. שתי שורות: `import random` למעלה, ואז `print(random.randint(1, 6))`. אם כתבת
-   `randint(1, 6)` בלי `random.` לפני — פייתון לא תמצא אותה.
-
-### e2 — Pinning the Thread · 25 XP, 6 🪙
-
-**brief:** הוכיחי ש-`random.seed` עובד. קבעי seed, שמרי גלגול אחד במשתנה `first`.
-קבעי **את אותו seed שוב**, ושמרי גלגול נוסף במשתנה `second`. הדפיסי
-`Same thread: True` אם השניים זהים — בלי לכתוב `True` בעצמך.
-
-**starter:**
-```python
-import random
-
-random.seed(11)
-first = random.randint(1, 20)
-
-# set the same seed again, then roll into second
-
-print(f"Same thread: {first == second}")
+map: { cols: 20, rows: 8, path: [[0,4],[1,4], … ,[19,4]] },
+gold: 500, campHp: 3, seed: 12, allowed: ["archer"],
+waves: [
+  { delay: 0,  enemies: [{ kind: "satyr",     count: 10, gap: 0.5 }] },
+  { delay: 6,  enemies: [{ kind: "harpy",     count:  8, gap: 0.6 }] },
+  { delay: 14, enemies: [{ kind: "hellhound", count:  5, gap: 0.9 }] },
+],
+check: { kind: "battle", maxGoldSpent: 250, also: … },
 ```
 
-**solution:**
-```python
-import random
-
-random.seed(11)
-first = random.randint(1, 20)
-
-random.seed(11)
-second = random.randint(1, 20)
-
-print(f"Same thread: {first == second}")
-```
-
-**check:**
-```js
-{ kind: "source", mustInclude: ["random.seed"],
-  message: { he: "המשימה הזאת דורשת random.seed",
-             en: "This one needs random.seed" },
-  also: { kind: "output", mode: "normalized", expect: "Same thread: True" } }
-```
-*This is the one seed exercise in the course whose expected output is safe: it
-compares two runs **inside Skulpt** instead of hard-coding a generated number.
-Never bake a specific seeded value into a check — see Implementation notes.*
-
-**hints:**
-1. אם היו מגלגלים פעמיים ברצף, האם `first == second` היה יוצא `True`? מה צריך
-   לקרות באמצע כדי שכן?
-2. `random.seed(11)` מחזיר את החוט לאותה נקודת התחלה. צריך לקרוא לו שוב לפני
-   הגלגול השני, עם אותו מספר בדיוק.
-3. שתי שורות במקום ההערה: `random.seed(11)` ואז `second = random.randint(1, 20)`.
-   שימי לב שהשוואה `first == second` מחזירה `True` או `False` בעצמה — לכן לא
-   כותבים את המילה `True` בשום מקום.
-
-### e3 — Choice of Weapons · 25 XP, 6 🪙
-
-**brief:** בחדר הנשק יש שלושה פריטים: `sword`, `spear`, `shield`. בחרי אחד
-באקראי והדפיסי `You draw the sword.` (או spear, או shield).
-
-**starter:**
-```python
-import random
-
-weapons = ["sword", "spear", "shield"]
-
-# pick one at random and print the sentence
-```
-
-**solution:**
-```python
-import random
-
-weapons = ["sword", "spear", "shield"]
-
-choice = random.choice(weapons)
-print(f"You draw the {choice}.")
-```
-
-**check:**
-```js
-{ kind: "source", mustInclude: ["random.choice"],
-  message: { he: "כאן צריך את random.choice על הרשימה",
-             en: "This one needs random.choice on the list" },
-  also: { kind: "output", mode: "regex", expect: "^You draw the (sword|spear|shield)\\.\\s*$" } }
-```
-
-**hints:**
-1. יש לך רשימה. איזו פונקציה במודול `random` מקבלת רשימה ומחזירה איבר אחד?
-2. `random.choice(weapons)` **מחזירה** את הפריט עצמו, כמחרוזת. איפה מכניסים
-   מחרוזת לתוך משפט?
-3. שמרי את התוצאה: `choice = random.choice(weapons)`, ואז
-   `print(f"You draw the {choice}.")`. שימי לב לנקודה בסוף המשפט — הבדיקה
-   מחפשת אותה. אפשר גם לכתוב את הכול בשורה אחת בתוך ה-f-string.
-
-### e4 — The Distance to Olympus · 30 XP, 8 🪙
-
-**brief:** אנבת' צריכה חישוב, לא הימור. מהמחנה למבוך יש 7 סטדיונים מזרחה ו-11
-צפונה. חשבי את המרחק הישיר עם משפט פיתגורס בעזרת `math.sqrt`, והדפיסי אותו
-מעוגל לשתי ספרות. אחר כך חשבי כמה ימי מסע צריך אם הולכים 4 סטדיונים ליום —
-ומכיוון שאי אפשר לצאת לחצי יום, עגלי **למעלה**.
-
-הפלט המדויק:
-```
-Distance: 13.04 stadia
-Days of travel: 4
-```
+*(10 × 20 + 8 × 30 + 5 × 70 = **790** HP. 790 ÷ 160 = 4.94, so `ceil` is 5 and
+`floor` is 4. Five archers hold at 3/3. Four leak two. Six cost 300 and break the
+budget. There is exactly one right answer and the maths finds it.)*
 
 **starter:**
 ```python
 import math
 
-dx = 7
-dy = 11
+SPOTS = [[2,3],[5,5],[8,3],[11,5],[14,3],[17,5]]
 
-# 1. distance, with math.sqrt and **
+total = 0
+# 1. add up the hp of every monster in get_wave()
 
-# 2. the first output line, with round
+needed = 1
+# 2. one archer per 160 hp, rounded up
 
-# 3. days, with math.ceil, and the second output line
+for i in range(needed):
+    place_tower("archer", SPOTS[i][0], SPOTS[i][1])
 ```
 
 **solution:**
 ```python
 import math
 
-dx = 7
-dy = 11
+SPOTS = [[2,3],[5,5],[8,3],[11,5],[14,3],[17,5]]
 
-distance = math.sqrt(dx ** 2 + dy ** 2)
-print(f"Distance: {round(distance, 2)} stadia")
+total = 0
+for monster in get_wave():
+    total = total + monster["hp"]
 
-days = math.ceil(distance / 4)
-print(f"Days of travel: {days}")
+needed = math.ceil(total / 160)
+
+for i in range(needed):
+    place_tower("archer", SPOTS[i][0], SPOTS[i][1])
 ```
 
 **check:**
 ```js
-{ kind: "source", mustInclude: ["import math", "math.sqrt", "math.ceil"],
-  message: { he: "המשימה דורשת math.sqrt ו-math.ceil",
-             en: "This one needs math.sqrt and math.ceil" },
-  also: { kind: "output", mode: "normalized",
-    expect: "Distance: 13.04 stadia\nDays of travel: 4" } }
+{ kind: "battle",
+  maxGoldSpent: 250,
+  also: { kind: "source", mustInclude: ["import math", "math.ceil", "get_wave"],
+    message: { he: "המשימה דורשת לספור את הגל עם get_wave ולעגל כלפי מעלה עם math.ceil",
+               en: "This one needs get_wave to count the wave and math.ceil to round up" } } }
 ```
-*√(49+121) = √170 = 13.038…, so `round(…, 2)` is `13.04` and `ceil(13.038/4)` is
-`ceil(3.259…)` = 4. Note that `math.ceil` must be applied to the **unrounded**
-distance; using the rounded value happens to give the same answer here, which is
-deliberate — a wrong-but-passing path she cannot be punished for.*
 
 **hints:**
-1. משפט פיתגורס: הצלע הארוכה בריבוע היא סכום שתי האחרות בריבוע. איזה אופרטור
-   משיעור 4 מעלה בחזקה, ואיזו פונקציה במודול `math` מוציאה שורש?
-2. `math.sqrt(dx ** 2 + dy ** 2)` נותן את המרחק. לעיגול בתצוגה יש את `round`
-   משיעור 4, ולעיגול כלפי מעלה יש את `math.ceil`.
-3. שלוש שורות חישוב: `distance = math.sqrt(dx ** 2 + dy ** 2)`, אחר כך
-   `print(f"Distance: {round(distance, 2)} stadia")`, ואז
-   `days = math.ceil(distance / 4)` ו-`print(f"Days of travel: {days}")`. אם
-   קיבלת `13.038404810405297` — שכחת את `round`. אם קיבלת `3` ימים — עיגלת למטה
-   במקום למעלה.
+1. הדפיסי את `total` אחרי הלולאה, לפני שאת בונה משהו. מה המספר, וכמה פעמים
+   160 נכנס בו?
+2. הצבירה בלולאה היא התבנית משיעור 7, רק שהערך מגיע ממילון: `monster["hp"]`.
+   לעיגול כלפי מעלה יש פונקציה במודול `math` — לא `round`, ולא `floor`.
+3. `for monster in get_wave():` ובתוכו `total = total + monster["hp"]`. אחר כך
+   `needed = math.ceil(total / 160)`. הסכום הוא 790, החלוקה נותנת 4.9375,
+   ו-`math.ceil` מחזיר 5. אם קיבלת 4 — עיגלת למטה, ושתי מפלצות עוברות. אם בנית
+   שש — הוצאת 300 זהב מתוך תקציב של 250, והשלב נפסל על החריגה.
 
-## Quest — "The Dice of Fate" · 55 XP, 14 🪙
+---
 
-**A game she can actually play.** Roughly thirty lines, every one of them made of
-something she already owns. It ends differently about half the time, and pressing
-Run again is the reward.
+### L2 — The Pack · 30 XP, 8 🪙
 
-**brief:** על סף המבוך יושבת ספינקס וחוסמת את הדרך. בני קרב תורות:
-- `roll()` — מחזירה מספר בין 1 ל-6.
-- `strike(name, target_hp, bonus=2)` — מגלגלת, מחשבת נזק (`הגלגול + bonus`),
-  ואם הגלגול הוא 6 — הנזק **מוכפל** ומודפסת שורת `CRITICAL HIT!`. מדפיסה את
-  שורת המכה ומחזירה את ה-HP החדש של המותקף.
-- לולאת `while` שרצה כל עוד לשני הצדדים יש HP חיובי: את מכה ראשונה; אם הספינקס
-  נפל — `break` מיד, כדי שלא תחטפי מכה ממפלצת מובסת. אחרת הספינקס מכה חזרה עם
-  `bonus` של 3, ומודפסת שורת מצב.
-- בסוף: הודעת ניצחון או הודעת נסיגה.
+**Why this mechanic:** `math.sqrt` on the enemy's `x` and `y`, and the only level
+in Act IV where **nothing else works**. Twelve strategies were tested against
+this map. Eleven lose. The one that wins measures.
 
-שני הצדדים מתחילים עם 25 HP.
+**brief:** שלושה תותחים, ופגז תותח מתפוצץ: כל מי שנמצא במרחק 1.1 משבצות מנקודת
+הפגיעה סופג את המכה המלאה.
+
+המשחק מכוון לבד לראש השיירה. בראש השיירה יש בדיוק מפלצת אחת. באמצע יש שלוש.
+
+כתבי `choose_target` שבוחרת את המפלצת עם **הכי הרבה שכנים** קרובים אליה. לכל
+מפלצת ברשימה יש `x` ו-`y` — המיקום שלה על הלוח — והמרחק בין שתי נקודות הוא
+משפט פיתגורס, בדיוק כמו אתמול, רק שהפעם הוא בתוך פונקציית האסטרטגיה.
+
+```js
+map: { cols: 16, rows: 8, path: [[0,4],[1,4], … ,[15,4]] },
+gold: 300, campHp: 3, seed: 6, allowed: ["cannon"],
+waves: [
+  { delay: 0, enemies: [{ kind: "hellhound", count: 6, gap: 0.5 }] },
+  { delay: 6, enemies: [{ kind: "satyr",     count: 6, gap: 0.5 }] },
+],
+```
+
+**starter:**
+```python
+import math
+
+place_tower("cannon", 3, 3)
+place_tower("cannon", 6, 5)
+place_tower("cannon", 9, 3)
+
+def pack_size(enemies, target):
+    # how many monsters are within 1.1 cells of target?
+    return 0
+
+def choose_target(enemies):
+    return enemies[0]
+```
+
+**solution:**
+```python
+import math
+
+place_tower("cannon", 3, 3)
+place_tower("cannon", 6, 5)
+place_tower("cannon", 9, 3)
+
+def pack_size(enemies, target):
+    count = 0
+    for e in enemies:
+        gap = math.sqrt((e["x"] - target["x"]) ** 2 + (e["y"] - target["y"]) ** 2)
+        if gap <= 1.1:
+            count = count + 1
+    return count
+
+def choose_target(enemies):
+    best = enemies[0]
+    for e in enemies:
+        if pack_size(enemies, e) > pack_size(enemies, best):
+            best = e
+    return best
+```
+
+**check:**
+```js
+{ kind: "battle",
+  also: { kind: "source", mustInclude: ["math.sqrt", "def pack_size"],
+    message: { he: "כאן צריך למדוד מרחקים באמת — math.sqrt בתוך pack_size",
+               en: "This one needs real distances — math.sqrt inside pack_size" } } }
+```
+
+**hints:**
+1. הריצי כמו שזה, והסתכלי על הפיצוץ. כמה מפלצות הוא תופס בכל פעם? ואיפה על
+   השיירה היה כדאי לפוצץ אותו במקום?
+2. `pack_size` סופרת: היא עוברת על כל הרשימה ובודקת לכל מפלצת אם המרחק שלה
+   מהמטרה קטן או שווה ל-1.1. המרחק הוא `math.sqrt` של הפרש ה-`x` בריבוע ועוד
+   הפרש ה-`y` בריבוע. שימי לב שהמטרה עצמה נספרת — המרחק שלה מעצמה הוא 0, וזה
+   בסדר גמור.
+3. בגוף של `pack_size`: `count = 0`, ואז `for e in enemies:` ובתוכו
+   `gap = math.sqrt((e["x"] - target["x"]) ** 2 + (e["y"] - target["y"]) ** 2)`
+   ו-`if gap <= 1.1: count = count + 1`, ואחרי הלולאה `return count`.
+   ב-`choose_target` זו התבנית של "השומרת על הטוב ביותר", רק שההשוואה היא
+   `pack_size(enemies, e) > pack_size(enemies, best)`. אם קיבלת אפס בכל מקום —
+   שכחת את ה-`return` בסוף `pack_size`, וכל ההשוואות משוות `None` ל-`None`.
+
+---
+
+### L3 — Within Reach · 30 XP, 8 🪙
+
+**Why this mechanic:** the same `math.sqrt`, moved into the **build** phase. A
+tower more than about 2.6 cells from the path never fires once — it stands there
+looking exactly like a tower that works. Eight candidate squares are offered;
+three of them are traps; the budget covers five. She cannot eyeball it, and she
+cannot afford to build them all.
+
+**brief:** יש לך שמונה משבצות מסומנות ו-250 זהב — כלומר חמישה מגדלים בדיוק.
+
+קשת מגיעה עד 2.6 משבצות. מגדל שרחוק יותר מזה מהשביל לא יורה אפילו פעם אחת, והוא
+נראה בדיוק כמו מגדל שכן.
+
+הרשימה `ROAD` מסמנת נקודות לאורך הדרך. כתבי פונקציה `in_reach(spot)` שמחזירה
+`True` אם המשבצת נמצאת במרחק 2.4 או פחות מאחת מהן, ובני רק על אלה שעברו.
+
+```js
+map: { cols: 20, rows: 8, path: [[0,4],[1,4], … ,[19,4]] },
+gold: 250, campHp: 3, seed: 26, allowed: ["archer"],
+waves: [
+  { delay: 0,  enemies: [{ kind: "satyr",     count: 9, gap: 0.45 }] },
+  { delay: 6,  enemies: [{ kind: "harpy",     count: 7, gap: 0.5  }] },
+  { delay: 14, enemies: [{ kind: "hellhound", count: 4, gap: 0.8  }] },
+],
+```
+
+**starter:**
+```python
+import math
+
+CANDIDATES = [[2,3],[2,0],[6,5],[9,0],[9,3],[13,5],[16,7],[16,3]]
+ROAD = [[0,4],[4,4],[8,4],[12,4],[16,4],[19,4]]
+
+def in_reach(spot):
+    # True if this square is 2.4 or closer to any point on ROAD
+    return True
+
+for spot in CANDIDATES:
+    if in_reach(spot):
+        place_tower("archer", spot[0], spot[1])
+```
+
+**solution:**
+```python
+import math
+
+CANDIDATES = [[2,3],[2,0],[6,5],[9,0],[9,3],[13,5],[16,7],[16,3]]
+ROAD = [[0,4],[4,4],[8,4],[12,4],[16,4],[19,4]]
+
+def in_reach(spot):
+    for point in ROAD:
+        gap = math.sqrt((spot[0] - point[0]) ** 2 + (spot[1] - point[1]) ** 2)
+        if gap <= 2.4:
+            return True
+    return False
+
+for spot in CANDIDATES:
+    if in_reach(spot):
+        place_tower("archer", spot[0], spot[1])
+```
+
+*(The five that pass are `[2,3]`, `[6,5]`, `[9,3]`, `[13,5]` and `[16,3]`. The
+three that fail sit four and three cells off the road.)*
+
+**check:**
+```js
+{ kind: "battle",
+  also: { kind: "source", mustInclude: ["math.sqrt", "def in_reach", "return False"],
+    message: { he: "המשימה דורשת פונקציה in_reach שמודדת מרחק עם math.sqrt ומחזירה True או False",
+               en: "This needs an in_reach function that measures with math.sqrt and returns True or False" } } }
+```
+
+**hints:**
+1. הריצי כמו שזה — `in_reach` מחזירה `True` לכולם. מה קורה כשהיא מנסה לבנות
+   מגדל שישי, וכמה זהב יש לך בדיוק?
+2. `in_reach` צריכה לעבור על כל הנקודות ב-`ROAD` ולחפש **אחת** קרובה מספיק. אם
+   מצאה — אפשר להחזיר `True` מיד; אם הלולאה נגמרה ולא מצאה כלום, התשובה היא
+   `False`.
+3. גוף הפונקציה: `for point in ROAD:` ובתוכו `gap = math.sqrt(...)` ו-
+   `if gap <= 2.4: return True`. **אחרי** הלולאה, בשוליים של הפונקציה,
+   `return False`. אם ה-`return False` יושב בתוך הלולאה, הפונקציה תיפסל על
+   הנקודה הראשונה ותחזיר `False` לכולם. שלוש המשבצות שנפסלות הן `[2,0]`,
+   `[9,0]` ו-`[16,7]` — הן רחוקות שלוש עד ארבע משבצות מהכביש.
+
+---
+
+### SIDE BATTLE — The Dice of Fate · 25 XP, 6 🪙 · **optional**
+
+`optional: true`. Never blocks the lesson, never blocks the act.
+
+**Why this mechanic:** `random`, in the only shape that is honest in a graded
+game: the dice choose **which** of three good plans she builds, and all three
+hold. She gets the surprise without the injustice. She also gets `random.seed`,
+which is the tool that turns "it broke once and I cannot reproduce it" into a
+solvable problem — and which is, quietly, how every battle in this course is
+deterministic in the first place.
+
+**brief:** גרובר מהמר על איזו עמדה עדיפה. את לא מתווכחת — את מגלגלת.
+
+שלוש עמדות הליבה קבועות. את העמדה הרביעית תבחר `random.choice` מתוך `EXTRA`.
+קבעי `random.seed` בהתחלה כדי שהקרב ייצא אותו דבר בכל הרצה, ואז שני את המספר
+בזרע וראי מה קורה.
+
+שלוש העמדות ב-`EXTRA` טובות. אין כאן גלגול רע — יש כאן גלגול.
+
+```js
+optional: true,
+map: { cols: 18, rows: 8, path: [[0,4],[1,4], … ,[17,4]] },
+gold: 200, campHp: 3, seed: 33, allowed: ["archer"],
+waves: [
+  { delay: 0,  enemies: [{ kind: "satyr",     count: 8, gap: 0.5 }] },
+  { delay: 6,  enemies: [{ kind: "harpy",     count: 6, gap: 0.6 }] },
+  { delay: 13, enemies: [{ kind: "hellhound", count: 3, gap: 0.9 }] },
+],
+```
 
 **starter:**
 ```python
 import random
 
-def roll():
-    return random.randint(1, 6)
+random.seed(15)
 
-def strike(name, target_hp, bonus=2):
-    dice = roll()
-    damage = dice + bonus
-    # if dice is 6: double the damage and print CRITICAL HIT!
+CORE = [[3,3],[7,5],[10,3]]
+EXTRA = [[13,3],[14,5],[15,3]]
 
-    print(f"{name} hits for {damage}!")
-    return target_hp - damage
+for spot in CORE:
+    place_tower("archer", spot[0], spot[1])
 
-hero_hp = 25
-sphinx_hp = 25
-round_number = 1
-
-# your while loop here
-
-# and at the end: who won?
+# let the dice pick the fourth position, then build it
 ```
 
 **solution:**
 ```python
 import random
 
-def roll():
-    return random.randint(1, 6)
+random.seed(15)
 
-def strike(name, target_hp, bonus=2):
-    dice = roll()
-    damage = dice + bonus
-    if dice == 6:
-        damage = damage * 2
-        print(f"{name} rolls a 6. CRITICAL HIT!")
-    print(f"{name} hits for {damage}!")
-    return target_hp - damage
+CORE = [[3,3],[7,5],[10,3]]
+EXTRA = [[13,3],[14,5],[15,3]]
 
-hero_hp = 25
-sphinx_hp = 25
-round_number = 1
+for spot in CORE:
+    place_tower("archer", spot[0], spot[1])
 
-while hero_hp > 0 and sphinx_hp > 0:
-    print(f"--- Round {round_number} ---")
-    sphinx_hp = strike("Hero", sphinx_hp)
-    if sphinx_hp <= 0:
-        break
-    hero_hp = strike("Sphinx", hero_hp, 3)
-    print(f"Hero: {hero_hp} HP | Sphinx: {sphinx_hp} HP")
-    round_number = round_number + 1
-
-if sphinx_hp <= 0:
-    print("The Sphinx bows its head. The road into the Labyrinth is open.")
-else:
-    print("You fall back to camp. Ambrosia, and again tomorrow.")
+lucky = random.choice(EXTRA)
+place_tower("archer", lucky[0], lucky[1])
 ```
 
 **check:**
 ```js
-{ kind: "source", mustInclude: ["import random", "def strike", "while", "return"],
-  message: { he: "המשימה דורשת random, את הפונקציה strike, ולולאת while",
-             en: "The quest needs random, the strike function, and a while loop" },
-  also: { kind: "output", mode: "regex",
-    expect: "(The Sphinx bows its head|You fall back to camp)" } }
+{ kind: "battle",
+  also: { kind: "source", mustInclude: ["import random", "random.choice", "random.seed"],
+    message: { he: "משימת הצד הזאת דורשת random.seed ו-random.choice",
+               en: "This side battle needs random.seed and random.choice" } } }
 ```
-*The output check is deliberately loose: the fight is different every run, so the
-only thing that can be asserted is that it **finished** with one of the two
-endings. The `source` check carries the structural requirements. Balance is
-tuned so the hero wins roughly half the time (simulated over 4,000 fights:
-~50%, average 3–4 rounds) — losing has to be possible or winning means nothing.*
+
+*Never compare a generated number in a `check`.* Skulpt's generator is not
+CPython's, so a hard-coded "seed 15 gives 2" would be wrong in the browser. What
+the check asserts is that the battle was won and that `random` was actually used;
+what makes that safe is that every draw wins.
 
 **hints:**
-1. הלולאה צריכה להיעצר בשני מקרים שונים. איזה תנאי אחד מכסה את שניהם? ומה
-   התפקיד של ה-`break` באמצע הסיבוב?
-2. `while hero_hp > 0 and sphinx_hp > 0:` — בפנים: שורת הכותרת של הסיבוב, מכה
-   שלך שמעדכנת את `sphinx_hp`, בדיקה `if sphinx_hp <= 0: break`, מכה של הספינקס
-   שמעדכנת את `hero_hp`, שורת מצב, וקידום `round_number`. שימי לב שכל מכה היא
-   השמה: `sphinx_hp = strike(...)`.
-3. הביקורת הכי חשובה: `strike` **מחזירה** את ה-HP החדש, אז חייבים לשמור אותו
-   חזרה למשתנה — `sphinx_hp = strike("Hero", sphinx_hp)`. אם תכתבי רק
-   `strike("Hero", sphinx_hp)` הנזק יודפס וייעלם, וההודעה "-25 HP" לא תגיע לעולם
-   והלולאה לא תיגמר. הספינקס מכה עם ארגומנט שלישי, `strike("Sphinx", hero_hp, 3)`,
-   כי היא חזקה ממך. הכפלת הקריטי היא `damage = damage * 2` בתוך
-   `if dice == 6:`, לפני שורת ה-`print` של המכה.
+1. שלוש עמדות בנויות והרביעית חסרה. איזו פונקציה במודול `random` מקבלת רשימה
+   ומחזירה איבר אחד ממנה?
+2. `random.choice(EXTRA)` **מחזירה** משבצת — רשימה של שני מספרים. שמרי אותה
+   במשתנה, ואז השתמשי ב-`[0]` וב-`[1]` שלה כמו בכל רשימה אחרת.
+3. שתי שורות: `lucky = random.choice(EXTRA)` ואז
+   `place_tower("archer", lucky[0], lucky[1])`. עכשיו החלק המעניין: שני את
+   המספר בתוך `random.seed(...)` והריצי שוב. אותו זרע נותן תמיד את אותו גלגול,
+   וזרע אחר נותן גלגול אחר — וזה בדיוק למה `seed` קיים. בלעדיו לא היית יכולה
+   לשחזר באג שקרה לך פעם אחת.
 
-**Optional extension (not required, no XP):** *"רוצה שהמשחק ישאל אותך לפני כל
-סיבוב?"* — add `input("Press Enter to roll")` at the top of the loop. Flag in the
-UI that this version cannot be auto-checked, and that it is hers to keep.
+---
+
+## The great battle — "The Sphinx at the Crossroads" · 60 XP, 15 🪙
+
+**Why this mechanic:** the two halves of the lesson in one function, and a wave
+that needs both. Harpies fly, so the three cannons cannot touch them and the four
+archers are the whole air defense. The ground waves arrive in tight columns, so
+the cannons are worth triple if she aims them at the middle of a pack and worth
+one third if she lets the game aim at the front.
+
+Verified: **no strategy from the degenerate bank wins this battle** — not the
+default, not `return 0`, not "shoot the weakest", not "shoot the nearest to
+camp". Eighty-two monsters, four waves, and one function standing between them
+and the camp.
+
+**brief:** ספינקס יושבת על ההצטלבות ושולחת ארבעה גלים.
+
+הבנייה כבר כתובה: שלושה תותחים ועוד ארבע קשתות, 470 מתוך 480 זהב. מה שחסר הוא
+`choose_target` — ויש לה שתי עבודות, בסדר הזה:
+
+1. **מעופפת קודם.** תותח לא יכול לפגוע בהרפיה. הקשתות הן ההגנה האווירית היחידה.
+2. **אחרת — לב העדר.** מי שיש סביבה הכי הרבה שכנים במרחק 1.1, כדי שהפגז יתפוס
+   שלוש ולא אחת.
+
+```js
+map: { cols: 22, rows: 11,
+       path: [[0,2],[1,2],[2,2],[3,2],[4,2],[5,2],[6,2],[7,2],
+              [7,3],[7,4],[7,5],[7,6],[7,7],[7,8],
+              [8,8],[9,8],[10,8],[11,8],[12,8],[13,8],[14,8],
+              [14,7],[14,6],[14,5],[14,4],[14,3],
+              [15,3],[16,3],[17,3],[18,3],[19,3],[20,3],[21,3]] },
+gold: 480, campHp: 4, seed: 51, allowed: ["archer", "cannon"],
+waves: [
+  { delay: 0,  enemies: [{ kind: "satyr",     count: 18, gap: 0.4 }] },
+  { delay: 6,  enemies: [{ kind: "harpy",     count: 14, gap: 0.5 }] },
+  { delay: 14, enemies: [{ kind: "hellhound", count: 12, gap: 0.5 }] },
+  { delay: 24, enemies: [{ kind: "cyclops",   count:  7, gap: 0.7 },
+                         { kind: "harpy",     count:  8, gap: 0.5 }] },
+],
+```
+
+**starter:**
+```python
+import math
+
+CANNONS = [[5,4],[9,7],[12,6]]
+ARCHERS = [[2,1],[8,4],[15,4],[18,2]]
+
+for spot in CANNONS:
+    place_tower("cannon", spot[0], spot[1])
+for spot in ARCHERS:
+    place_tower("archer", spot[0], spot[1])
+
+# 1. pack_size(enemies, target) -> how many neighbours within 1.1
+
+# 2. choose_target(enemies) -> flyers first, then the heart of the pack
+```
+
+**solution:**
+```python
+import math
+
+CANNONS = [[5,4],[9,7],[12,6]]
+ARCHERS = [[2,1],[8,4],[15,4],[18,2]]
+
+for spot in CANNONS:
+    place_tower("cannon", spot[0], spot[1])
+for spot in ARCHERS:
+    place_tower("archer", spot[0], spot[1])
+
+def pack_size(enemies, target):
+    count = 0
+    for e in enemies:
+        gap = math.sqrt((e["x"] - target["x"]) ** 2 + (e["y"] - target["y"]) ** 2)
+        if gap <= 1.1:
+            count = count + 1
+    return count
+
+def choose_target(enemies):
+    for e in enemies:
+        if e["flying"]:
+            return e
+    best = enemies[0]
+    for e in enemies:
+        if pack_size(enemies, e) > pack_size(enemies, best):
+            best = e
+    return best
+```
+
+**check:**
+```js
+{ kind: "battle",
+  also: { kind: "source",
+    mustInclude: ["math.sqrt", "flying", "def choose_target"],
+    message: { he: "הקרב הגדול דורש בדיקת flying ומדידת מרחק עם math.sqrt",
+               en: "The great battle needs a flying check and a real distance with math.sqrt" } } }
+```
+
+**hints:**
+1. בני קודם רק את החלק של המעופפות והריצי. אחר כך רק את החלק של העדר. איזה
+   מהשניים לבדו מחזיק יותר גלים? זה אומר לך במה הבעיה הגדולה יותר.
+2. שני חלקים בפונקציה אחת, והסדר קובע: הלולאה שמחפשת `e["flying"]` יושבת ראשונה
+   ומחזירה מיד, כי `return` מסיים את הפונקציה. רק מי שהגיע מעבר לה מגיע לחישוב
+   העדר.
+3. `pack_size` היא בדיוק אותה פונקציה מ-L2 — אפשר להעתיק אותה כמו שהיא, וזה
+   בדיוק מה שפונקציות נועדו בשבילו. ב-`choose_target`: קודם
+   `for e in enemies:` עם `if e["flying"]: return e`. אחר כך `best = enemies[0]`,
+   לולאה שנייה עם `if pack_size(enemies, e) > pack_size(enemies, best):`, ובסוף
+   `return best`. אם הגל האחרון הוא זה שמפיל אותך — שם מגיעים שבעה קיקלופים
+   ושמונה הרפיות יחד, וזה בדיוק המקום שבו שני החלקים צריכים לעבוד באותו זמן.
 
 ## Reward & Recap
 
@@ -520,9 +709,10 @@ UI that this version cannot be auto-checked, and that it is hers to keep.
 
 **Achievements possible here**:
 - *First Import* — ייבאה מודול בפעם הראשונה
-- *Critical Hit* — גלגלה 6 במשימה (המנוע יכול לזהות `CRITICAL HIT!` בפלט)
-- *Play It Again* — הריצה את משחק המשימה חמש פעמים אחרי שכבר עברה אותה. **זה
-  ההישג הכי חשוב בשיעור** — הוא מודד הנאה, לא ביצועים
+- *Artillery Officer* — ניצחה את L2, כלומר מצאה את לב העדר עם `math.sqrt`
+- *Surveyor* — ניצחה את L3 בלי לבנות אף מגדל שלא ירה
+- *Play It Again* — שינתה את הזרע בקרב הצד והריצה חמש פעמים אחרי שכבר ניצחה.
+  **זה ההישג הכי חשוב בשיעור** — הוא מודד סקרנות, לא ביצועים
 - *No Hints Needed*, *Persistent*
 
 **Recap bullets**:
@@ -532,10 +722,13 @@ UI that this version cannot be auto-checked, and that it is hers to keep.
 - `random.choice` בוחרת איבר מרשימה
 - `random.seed` מקבע את סדרת האקראיים — שימושי כשמחפשים באג
 - `math.ceil` מעגל תמיד למעלה, `math.floor` תמיד למטה
-- משחק הוא לולאה, כמה פונקציות, ומעט מזל
+- `math.sqrt` בין שני זוגות `x`,`y` הוא מרחק אמיתי — וזה מה שמוצא את לב העדר
+- פגז תותח מתפוצץ ברדיוס 1.1: לכוון לאמצע שווה פי שלושה מלכוון לראש
+- מגדל רחוק מדי מהשביל נראה בדיוק כמו מגדל שעובד, ולא יורה אפילו פעם אחת
+- אף בדיקה בקורס לא משווה מספר אקראי — הרצה אחת לא מוכיחה כלום
 
 **Next teaser**: *"את מוכנה. מחר נכנסים למבוך — ומגלים שיש בו חדרים שבתוכם יש
-חדרים שבתוכם יש חדרים."*
+חדרים שבתוכם יש חדרים. ושהברק קופץ."*
 
 ## Common mistakes to anticipate
 
@@ -546,13 +739,37 @@ UI that this version cannot be auto-checked, and that it is hers to keep.
 | `import Random` | `ImportError` / `File not found` | שמות מודולים באותיות קטנות |
 | `random.randint(1, 6)` ומצפה ל-0 | לא רואה 0 לעולם | `randint` כוללת קצוות, ומתחילה איפה שאמרת |
 | `random.choice("sword")` על מחרוזת | מקבלת אות בודדת | `choice` עובדת על רשימה; מחרוזת היא רצף תווים |
-| שוכחת לשמור את מה ש-`strike` מחזירה | הקרב לא נגמר לעולם, ואז `TimeLimitError` | הבעיה מלמעלה — `return` בלי השמה הוא ערך שנזרק |
+| שוכחת `return` בסוף `pack_size` | כל ההשוואות משוות `None` ל-`None`, האסטרטגיה זורקת שגיאה והקרב נגמר מיד | הקישור לשיעור 14 מפורש |
+| מודדת מרחק בין `x` של אחת ל-`y` של השנייה | תוצאה מספרית סבירה, אסטרטגיה שגויה, בלי שום שגיאה | לכתוב את הנוסחה לאט: הפרש ה-x בריבוע ועוד הפרש ה-y בריבוע |
+| שמה `return False` בתוך הלולאה ב-`in_reach` | כל המשבצות נפסלות, אין מגדלים בכלל | ה-`False` הוא מה שקורה כשהלולאה **נגמרה** |
+| בונה את כל שמונה המשבצות ב-L3 | `tooPoor` על השישי, והקרב נפסל | תקציב הוא חלק מהחידה |
+| מכוונת תותח להרפיה | התותח לא יורה בה בכלל, והמנוע אומר את זה | ארטילריה לא פוגעת במשהו שעף |
 | `math.sqrt` על מספר שלילי | `ValueError: math domain error` | לא בתרגילים, אבל יופיע אם תשחק |
 | מריצה פעם אחת ומסיקה שהקוד תקין | תרגיל שעובר ואז נכשל | "הרצה אחת לא מוכיחה כלום" — להגיד את זה במפורש |
 | `while True:` בלי `break` | `TimeLimitError` אחרי 5 שניות | המנוע עוצר בבטחה; זו לא קריסה |
 
 ## Implementation notes
 
+- **Every level was simulated headless** against `assets/js/battle/sim.js`, and
+  the strategy levels were run against the same eleven-strategy degenerate bank as
+  lesson 14.
+
+  | Level | Solution | Empty | Default targeting | Other strategies that also win |
+  | --- | --- | --- | --- | --- |
+  | L1 | wins 3/3, 5 archers, 250 gold, 29s | loses | n/a (build only) | — `floor` leaks 2, six towers break the 250 cap, four towers leak 2 |
+  | L2 | wins 3/3, 3 cannons, 11s | loses | **loses** | **none — this is the only strategy of twelve that wins** |
+  | L3 | wins 3/3, 5 archers, 28s | loses | n/a (build only) | — all eight candidates → `tooPoor`; the first five in list order → 2 leak |
+  | side | wins on seeds 1, 2, 3, 5, 7, 11, 15, 42, 99 **and** on all three outcomes forced by hand | loses | n/a | core three towers alone → 1 leaks |
+  | great | wins 4/4, 7 towers, 57s | loses | **loses** | **none** |
+- **`math.sqrt`, `math.ceil`, `math.floor` and `random.choice` were all confirmed
+  to work inside a `choose_target` that the engine calls synchronously from JS.**
+  This was the single largest risk in the lesson and it is settled: `import math`
+  at module level, used inside the strategy function, behaves normally.
+- **`sorted()` on a list of dicts raises** in Skulpt
+  (`'<' not supported between instances of 'dict' and 'dict'`) and `key=` needs a
+  `lambda`, which the course excludes. Every "pick the best one" here is written
+  as the keep-the-best loop instead. Do not let a future draft slip a `sorted`
+  into a strategy function.
 - **Skulpt**: `import random`, `import math` — שניהם ב-matrix המאומת
   (`01-architecture.md`). `read` resolves them from `Sk.builtinFiles`, so
   `skulpt-stdlib.js` **must** be loaded on the lesson shell — this is the first
@@ -579,14 +796,18 @@ UI that this version cannot be auto-checked, and that it is hers to keep.
 - **`regex` mode and trailing newlines**: e1 and e3 anchor with `^…\\s*$`.
   `checker.js` should run regex checks against the trimmed output; the `\\s*`
   is belt-and-braces so a stray newline never fails her.
-- **The quest is the first exercise in the course whose output is not
-  deterministic.** The success panel should say so: "עברת — והפלט שלך לא יהיה
-  זהה בפעם הבאה. זה בכוונה."
-- **Execution limit**: the fight is bounded (25 HP, minimum 3 damage per hit →
-  at most ~9 rounds), so it can never hit the 5-second `execLimit`. The one way
-  she can hang it is forgetting the assignment in `sphinx_hp = strike(...)` —
-  covered in hint 3 and in the mistakes table, and the engine's friendly
-  `TimeLimitError` message catches the rest.
+- **The side battle is the only place `random` touches a graded outcome, and it
+  cannot change one.** All three squares in `EXTRA` were forced by hand and all
+  three win; nine seeds were run and all nine win. If that level is ever retuned,
+  re-run all three forced outcomes, not one seed.
+- **`random.shuffle` is deliberately unused** — it is not on the verified list.
+  It may go in the Try It block if verification ever clears it, never in a level.
+- **Execution limit**: `pack_size` is O(n) and `choose_target` calls it O(n)
+  times, so a tick with twenty monsters in one cannon's range is 400 distance
+  calculations. Measured across the great battle (82 monsters, four waves) this
+  stays comfortably inside the 5-second `execLimit`, but it is the most expensive
+  strategy function in the course before lesson 20. If a future level pushes wave
+  sizes much past this, measure before shipping.
 - No `input()` in any graded exercise here; the optional interactive extension is
   the only place it appears, and it is explicitly ungraded.
 - **Combined checks** use the `source` + `also: { output }` pattern

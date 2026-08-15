@@ -285,7 +285,41 @@ Annabeth in the side quest.
     Caption: רשימה של אובייקטים היא עדיין רשימה. כל מה שאת יודעת מ-`for` עובד
     עליה בלי שינוי — וזה כל הרעיון של התבנית: כתבת אחת, יצקת שלוש מאות.
 
-14. **callout · myth** — הפייסטוס נולד עם רגל עקומה והושלך מהאולימפוס. הוא בנה
+14. **code (runnable)** — the moment the class stops being a private exercise
+    and becomes part of the game. This block is the bridge to every battle in
+    the lesson and must not be skipped.
+    ```python
+    class SkyWatch:
+        def fire(self, enemies):
+            for enemy in enemies:
+                if enemy["flying"]:
+                    return enemy
+            return enemies[0]
+
+    register_tower("archer", SkyWatch)
+    print("archers now think for themselves")
+    ```
+    Output: `archers now think for themselves`
+    Caption: `register_tower` מקבל **שם של סוג מגדל** ואת התבנית עצמה — בלי
+    סוגריים אחרי השם של ה-class, כי את מוסרת את התבנית ולא יציקה. מכאן והלאה,
+    בכל פעם שקשת צריך מטרה, המנוע קורא ל-`fire` של האובייקט שיצק מהתבנית שלך.
+    `fire` מקבלת בדיוק את מה ש-`choose_target` קיבלה בשיעור 14, ומחזירה בדיוק
+    את אותם דברים.
+
+15. **callout · warn — שלושה כללים של המנוע**, וכולם ייפגשו איתך בקרב הראשון:
+    > **1.** השם חייב להיות סוג מגדל שקיים: `"archer"`, `"cannon"`, `"ice"`,
+    > `"lightning"`. את לא ממציאה מגדל חדש — את מחליפה למגדל קיים את הראש.
+    > `register_tower("storm", …)` ואחריו `place_tower("storm", …)` ייתן
+    > `unknownTower` ולא ייבנה כלום.
+    > **2.** המנוע יוצק בלי ארגומנטים: `TheClass()`. אם כתבת
+    > `def __init__(self, power):`, תקבלי באמצע הקרב
+    > `TypeError: __init__() missing 1 required argument: power`. כל מה שהתבנית
+    > צריכה — היא מכינה לעצמה.
+    > **3.** יציקה אחת לכל סוג מגדל, והיא חיה כל הקרב. כל הקשתים במפה חולקים
+    > אובייקט אחד; אם תרשמי את אותה תבנית גם ל-`"cannon"`, יהיו שתי יציקות
+    > נפרדות עם שני מצבים נפרדים. מה שתשמרי על `self` יהיה שם גם בירייה הבאה.
+
+16. **callout · myth** — הפייסטוס נולד עם רגל עקומה והושלך מהאולימפוס. הוא בנה
     לעצמו רגליים ממתכת, וכיסאות שהולכים לבד, ושפחות מזהב שיודעות לדבר. הוא האל
     היחיד באולימפוס שהמיומנות שלו נבנתה ולא ניתנה. אם יש קבינה שמתאימה למי
     שלומדת לתכנת, זו שלו.
@@ -977,7 +1011,7 @@ Bead 19 is added to the necklace. Nineteen down.
   `return 0`, `return enemies[0]` and `return None` all lose. The leak counts
   under each level are measured, not estimated.
 - **The exact contract of `register_tower`, verified against `pyapi.js` and
-  `sim.js`, because three parts of it are easy to get wrong:**
+  `sim.js`, because three parts of it are routinely got wrong:**
   1. The first argument must be one of the **existing** tower kinds. `sim.js`
      looks the placement up in its own `TOWERS` table, so
      `register_tower("storm", …)` followed by `place_tower("storm", …)` is an

@@ -351,9 +351,16 @@ And the second lever, from `spec/09-battle-game.md`: damage per hit is
 enough to make a three-way chain a real decision — verified by simulating every
 branch of every level.
 
+**The report is not in her source.** b2, b3 and the great battle read the
+scouting report with `input()`, and the level supplies the answer through
+`check.stdin`. She cannot look at her own code and know which branch will run, so
+hard-coding the winning build is a gamble rather than a shortcut — verified: a
+program that skips the chain and places the ground defense loses b2 outright.
+That is `if`/`elif`/`else` being *needed*, not merely required.
+
 Each level is `check.kind: "battle"` with an `also` `source` rule naming the
 construct. The battle punishes the wrong branch; the `source` rule stops her from
-deleting the chain and hard-coding the answer she already saw.
+deleting the chain once she has seen a report go by.
 
 ### b1 — השורה שרצה רק לפעמים / The Line That Runs Only Sometimes · 20 XP, 5 🪙
 
@@ -446,18 +453,17 @@ waves: [
 ],
 ```
 
-**brief (he)**: אנאבת' חזרה מהסיור והשאירה שורה אחת בראש הקוד: `wave = "harpy"`.
-זה הדיווח, ואת לא משנה אותו.
+**brief (he)**: אנאבת' יוצאת לסיור ותחזור רגע לפני הקרב. מה שהיא תראה יגיע
+לתוכנית שלך דרך `input()` — ואת לא יודעת מראש מה זה יהיה.
 
 כתבי הגנה שמתאימה את עצמה לדיווח: **אם** הגל מעופף — ארבע קשתות, כי רק הן
-מגיעות לאוויר. **אחרת** — שני תותחים, שזה מה שהיה נכון נגד גל קרקעי.
+מגיעות לאוויר. **אחרת** — שני תותחים, שזה מה שנכון נגד גל קרקעי.
 
-הענף השני לא ירוץ הפעם, ובכל זאת כתבי אותו. בשבוע הבא הדיווח ישתנה, והתוכנית
-צריכה להיות מוכנה.
+שני הענפים חייבים להיות כתובים נכון. לנחש איזה מהם ירוץ זו לא אסטרטגיה.
 
 **starter**
 ```python
-wave = "harpy"
+wave = input("What did the scouts see? ")
 
 if wave == "harpy":
     place_tower("archer", 2, 5)
@@ -465,7 +471,7 @@ if wave == "harpy":
 
 **solution**
 ```python
-wave = "harpy"
+wave = input("What did the scouts see? ")
 
 if wave == "harpy":
     place_tower("archer", 2, 5)
@@ -476,13 +482,16 @@ else:
     place_tower("cannon", 4, 2)
     place_tower("cannon", 7, 2)
 ```
-Verified: 3/3, twelve kills, 200 of 200 spent. The `else` branch, run against
-this wave, kills four and loses 3 HP; a cannon plus two archers also loses.
+Verified with `stdin: ["harpy"]`: 3/3, twelve kills, 200 of 200 spent. The `else`
+branch, run against this wave, kills four and loses 3 HP; a cannon plus two
+archers also loses; and a program that reads the report and then ignores it,
+placing the two cannons unconditionally, loses in exactly the same way.
 
 **check**
 ```js
 check: {
   kind: "battle",
+  stdin: ["harpy"],
   also: { kind: "source", mustInclude: ["if", "else"],
           message: { he: "התוכנית צריכה שני מסלולים: if לדיווח המעופף, ו־else לכל השאר",
                      en: "The program needs both paths: if for the flying report, else for everything else" } }
@@ -490,8 +499,8 @@ check: {
 ```
 
 **hints**
-1. (he) "מה יקרה אם תבני את שני התותחים נגד הגל הזה? נסי, וקראי מה המנוע אומר
-   על המגדלים שלך אחרי הקרב."
+1. (he) "הריצי, והקלידי `harpy` כשהתוכנית שואלת. עכשיו נסי להריץ שוב ולהקליד
+   משהו אחר — מה נבנה? ומה יקרה אם תבני שני תותחים נגד גל מעופף?"
 2. (he) "`else` נכתב צמוד לשוליים, מיושר בדיוק מתחת ל־`if` שלו, עם נקודתיים
    אחריו — ובלי שאלה. כל מה שמתחתיו מוזח בארבעה רווחים."
 3. (he) "בתוך ה־`if` ארבע שורות `place_tower` של `\"archer\"` —
@@ -516,19 +525,20 @@ waves: [
 ],
 ```
 
-**brief (he)**: הדיווח הפעם אומר `"both"` — שני קיקלופים על הקרקע, ואחריהם חמש
-הרפיות באוויר. כתבי שרשרת של שלושה מסלולים:
+**brief (he)**: הדיווח מגיע שוב ב־`input()`, ויכול להיות אחד משלושה:
+`"harpy"`, `"cyclops"` או `"both"`. כתבי שרשרת של שלושה מסלולים:
 
 - `"harpy"` → שלוש קשתות. מספיק נגד אוויר, חסר לחלוטין נגד שריון.
 - `"cyclops"` → שני תותחים וקשת. מצוין נגד שריון 5, עיוור לגמרי לאוויר.
 - כל דיווח אחר → תותח **וגם** שלוש קשתות. יקר יותר, ומחזיק בשניהם.
 
-רק המסלול השלישי ירוץ. שני האחרים חייבים להיות כתובים נכון בכל זאת — ואם את
-רוצה לראות למה, שני את השורה הראשונה ל־`"harpy"` והריצי.
+היום מגיע `"both"` — שני קיקלופים על הקרקע, ואחריהם חמש הרפיות באוויר — אבל
+התוכנית לא אמורה לדעת את זה מראש. הריצי אותה עם שלושת הדיווחים וראי שלושה
+מערכי הגנה שונים נבנים מאותן שורות בדיוק.
 
 **starter**
 ```python
-report = "both"
+report = input("What is coming? ")
 
 if report == "harpy":
     place_tower("archer", 3, 3)
@@ -538,7 +548,7 @@ if report == "harpy":
 
 **solution**
 ```python
-report = "both"
+report = input("What is coming? ")
 
 if report == "harpy":
     place_tower("archer", 3, 3)
@@ -554,14 +564,16 @@ else:
     place_tower("archer", 7, 3)
     place_tower("archer", 5, 5)
 ```
-Verified: 3/3, seven kills, 240 of 250 spent. The `"harpy"` branch leaks 2 (the
-cyclopes walk through 8 damage per second). The `"cyclops"` branch is overrun
-outright — it kills three and then the harpies arrive.
+Verified with `stdin: ["both"]`: 3/3, seven kills, 240 of 250 spent. The
+`"harpy"` branch's build leaks 2 (the cyclopes walk through 8 damage per second).
+The `"cyclops"` branch's build is overrun outright — it kills three and then the
+harpies arrive.
 
 **check**
 ```js
 check: {
   kind: "battle",
+  stdin: ["both"],
   also: { kind: "source", mustInclude: ["if", "elif", "else"],
           message: { he: "שלושה דיווחים אפשריים, ולכן שרשרת: if, elif ו־else",
                      en: "Three possible reports, so a chain: if, elif and else" } }
@@ -589,7 +601,9 @@ so the code runs, the battle is lost, and the reason is invisible until she read
 the indentation.
 
 ```js
-map: { cols: 13, rows: 8, path: <the same ROAD2 as b2> },
+map: { cols: 13, rows: 8,
+       path: [[0,6],[1,6],[2,6],[3,6],[3,5],[3,4],[3,3],[4,3],[5,3],
+              [6,3],[7,3],[8,3],[8,2],[8,1],[9,1],[10,1],[11,1],[12,1]] },   // the same road as b2
 gold: 240, campHp: 3, seed: 24, allowed: ["archer", "cannon"],
 waves: [
   { delay: 0,  enemies: [ { kind: "satyr", count: 4, gap: 0.8 } ] },
@@ -667,7 +681,7 @@ check: {
    פתוחה — לא לבלוק ולא לשוליים."
 3. (he) "שורה 3 מסתיימת ב־`:`. שורה 4 נדחפת פנימה בארבעה רווחים. השורה האחרונה
    נצמדת לשוליים לגמרי — היא לא שייכת ל־`else`, היא שייכת לתוכנית, ולכן היא רצה
-   תמיד. אם תשאירי אותה מוזחת הקוד ירוץ בלי שגיאה, הקשת פשוט לא תיבנה, וההרפיות
+   תמיד. אם תשאירי אותה מוזחת הקוד ירוץ בלי שגיאה, הקשת לא תיבנה בכלל, וההרפיות
    בגל השלישי יעברו. הריצי ותראי."
 
 ## The great battle — "פרשת הדרכים / The Crossroads" · 55 XP, 15 🪙
@@ -694,9 +708,9 @@ means something she can point at. It is also the first battle where the answer t
 one question changes which question gets asked next, which is what a decision
 tree is.
 
-**brief (he)**: הדרך מתפצלת לשלוש, ואת בוחרת את האמצעית: `road = "middle"`.
-הדרך הזאת מתפתלת שלוש פעמים, ומגיעים בה שלושה גלים — סאטירים, ואז הרפיות
-באוויר, ואז שני קיקלופים עם כלבי גיהינום. יש 330 זהב.
+**brief (he)**: הדרך מתפצלת לשלוש, וההחלטה נופלת רגע לפני היציאה — היא מגיעה
+לתוכנית ב־`input()`. הדרך שנבחרה היום מתפתלת שלוש פעמים, ומגיעים בה שלושה גלים
+— סאטירים, ואז הרפיות באוויר, ואז שני קיקלופים עם כלבי גיהינום. יש 330 זהב.
 
 התוכנית צריכה שתי רמות של החלטה:
 
@@ -709,7 +723,7 @@ tree is.
 
 **starter**
 ```python
-road = "middle"
+road = input("Which road? ")
 gold = get_gold()
 
 if road == "left":
@@ -718,7 +732,7 @@ if road == "left":
 
 **solution**
 ```python
-road = "middle"
+road = input("Which road? ")
 gold = get_gold()
 
 if road == "left":
@@ -738,8 +752,8 @@ else:
     place_tower("ice", 5, 5)
     place_tower("archer", 3, 2)
 ```
-Verified: 3/3, eighteen kills, 330 of 330 spent — the budget is exact, which is
-why the inner `if` matters. Three branches were simulated as losses: the inner
+Verified with `stdin: ["middle"]`: 3/3, eighteen kills, 330 of 330 spent — the
+budget is exact, which is why the inner `if` matters. Three branches were simulated as losses: the inner
 `else` (five archers, 250 gold) leaks 1; the `"left"` branch is overrun; an
 all-cannon build is overrun by the harpies.
 
@@ -747,6 +761,7 @@ all-cannon build is overrun by the harpies.
 ```js
 check: {
   kind: "battle",
+  stdin: ["middle"],
   also: { kind: "source", mustInclude: ["if", "elif", "else"],
           message: { he: "הקרב הזה דורש עץ החלטות: שרשרת על הדרך, ובתוכה שאלה נוספת על הזהב",
                      en: "This one needs a decision tree: a chain on the road, with a second question about gold inside it" } }
@@ -875,13 +890,21 @@ desc (he): "נעליים מהמחסן של הרמס. הן לא מהירות במ
   and a variable named `iffy` does not satisfy `if`.
 - **The default objective is a perfect defense** — one leak fails the level. The
   3 camp HP exist so a hopeless run ends fast, not as a budget she may spend.
-- **No `input()` in a battle level.** Her script runs once before the wave with
-  nothing queued on stdin. The `input()` material from lesson 3 stays in the
-  teaching blocks and the training ground.
+- **`check.stdin` is what makes the chain necessary.** b2, b3 and the great
+  battle read their report with `input()`, and the level answers it: `stdin:
+  ["harpy"]`, `["both"]`, `["middle"]`. Three consequences worth stating:
+  - The engine passes `check.stdin` into the build script's run (`checker.js`),
+    so a battle level with `input()` grades cleanly instead of raising. Verified
+    end to end in the headless simulation.
+  - The prompt string never reaches stdout — Skulpt hands it to `inputfun` and
+    the UI renders it in the Iris-message panel — so a prompt cannot interfere
+    with an `also` output rule. This is the same convention as lesson 3.
+  - When she presses **Run** rather than **Fight**, the prompt appears and she
+    answers it herself. Encourage that in the hints: running the same program
+    three times with three different reports is the fastest way to see that one
+    chain produces three defenses.
 - **`get_wave()` is deliberately unused here.** It returns a list of dicts, and
-  lists arrive in lesson 9. The scouting report is a plain string variable at the
-  top of the starter, and the brief says Chiron rewrites that line before the
-  real thing — which is exactly true of lesson 9, where she will read the wave
-  herself.
+  lists arrive in lesson 9. Until then, `input()` is how the battlefield tells
+  her something she did not write down herself.
 - **`optional`, `maxTowers` and `maxGoldSpent` are not used in this lesson.**
   Everything is decided by the wave and the tower matchup.

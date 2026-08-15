@@ -239,7 +239,27 @@ screen.
     והוא התקדם כשגבו אליה והסתכל רק בהשתקפות. **הפתרון לא היה חרב טובה יותר.
     הוא היה דרך אחרת להסתכל על אותה בעיה.** אנאבת' תזכיר לך את זה לפני הקרב.
 
-15. **prose** — the act-closing frame, right before Try It: "בשש השיעורים
+15. **prose + code · runnable** — the bridge into the battles: **a wall is a
+    loop you can see.** Two lines, six towers.
+    ```python
+    for x in range(6):
+        place_tower("archer", x, 3)
+    print(f"wall of 6, {get_gold()} gold left")
+    ```
+    Output on the training field (500 gold): `wall of 6, 200 gold left`.
+    Explain (he): המשתנה `x` הוא **העמודה**. בכל סיבוב הוא מקבל מספר אחר, ולכן
+    כל מגדל נוחת במקום אחר — 0, 1, 2, 3, 4, 5. שני את `range(6)` ל־`range(4)`
+    והחומה תתקצר; שני ל־`range(2, 8)` והיא תזוז ימינה. **מה שכתוב ב־`range` הוא
+    מה שתראי על הלוח.**
+
+16. **callout · warn** — title: מגדל על השביל, ומגדל רחוק מדי.
+    text: שני דברים יכולים להפיל חומה שנראית מושלמת. הראשון: משבצת אחת בטווח
+    שלך היא כביש, ואי אפשר לבנות עליה — הקרב ייפסל אפילו אם אף מפלצת לא עברה.
+    השני: מגדל שנמצא יותר מ־2.6 משבצות מהשביל לא יורה אף פעם, והוא זהב שנשרף.
+    לשתי הבעיות האלה יש פתרון אחד ואותו: לבחור נכון את ה־`range`, ולדלג עם
+    `continue` על מה שאסור.
+
+17. **prose** — the act-closing frame, right before Try It: "בשש השיעורים
     האחרונים למדת להדפיס, לזכור, לשאול, להחליט ולחזור. הקרב הבא דורש את חמשת
     הדברים האלה יחד, בתוכנית אחת."
 
@@ -544,7 +564,9 @@ so if the `and` test is not first it never runs. The wall she gets is visibly
 patterned, which is the reward.
 
 ```js
-map: { cols: 14, rows: 7, path: [[0,4],[1,4],…,[13,4]] },
+map: { cols: 14, rows: 7,
+       path: [[0,4],[1,4],[2,4],[3,4],[4,4],[5,4],[6,4],
+              [7,4],[8,4],[9,4],[10,4],[11,4],[12,4],[13,4]] },
 gold: 710, campHp: 3, seed: 46, allowed: ["archer", "cannon", "ice", "lightning"],
 waves: [
   { delay: 0,  enemies: [ { kind: "satyr", count: 16, gap: 0.26 } ] },
@@ -657,6 +679,11 @@ load-bearing: `for`, `range(start, stop, step)`, `if`, `continue`.
 ושימי לב לשתי המשבצות שאסור לגעת בהן: `(10, 5)` ו־`(2, 2)` הן כביש, כי שם
 השביל עולה. דלגי עליהן.
 
+ובסוף — שורה אחת לאנאבת', שסופרת כמה מגדלים באמת קמו בגן:
+`12 towers in the garden`. את המספר אל תכתבי ביד; ספרי אותו בצובר שגדל בכל
+סיבוב שבנה מגדל. שימי לב שזה בדיוק המספר שמראה שדילגת נכון — לולאה בלי
+`continue` הייתה מנסה לבנות ארבעה־עשר.
+
 **starter**
 ```python
 for x in range(0, 14, 2):
@@ -665,19 +692,26 @@ for x in range(0, 14, 2):
 
 **solution**
 ```python
+towers = 0
+
 for x in range(0, 14, 2):
     if x == 10:
         continue
     place_tower("archer", x, 5)
+    towers = towers + 1
 
 for x in range(0, 14, 2):
     if x == 2:
         continue
     place_tower("archer", x, 2)
+    towers = towers + 1
+
+print(f"{towers} towers in the garden")
 ```
 Verified, in the shipped simulation: twelve archers — row 5 at x = 0, 2, 4, 6, 8,
 12 and row 2 at x = 0, 4, 6, 8, 10, 12 — 600 of 600 gold spent, camp at 3/3, all
-thirty-one monsters dead including Medusa, battle length about 68 seconds.
+thirty-one monsters dead including Medusa, battle length about 68 seconds, and
+the log reads `12 towers in the garden`.
 
 Three ways to be wrong, all simulated:
 
@@ -691,9 +725,14 @@ Three ways to be wrong, all simulated:
 ```js
 check: {
   kind: "battle",
-  also: { kind: "source", mustInclude: ["for", "range(", "continue"],
-          message: { he: "גן שלם נבנה בלולאות: for עם range בקפיצות, ו־continue לשתי המשבצות שהן כביש",
-                     en: "A whole garden is built with loops: for with a stepped range, and continue for the two squares that are road" } }
+  also: [
+    { kind: "source", mustInclude: ["for", "range(", "continue"],
+      message: { he: "גן שלם נבנה בלולאות: for עם range בקפיצות, ו־continue לשתי המשבצות שהן כביש",
+                 en: "A whole garden is built with loops: for with a stepped range, and continue for the two squares that are road" } },
+    { kind: "output", mode: "contains", expect: "12 towers in the garden",
+      message: { he: "חסרה שורת הסיכום: כמה מגדלים קמו בגן, כשהמספר נספר בצובר ולא נכתב ביד",
+                 en: "The closing count is missing: how many towers stand in the garden, counted by an accumulator rather than typed" } },
+  ],
 }
 ```
 
@@ -713,8 +752,10 @@ check: {
        place_tower(\"archer\", x, 5)
    ```
    שלוש רמות הזחה: 0 ללולאה, 4 לגוף שלה, 8 ל־`continue`. השנייה זהה, עם `2`
-   במקום `10` ועם שורה `2` במקום `5`. שש קשתות בכל חומה, שתים־עשרה סך הכול,
-   600 זהב בדיוק. מדוזה עוברת ליד כל אחת מהן — לכן כמות מנצחת אותה, ולא כוח."
+   במקום `10` ועם שורה `2` במקום `5`. הוסיפי `towers = towers + 1` אחרי כל
+   `place_tower` — שימי לב שהיא **אחרי** ה־`continue`, ולכן סיבוב שדילג לא
+   נספר — ובסוף `print(f\"{towers} towers in the garden\")`. שש קשתות בכל
+   חומה, שתים־עשרה סך הכול, 600 זהב בדיוק. מדוזה עוברת ליד כל אחת מהן — לכן כמות מנצחת אותה, ולא כוח."
 
 ### Victory
 
@@ -735,12 +776,14 @@ desc (he): "דיסקית ברונזה מלוטשת מגב מגן. מי שמסת�
 בעיניים — ולפעמים זווית אחרת שווה יותר מחרב חדה יותר."
 
 **Achievements possible here**
-- *Gorgon Slayer* — drained all six of Medusa's HP.
-- *Completionist* — every exercise in Act II, including the side quest.
-- *Off By One* — the `range` boundary was wrong once and then right. Awarded with
+- *Gorgon Slayer* — Medusa reached 0 HP and the garden held.
+- *Completionist* — every battle in Act II, including the optional side battle.
+- *Off By One* — a `range` boundary was wrong once and then right. Awarded with
   affection, never as a scold.
+- *Wall Builder* — first battle won with more than ten towers, none of them
+  placed by a hand-written line.
 - *No Hints Needed* — finished the lesson with zero ambrosia spent.
-- *Interviewer's Favourite* — finished the FizzBuzz side quest.
+- *Interviewer's Favourite* — finished the FizzBuzz side battle.
 
 **Recap bullets**
 - `for x in range(n)` חוזר `n` פעמים וסופר לבד — בלי מונה ידני ובלי תנאי
@@ -748,6 +791,7 @@ desc (he): "דיסקית ברונזה מלוטשת מגב מגן. מי שמסת�
 - `range(a, b)` ו־`range(a, b, step)` נותנות שליטה בהתחלה, בסוף ובקפיצה — גם שלילית
 - `continue` מדלג על שאר הסיבוב הנוכחי; `break` יוצא מהלולאה כולה
 - **`for` כשאת יודעת כמה פעמים, `while` כשאת יודעת מתי לעצור**
+- חומה של מגדלים היא לולאה שרואים אותה: הטווח שכתבת הוא הצורה שעל הלוח
 
 **Next teaser (he)**: *"מדוזה השאירה חבילה ורשימה — עשרים שמות, אחד מתחת לשני.
 עד עכשיו כל משתנה שלך החזיק דבר אחד בדיוק. מחר תלמדי איך פייתון מחזיק רשימה
@@ -760,15 +804,19 @@ desc (he): "דיסקית ברונזה מלוטשת מגב מגן. מי שמסת�
 | `range(12)` when she wanted 1–12 | לא שגיאה — הפלט מתחיל ב־0 ונגמר ב־11 | `range` מתחיל באפס; `range(1, 13)` נותן 1 עד 12 |
 | `range(1, 12)` for twelve rows | לא שגיאה — 11 שורות בלבד | הסוף לא נכלל, לכן `13` |
 | `for row in range(10 / 2):` | `TypeError: 'float' object cannot be interpreted as an integer` | `/` מחזיר `float`; `//` או `int()` |
-| `for row in range(1, 11)` (no colon) | `SyntaxError: bad input on line N` | נקודתיים בסוף שורת ה־`for` |
-| body not indented | `SyntaxError: bad input on line N` (CPython: `IndentationError: expected an indented block`) | אחרי `:` בא בלוק מוזח — כמו בשיעורים 6 ו־7 |
+| `for row in range(1, 11)` (no colon) | `SyntaxError: bad input (line N)` | נקודתיים בסוף שורת ה־`for` |
+| body not indented | `SyntaxError: bad input (line N)` (CPython: `IndentationError: expected an indented block`) | אחרי `:` בא בלוק מוזח — כמו בשיעורים 6 ו־7 |
 | `for row in range(12)` then uses `rows` | `NameError: name 'rows' is not defined` | שם המשתנה בלולאה הוא מה שכתבת ב־`for` |
-| `continue` outside a loop | `SyntaxError: 'continue' outside loop on line N` | `continue` ו־`break` חיים רק בתוך לולאה |
+| `continue` outside a loop | `SyntaxError: 'continue' outside loop (line N)` | `continue` ו־`break` חיים רק בתוך לולאה |
 | `break` where `continue` was needed | לא שגיאה — הלולאה נעצרת מוקדם והפלט קצר | `break` = סיימנו; `continue` = לא הסיבוב הזה |
 | `print` after `continue` in the same block | לא שגיאה — השורה לא רצה באותו סיבוב | `continue` קופץ מעל כל מה שנשאר בבלוק |
 | `if row == 3 or 7:` | לא שגיאה — נכון תמיד, ומדלג על הכל | כל צד של `or` הוא שאלה שלמה: `row == 3 or row == 7` |
 | `print` accumulator inside the loop | לא שגיאה — שורה בכל סיבוב במקום אחת | הזחה קובעת; הסיכום צמוד לשוליים |
 | `range(20, 0, 3)` for a countdown | לא שגיאה — פלט ריק | לספירה למטה צריך צעד שלילי; `range` ריק לא זורק שגיאה |
+| a wall that runs over a road square | הקרב נראה מנצח והשלב נכשל: "אי אפשר לבנות על השביל עצמו" | `continue` על העמודה החוצה — זה בדיוק b4 והבוס |
+| a wall longer than the purse | "לא נשאר מספיק זהב למגדל הזה" והשלב נכשל | `range` ארוך מדי עולה יותר ממה שיש; ספרי משבצות מול מחיר |
+| a wall starting left of the road | "המגדל במשבצת (0, 3) רחוק מדי מהשביל ולא ירה אף פעם" | ההתחלה של `range` היא מקום, לא רק מספר |
+| `towers = towers + 1` before the `continue` | לא שגיאה — הסיכום גדול באחד | הצובר עולה רק בסיבוב שבאמת בנה מגדל |
 
 Note how many rows in this table are **not errors**. By lesson 8 her bugs stop
 being crashes and start being wrong answers, and that shift deserves a sentence
@@ -777,49 +825,57 @@ in the lesson: *"מכאן והלאה, החלק הקשה הוא לא שהתוכנ
 
 ## Implementation notes
 
-- **Boss checker semantics.** `hp: 6` with six cases means one HP per case. The
-  checker must run **all six cases on every submission** and report
-  `{passed: n, total: 6}` so the bar reflects partial progress from the first
-  run. It must never stop at the first failure — a boss bar that only ever shows
-  0 or 6 is not a boss bar.
-- **Persist the best result.** `game.js` stores the highest `passed` count for
-  the boss so the bar does not reset when she closes the tab mid-fight
-  (`02-game-design.md`: "Partial progress is kept and shown"). Progress is saved
-  per exercise, and the boss counts as one.
-- **Name the failing case in her language, not in JSON.** On a partial pass,
-  show which stdin value failed — *"עם 13 שורות התוכנית שלך הדפיסה `Keep
-  walking.` במקום `Too many. Use the shield.`"* — and offer a diff of expected
-  versus actual for the first differing line only. Dumping six full outputs at
-  390px is unreadable.
-- **The side quest e5 needs an `optional: true` flag** on the exercise object —
-  a schema addition. It must not count toward lesson completion, the completion
-  bonus, or the *No Hints Needed* achievement, but it does award its own XP and
-  drachmas and it does count toward *Completionist*.
-- **e1–e5 each carry two checks** — write them with the `also` field, as in
-  lesson 1 and as required by `.claude/rules/lesson-authoring.md`:
-  ```js
-  check: { kind: "source", mustInclude: ["continue"],
-           message: { he: "המשימה הזו דורשת continue — לדלג על סיבוב, לא לצאת מהלולאה",
-                      en: "This one needs continue — skip a round, do not leave the loop" },
-           also: { kind: "output", mode: "normalized", expect: "Row 1 checked\n…" } }
-  ```
-  The boss uses a single `cases` check with no `also`.
+- **The boss bar is Medusa's own HP, not a count of test cases.** The old
+  case-based boss is gone with the exercises. `boss.hp: 380` matches the value in
+  `sim.js`, and the honest bar is the **lowest HP Medusa reached in her best run
+  so far**: the simulation already records every tick, so `game.js` can read
+  `min(hp)` for the medusa enemy out of the snapshots and store the best result
+  the way it stores any other progress (`02-game-design.md`: "Partial progress is
+  kept and shown"). A first attempt that takes her to 120 and then leaks shows a
+  bar two thirds drained, which is true and encouraging. This is a small
+  `game.js` addition and the only one this lesson needs.
+- **Name the reason in her language.** On a loss, `LC.Battle.diagnose` already
+  produces the right sentence for every failure mode this boss can produce —
+  `onPath`, `tooPoor`, a cannon that cannot reach the harpies, a leak. Show it
+  above the replay, not a stack of numbers.
+- **e5 uses `optional: true`** on the level object. It must not count toward
+  lesson completion, the completion bonus, or the *No Hints Needed* achievement,
+  but it does award its own XP and drachmas and it does count toward
+  *Completionist*.
+- **Every level here was simulated headlessly** through
+  `assets/js/battle/{sim,pyapi,play}.js` in a Node VM, the way
+  `tools/verify-python.mjs` loads them. For all six: the stated `solution` wins,
+  an empty program loses, every `also` rule passes on the solution, and every
+  starter runs.
+- **The near-miss builds were simulated too.** b1 with `range(5)`: overrun. b2
+  with `range(9)`: nine towers, three of which never fire, overrun. b3 with one
+  wall: overrun (first) and 2 leaks (second). b4 without `continue`: the wave is
+  held and the level is still refused, on `onPath` at (4, 3). The boss with one
+  wall: 1 leak; without `continue`: `onPath` at (10, 5) and (2, 2); with cannons
+  instead of archers: `tooPoor` plus ten harpies flying over the lot.
+- **The boss uses an `also` array** — a `source` rule and an `output` rule. The
+  output rule (`mode: "contains"`, `"12 towers in the garden"`) is what forces
+  the accumulator, and it is genuinely graded: the verifier no longer skips
+  non-source `also` rules.
 - **`source` checks read a stripped skeleton** (comments and string literals
-  removed). `for `, `range(` and `continue` all sit outside literals and survive
-  stripping, so no check in this lesson needs `raw: true`. This is also why e2's
-  `mustInclude: ["for "]` cannot be satisfied by a comment reading
-  `# for each row` — the comment is gone before matching, which is exactly the
-  behaviour that exercise needs.
-- **`source` substrings use trailing markers**: `"for "` and `"range("` rather
-  than `"for"` and `"range"`, so a variable named `forest` or a comment about
-  ranges cannot satisfy the requirement.
-- `input()` prompt text is rendered in the Iris-message panel and never reaches
-  stdout, so no `expect` string in the boss includes the prompt (verified by
-  running all six cases with queued stdin).
+  removed), so `for`, `range(` and `continue` all survive and none of these checks
+  needs `raw: true`. A comment reading `# for each row` cannot satisfy
+  `mustInclude: ["for"]`, which is exactly the behaviour these levels need.
+- **`mustInclude` matches bare identifiers as whole words** (`checker.js`
+  `present()`), so `["for", "continue"]` is safe against a variable named
+  `forest` or `continued`. `"range("` carries punctuation and matches literally.
+- **`check.stdin` is available but deliberately unused here.** Lesson 6 uses it
+  for the scouting report; this lesson has enough new machinery in `range` and
+  `continue`, and every number a level needs is already on the board.
 - **`enumerate`, `zip` and `for … in <list>` are all supported by Skulpt but are
   deliberately absent here.** `for` over a list arrives in lesson 9 with lists
   themselves. This lesson is `range` only, so that lesson 9 has exactly one new
-  idea.
-- Every code block, solution, expected output and boss case in this file was
-  executed through the shipped `assets/js/vendor/skulpt.min.js` with
+  idea. `get_wave()` and `get_map()` stay unused for the same reason.
+- **The boss battle is long** — about 68 simulated seconds, roughly 680 snapshots.
+  That is well inside `MAX_TICKS` (3000) but it is the longest battle in the
+  course so far, so the replay controls (2× / 4× and the scrubber) stop being a
+  nicety here. Make sure the wave counter in the HUD reads "4 / 4" so she can see
+  that Medusa is the last thing coming.
+- Every teach-block sample and every expected output in this file was executed
+  through the shipped `assets/js/vendor/skulpt.min.js` with
   `__future__: Sk.python3`.

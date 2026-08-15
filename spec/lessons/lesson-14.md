@@ -283,6 +283,54 @@ prose block and its own callout, not a sentence.
     נכנס לחושך, חוזר עם מספרים, ומישהי הופכת מספרים לתמונה. `return` הוא הרגע
     שבו המספרים עוברים מיד ליד.
 
+---
+
+*(Everything above is the scout. Everything below is the wall. This line is the
+graduation, and the page should mark it — a divider, a change of background, an
+"Act IV, part two" heading. She should be able to point at the moment the course
+changed shape.)*
+
+16. **prose** — **הרגע שבו המשחק מתחיל לקרוא לך.** עד עכשיו כל תוכנית שכתבת
+    רצה מלמעלה למטה, נגמרה, ואז המשחק עשה מה שהוא עושה. הצבת מגדלים,
+    והמגדלים בחרו לבד במי לירות.
+
+    היום זה מתהפך. את כותבת פונקציה אחת — ולא קוראת לה אף פעם. **המשחק
+    קורא לה.** כל פעם שמגדל מוכן לירות ורואה משהו בטווח, הוא עוצר, שואל
+    אותך, ועושה מה שאמרת. עשר פעמים בשנייה, לכל אורך הקרב.
+
+    הקוד שלך כבר לא רץ לפני המשחק. הוא רץ **בתוך** המשחק.
+    *(Do not soften this into "and now a new feature". Name it: she is writing a
+    callback, and the whole rest of the course is built on it.)*
+
+17. **code (runnable: false)** — החוזה, בארבע שורות:
+    ```python
+    def choose_target(enemies):
+        return enemies[0]
+    ```
+    Caption: `enemies` היא רשימה של מילונים — כל המפלצות שהמגדל הזה רואה
+    ברגע זה. מה שהפונקציה **מחזירה** הוא המטרה. זה כל החוזה.
+
+    על העמוד מופיעה ליד הבלוק טבלת מילון אחת, אמיתית, מתוך קרב:
+    ```python
+    {"kind": "hellhound", "hp": 54, "max_hp": 70, "distance": 12.4,
+     "speed": 1.4, "armour": 2, "flying": False, "x": 8.6, "y": 7.0}
+    ```
+    ומשפט אחד: `distance` הוא כמה עוד נשאר לה ללכת עד לשער — לא כמה הוא
+    כבר הלך.
+
+18. **callout · warn** — כותרת: *"`None` פירושו לא לירות"*.
+    פונקציה בלי `return` מחזירה `None`, והמשחק קורא את `None` כ"החזיקו אש".
+    כל המגדלים שלך יעמדו, יעקבו אחרי המפלצות, ולא יעשו כלום. זה לא קרס,
+    וזה לא באג של המשחק — זה בדיוק מה שביקשת. השאלה הראשונה כשההגנה
+    שותקת: איפה שכחתי `return`?
+
+19. **callout · warn** — כותרת: *"פונקציה שנופלת — מפילה את הקרב"*.
+    אם `choose_target` זורקת שגיאה — `IndexError` על רשימה קצרה מהצפוי,
+    `KeyError` על מפתח שלא קיים — הקרב נעצר באותו רגע ונחשב כהפסד. לא
+    מגדל אחד מפספס תור — הכול. המנוע יראה לך את השגיאה האמיתית, עם
+    מספר השורה. זו לא הענשה, זו הודעה — והיא תופיע לך שוב בשיעור 18,
+    כשנלמד לתפוס אותה במקום להיבהל ממנה.
+
 ## Try It (ungraded)
 
 ```python
@@ -791,10 +839,17 @@ def choose_target(enemies):
 **Item**: 🗺️ **מפת המבוך / The Labyrinth Map** — "לא שלמה, ולא מדויקת. אבל היא
 ביד, וזה יותר ממה שהיה לכל אחד אחר." (Bead #14.)
 
+**Rank-up**: this is the lesson that changes her title on the hub from *Camper*
+to **Strategos / אסטרטגית**. `game.js` should mark it — the control-model change
+deserves a visible, permanent acknowledgement, not a toast that fades.
+
 **Achievements possible here**:
 - *The Scout Returns* — הפונקציה הראשונה שהחזירה ערך
-- *None Shall Pass* — פתרה את e2 (ניצחון על `None`)
-- *Composer* — פונקציה שקוראת לפונקציה אחרת (המשימה)
+- *Strategos* — **הקרב הראשון שנוצח בעזרת `choose_target`** (L1). ההישג הגדול של
+  השיעור, ושל המערכה
+- *None Shall Pass* — ניצחה את L2 (ניצחון על `None`)
+- *Composer* — פונקציה שקוראת לפונקציה אחרת (L4 והקרב הגדול)
+- *Grounded* — ראתה אסטרטגיה קורסת באמצע קרב וניצחה בהרצה הבאה
 - *No Hints Needed*, *Persistent*
 
 **Recap bullets**:
@@ -804,9 +859,13 @@ def choose_target(enemies):
 - `return` מסיים את הפונקציה מיד, גם באמצע `if`
 - אפשר כמה פרמטרים, והסדר קובע; פרמטר עם ערך ברירת מחדל הוא אופציונלי ובא בסוף
 - משתנה שנולד בתוך פונקציה מת איתה — `return` הוא הדרך היחידה להוציא אותו
+- **`choose_target` היא פונקציה שאת לא קוראת לה — המשחק קורא לה**, כל פעם שמגדל
+  מוכן לירות
+- מה שהיא מחזירה הוא המטרה. `None` פירושו "לא לירות" — וזה בדרך כלל `return` חסר
+- אסטרטגיה שזורקת שגיאה מסיימת את הקרב בהפסד
 
-**Next teaser**: *"יש לך מפה. אין לך מזל. מחר כירון נותן לך קוביות — ואת בונה
-משחק שאפשר באמת לשחק בו."*
+**Next teaser**: *"המגדלים שלך שואלים אותך במי לירות, ואת עונה. מחר תלמדי לענות
+עם מספרים אמיתיים — מרחקים, שורשים, וקצת מזל."*
 
 ## Common mistakes to anticipate
 
@@ -820,11 +879,45 @@ def choose_target(enemies):
 | מחליפה סדר ארגומנטים | תוצאה שגויה בלי שגיאה | הכי מסוכן — אין שגיאה. לבדוק ידנית מול הפלט הצפוי |
 | משתמשת במשתנה מקומי בחוץ | `NameError: name 'x' is not defined` | scope: נולד בפנים, מת בפנים |
 | מגדירה משתנה בחוץ ומצפה שהפונקציה תעדכן אותו | הערך בחוץ לא משתנה | לא להיכנס ל-`global` — לומר "תחזירי את הערך ותשמרי אותו" |
+| **קוראת ל-`choose_target` בעצמה** בסוף הקוד | `NameError` על `enemies`, או שגיאה מוזרה | המשחק קורא לה. אסור וגם אין צורך לקרוא לה לבד |
+| כותבת `def choose_target(enemies, tower)` | הקריאה מהמשחק נכשלת עם `TypeError` על מספר ארגומנטים | החוזה הוא פרמטר אחד בדיוק |
+| מאייתת `choose_targets` או `chooseTarget` | הקרב רץ עם ברירת המחדל, בלי שום שגיאה | **הכי מסוכן** — אין שגיאה, רק תוצאה גרועה. המנוע צריך להתריע כשקיימת פונקציה בשם דומה |
+| `return` בתוך הלולאה כשמחפשים מקסימום | בוחרת תמיד את הראשונה | `return best` יושב **אחרי** הלולאה |
+| `enemies[1]` כשיש מפלצת אחת בטווח | `IndexError`, והקרב נגמר מיד | `enemies` משתנה באורכו בכל קריאה |
+| מחזירה `True` או מחרוזת שאינה `id` | המגדלים מחזיקים אש | רק dict, `id`, אינדקס או `None` מתקבלים |
 
 ## Implementation notes
 
+- **Every level was simulated headless** against `assets/js/battle/sim.js` and
+  `assets/js/battle/pyapi.js` before it was written down. Each was run against her
+  solution, an empty program, and a bank of **eleven** degenerate or
+  plausible-but-wrong strategies: no strategy at all (the engine default),
+  `return 0`, `return enemies[0]`, `return enemies[-1]`, `return None`, lowest HP,
+  highest HP, nearest to camp, furthest from camp, fastest, least armour, most
+  armour.
+
+  | Level | Solution | Empty | Default targeting | Other strategies that also win |
+  | --- | --- | --- | --- | --- |
+  | L1 | wins 3/3, 12s | loses | **loses**, 1 leak | `return 0` and "most armour" — both name the same cyclops, so they are the same answer, not a guess that got lucky |
+  | L2 | wins 3/3, 12s | loses | **loses** | same three |
+  | L3 | wins 3/3, 26s | loses | **loses**, 3 leak | "fastest" and "least armour" — both pick harpies first, which is the insight |
+  | L4 | wins 3/3, 31s | loses | **loses** | "highest HP" and "most armour" — again the same cyclops |
+  | great | wins 4/4, 54s | loses | **loses** | **none. Every single degenerate strategy loses this battle.** |
+
+  The rule this table enforces: a level is only finished when a strategy that
+  reasons wins and a strategy that guesses does not. Where something other than
+  the stated solution wins, it is because it selects **the same monster** for a
+  defensible reason — never because a constant happened to work.
+- **L1 and L2 lean on one specific engine fact**: the list handed to
+  `choose_target` is in spawn order, so `enemies[0]` is the monster that has been
+  on the field longest. The default targets whoever is furthest along the path
+  instead, which is a different monster the moment anything overtakes anything.
+  Both levels are built on exactly that gap. If the sim ever changes the ordering
+  of `inRange`, **these two levels stop teaching and must be re-tuned.** Leave
+  this note in place.
 - **Skulpt**: `return`, כמה פרמטרים, ערכי ברירת מחדל, `None` — כולם ב-matrix
-  המאומת. אין תלות בשום דבר חריג.
+  המאומת. Calling her `def` synchronously from JS with a list of dicts is
+  verified, as is a strategy that raises being caught and reported.
 - **Verify three error strings** with `node tools/verify-python.mjs` before
   shipping, and paste whatever Skulpt prints into the blocks:
   1. teach 3 — `TypeError: unsupported operand type(s) for +: 'NoneType' and 'int'`
@@ -836,10 +929,16 @@ def choose_target(enemies):
      message she will never see.
 - **Verify that `print(None)` renders exactly `None`** in Skulpt — the entire
   compare block in teach 6 depends on that string appearing in the output panel.
-- **e3's starter crashes on purpose.** `checker.js` must show the runtime error
-  clearly and still offer hints; an exercise whose starter fails to run is a
-  first for the course, so confirm the failure state renders as "here is what
-  happened" and not as "you failed".
+- **L1's starter returns `None` on purpose** and L2's starter `print`s on
+  purpose. Neither crashes; both lose in a way the engine already explains
+  ("your towers saw monsters but never fired"). Confirm that message reaches the
+  page — it is doing more teaching than the hints are.
+- **The `also: { kind: "source" }` rule is what makes each level's concept
+  compulsory**, since `choose_target` is optional as far as the engine is
+  concerned. L3 requires `flying`; L4 requires `def threat`; the great battle
+  requires all of it. `also` now also accepts an **array** of rules, so a level
+  can demand a construct and a printed line at once — not needed here, but it is
+  how lesson 15's reports are checked.
 - **`sum()` is deliberately unused** in e4 even though she learned it in L10.
   The accumulator pattern makes the returned value visibly flow into a variable,
   which is the point being taught. If she solves it with `sum()` plus a list she
