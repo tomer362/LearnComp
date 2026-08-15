@@ -16,7 +16,7 @@
 | **item** | 🧵 חוט אריאדנה / Ariadne's String |
 | **control model** | build script + strategy function (from L14) |
 | **towers unlocked** | ⚡ **lightning** — chains to 3 enemies at once |
-| **boss** | 🌀 **המבוך / The Labyrinth** — HP 4, אחד לכל גל שנעצר |
+| **boss** | 🌀 **לב המבוך / The Heart of the Labyrinth** — קיקלופ עם 520 חיים, נכנס בתוך הקהל בגל האחרון |
 | **XP** | 20 + 30 + 30 + 30 (training battles) + 70 (boss) + 25 (optional side battle) + 30 (bonus) = **235** |
 | **drachmas** | 5 + 8 + 8 + 8 + 18 + 6 = **53** 🪙 |
 
@@ -662,29 +662,41 @@ def choose_target(enemies):
 
 ## BOSS — 🌀 המבוך / The Labyrinth · 70 XP, 18 🪙
 
-**boss object:** `{ name: { he: "המבוך", en: "The Labyrinth" }, icon: "🌀", hp: 4 }`
+**boss object:**
+```js
+boss: { icon: "🌀",
+        name: { he: "לב המבוך", en: "The Heart of the Labyrinth" },
+        hp: 520 }
+```
 
-Four waves, one HP each. Each wave she survives is one corridor of the maze
-mapped, and the health bar is the map filling in. Partial progress is kept
-between attempts (`spec/02-game-design.md`), so a run that dies to the cyclopes
-still banks the three corridors before them. **Losing is not possible here, only
-unfinished.**
+**The boss is a monster, and `boss.hp` matches its real health.** `lesson.js`
+drains the bar from the toughest thing on the field, so a boss object whose `hp`
+disagreed with the simulation would draw a lie. The Heart is a cyclops with `hp:
+520` overridden in its wave group — armour 5, speed 0.8, and it walks in **at the
+same moment** as seven ordinary cyclopes and twelve harpies. That is the whole
+fight: the biggest threat on the board arrives inside the biggest crowd, and only
+a strategy that can pick it out of the crowd kills it in time.
+
+Partial progress is kept between attempts (`spec/02-game-design.md`), so a run
+that dies with the Heart at a quarter health starts tomorrow knowing exactly how
+close it was.
 
 **Why this mechanic:** both recursions at once, on the largest wave in Act IV —
-eighty monsters. The build is recursive because one function has to raise two
-different kinds of tower from two different lists, and `raise_towers(kind, spots,
-i)` does it by walking a list it was handed. The targeting is recursive because
-the answer to "who is the biggest threat in this list" is "the biggest of the
-first one and whatever the rest of the list says".
+seventy-eight monsters. The build is recursive because one function has to raise
+two different kinds of tower from two different lists, and `raise_towers(kind,
+spots, i)` does it by walking a list it was handed. The targeting is recursive
+because the answer to "who is the biggest threat in this list" is "the biggest of
+the first one and whatever the rest of the list says" — and on the last wave that
+question has a 520-HP answer standing in a crowd of twenty.
 
 Verified: **the engine's own targeting loses this battle**, and so does every
-degenerate strategy in the bank.
+single strategy in the degenerate bank. There is no shortcut through this one.
 
 **Framing:** אנבת' מחזיקה את הקצה של החוט בפתח. את הולכת פנימה. כל גל שתעצרי הוא
 מסדרון שנדלק על המפה שלה.
 
-**brief:** המסדרון מתקפל שלוש פעמים וחוזר על עצמו. ארבעה גלים, שמונים מפלצות,
-490 זהב.
+**brief:** המסדרון מתקפל שלוש פעמים וחוזר על עצמו. ארבעה גלים, 78 מפלצות,
+490 זהב — ובגל האחרון, יחד עם כל השאר, נכנס משהו עם 520 נקודות חיים.
 
 הבנייה: פונקציה **אחת** בשם `raise_towers(kind, spots, i)` שמקבלת סוג מגדל
 ורשימת משבצות, ומציבה את כולן ברקורסיה. קראי לה פעמיים — פעם ל-`LIGHTNING`
@@ -697,14 +709,22 @@ degenerate strategy in the bank.
 ```js
 map: { cols: 15, rows: 9, path: LABYRINTH },
 gold: 490, campHp: 5, seed: 71, allowed: ["archer", "lightning"],
+boss: { icon: "🌀",
+        name: { he: "לב המבוך", en: "The Heart of the Labyrinth" }, hp: 520 },
 waves: [
   { delay: 0,  enemies: [{ kind: "satyr",     count: 22, gap: 0.3  }] },
   { delay: 5,  enemies: [{ kind: "harpy",     count: 18, gap: 0.35 }] },
   { delay: 12, enemies: [{ kind: "hellhound", count: 18, gap: 0.35 }] },
-  { delay: 24, enemies: [{ kind: "cyclops",   count: 12, gap: 0.6  },
-                         { kind: "harpy",     count: 10, gap: 0.35 }] },
+  { delay: 24, enemies: [{ kind: "cyclops",   count:  7, gap: 0.6  }] },
+  { delay: 24, enemies: [{ kind: "harpy",     count: 12, gap: 0.35 }] },
+  { delay: 24, enemies: [{ kind: "cyclops",   count:  1, hp: 520, gap: 1 }] },
 ],
 ```
+
+*(Three separate `waves` entries share `delay: 24` on purpose. Groups listed
+inside **one** entry spawn one after another — the clock accumulates across them —
+so simultaneous pressure needs separate entries with the same delay. That is what
+puts the Heart on the field at the same moment as the crowd it hides in.)*
 
 **starter:**
 ```python
@@ -767,10 +787,12 @@ def choose_target(enemies):
 | 1 | 22 satyrs, very tight | שהבנייה בכלל קרתה. רקורסיה בלי מקרה בסיס נופלת כאן לפני שהמפלצת הראשונה זזה |
 | 2 | 18 harpies | שיש קשתות. מגדלי ברק פוגעים במעופפות, אבל שלושה מהם לבד לא מספיקים |
 | 3 | 18 hellhounds, packed | שהברק אכן משורשר — שלוש מכות בפגיעה אחת, וזה מה שמחזיק את הגל |
-| 4 | 12 cyclopes + 10 harpies | שהאסטרטגיה בוחרת את המסוכן ולא את הקרוב. כאן ברירת המחדל נופלת |
+| 4 | 7 cyclopes + 12 harpies + **the Heart** | שהאסטרטגיה בוחרת את המסוכן ולא את הקרוב. כאן ברירת המחדל נופלת, וכל שאר הניחושים איתה |
 
-*Order matters: the health bar moves in the first ten seconds, which is what
-keeps her in the fight. Wave 4 is where the lesson's idea is actually tested.*
+*Order matters: the first three waves are survivable without any strategy at all,
+so she gets to watch her wall work before the fourth wave asks the question the
+lesson was built around. That fourth wave is where every degenerate strategy
+dies.*
 
 **hints:**
 1. שתי הפונקציות רקורסיביות, ושתיהן נראות אחרת. אחת **עושה** משהו ולא מחזירה
@@ -786,7 +808,9 @@ keeps her in the fight. Wave 4 is where the lesson's idea is actually tested.*
    `raise_towers("lightning", LIGHTNING, 0)` ו-`raise_towers("archer", ARCHERS, 0)`
    — שימי לב שהפונקציה אחת, והיא בונה שני סוגי מגדלים לגמרי, כי הסוג הוא פרמטר.
    `strongest` היא העתקה מדויקת מ-L3. אם הקרב נגמר אחרי שנייה — אחת מהשתיים
-   איבדה את מקרה הבסיס שלה, וההודעה תגיד לך באיזו שורה.
+   איבדה את מקרה הבסיס שלה, וההודעה תגיד לך באיזו שורה. ואם שלושת הגלים
+   הראשונים עוברים בשלום והרביעי מפיל אותך: זה הגל שבו לב המבוך נכנס בתוך
+   הקהל, ובדיוק בשבילו הרקורסיה מחפשת את החזק ולא את הקרוב.
 
 **Victory cutscene**: החוט האדום נמתח מאחורייך עד הפתח, ואנבת' מושכת. המפה מלאה.
 מעל הדלת האחרונה חרוט שם, בכתב יד שאת כבר מזהה: *Daedalus*.
@@ -955,7 +979,7 @@ the 5-second `execLimit`. That is a **teachable moment, not a bug**: "רקורס
   | L2 | wins 3/3, 5 archers, 26s | loses | n/a (build only) | 4 towers → 1 leaks; 6 towers → over the 250 cap |
   | L3 | wins 3/3, 3 lightning, 30s | loses | **loses** | also won by "highest HP" and "most armour" — the same cyclops, reached by reasoning |
   | L4 | wins 3/3, 3 lightning, 31s | loses | **loses** | the broken starter ends the battle as a strategy error, as designed |
-  | boss | wins 5/5, 5 towers, 80 monsters, 67s | loses | **loses** | only "highest HP" also wins, and that is what the recursion computes |
+  | boss | wins 5/5, 5 towers, 78 monsters, 66s | loses | **loses** | **none. Every strategy in the bank loses the Labyrinth.** |
   | side | wins 3/3, 5 archers, 24s | loses | n/a (build only) | 3 towers → 2 leak; `fib` missing the `n == 1` stop → `RecursionError` |
 - **Every starter in this lesson runs without a syntax error before she writes
   anything.** Stub bodies carry a placeholder statement (`print(n)`, `return 0`)
@@ -972,11 +996,19 @@ the 5-second `execLimit`. That is a **teachable moment, not a bug**: "רקורס
   `while n > 0:` are caught and `format(` and `before ` are not. Better still
   would be `checker.js` tokenising the skeleton and comparing tokens; until it
   does, keep the space and add a regression test for `towers_before = 0`.
-- **Health bar wiring**: the boss has 4 HP and the sim already records which wave
-  each kill and each leak belonged to. `game.js` should drain one HP per wave
-  survived and persist it, so a run that dies to the cyclopes still banks three
-  corridors (`spec/02-game-design.md`). The wave table above supplies the toast
-  text for each hit.
+- **Health bar wiring**: `lesson.js` drains the boss bar from the toughest
+  monster on the field, so `boss.hp` **must equal** the Heart's `hp` (520) or the
+  bar draws a lie. If the boss wave is ever retuned, change both numbers together.
+  Nothing else on the map comes near 520, so the bar can never latch onto the
+  wrong monster.
+- **Groups inside one `waves` entry spawn sequentially** — the clock accumulates
+  across them. The boss's fourth wave is therefore three separate entries that
+  share `delay: 24`, which is the only way to get the Heart, the cyclopes and the
+  harpies onto the field at the same moment. Worth knowing before retuning any
+  wave in this lesson.
+- **`print()` inside `choose_target` reaches the live page log but is not in the
+  captured output**, so no check in this lesson may test for printed text from a
+  strategy function — and none does.
 - **Recursion depth used by this lesson is small but not trivial.** `strongest`
   recurses once per enemy in range, and the boss's tightest moment puts roughly a
   dozen monsters inside a lightning tower's 3.0 radius at once — about twelve

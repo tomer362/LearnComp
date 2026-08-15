@@ -939,6 +939,16 @@ deserves a visible, permanent acknowledgement, not a toast that fades.
   requires all of it. `also` now also accepts an **array** of rules, so a level
   can demand a construct and a printed line at once — not needed here, but it is
   how lesson 15's reports are checked.
+- **Groups listed inside a single `waves` entry spawn sequentially** — the clock
+  accumulates across them. L1 and L2 rely on exactly that: the single cyclops is
+  listed first in its entry and enters at t=0, and the satyrs follow from t=1.
+  Splitting them into two entries with the same `delay` would put them on the
+  field together and break both levels.
+- **`print()` inside `choose_target` reaches the live page log but is not in the
+  captured output.** L2's broken starter prints on every call, so the log is what
+  tells her the function is running — but no check may assert on that text, and
+  none does. It also means a debug `print` in a strategy function is a
+  performance question, not a correctness one.
 - **`sorted()` is deliberately unused** in every strategy function. Skulpt raises
   `'<' not supported between instances of 'dict' and 'dict'` on a list of dicts,
   and `key=` would need a `lambda`, which the course excludes. Every "pick the

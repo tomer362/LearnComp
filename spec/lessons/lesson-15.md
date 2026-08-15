@@ -728,8 +728,9 @@ def choose_target(enemies):
    בדיוק מה שפונקציות נועדו בשבילו. ב-`choose_target`: קודם
    `for e in enemies:` עם `if e["flying"]: return e`. אחר כך `best = enemies[0]`,
    לולאה שנייה עם `if pack_size(enemies, e) > pack_size(enemies, best):`, ובסוף
-   `return best`. אם הגל האחרון הוא זה שמפיל אותך — שם מגיעים שבעה קיקלופים
-   ושמונה הרפיות יחד, וזה בדיוק המקום שבו שני החלקים צריכים לעבוד באותו זמן.
+   `return best`. אם הגל האחרון הוא זה שמפיל אותך — שם נכנסים שבעה קיקלופים
+   ומיד אחריהם שמונה הרפיות, וזה בדיוק המקום שבו שני החלקים צריכים לעבוד
+   בזה אחר זה בלי הפסקה.
 
 ## Reward & Recap
 
@@ -822,6 +823,14 @@ def choose_target(enemies):
   **`random.shuffle` is deliberately not used anywhere in this lesson** — it is
   not on the verified list; if verification shows it works, it may be added to
   the Try It block only, never to a check.
+- **Groups listed inside a single `waves` entry spawn sequentially** — the clock
+  accumulates across them, so `[{cyclops 7}, {harpy 8}]` in one entry means the
+  harpies start after the last cyclops. Simultaneous pressure needs separate
+  entries sharing a `delay`. Every wave here was tuned as written; do not "tidy"
+  two entries into one.
+- **`print()` inside `choose_target` reaches the live page log but is not in the
+  captured output**, so no check may test for text a strategy function printed —
+  and none does.
 - **No level in this lesson checks printed output.** Everything graded is the
   simulated battle plus a `source` rule, which removes the whole class of
   "trailing newline failed me" problems that the earlier draft had to defend

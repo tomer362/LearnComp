@@ -756,6 +756,13 @@ for row in ROWS:
 - **L3's cannons cost 90 and the budget is 560**, so six is the maximum and a
   seventh raises `tooPoor`. The tight budget is deliberate: it is what stops
   "build more of everything" from being an answer.
+- **Groups listed inside a single `waves` entry spawn sequentially** — the clock
+  accumulates across them, so every wave in this lesson is its own entry with its
+  own `delay`. Do not merge them.
+- **Rocks are unbuildable** and raise an `onRock` build error. No level here
+  defines `map.rock`, so nothing in this lesson is affected — but a future
+  decorative rock added to `SNAKE` at columns 2, 5, 7 or 8 on rows 1, 4 or 7
+  would silently break `build_wall`.
 - **No harpies appear in any level that allows cannons except the great battle**,
   where archers cover the air. Cannons cannot hit flying enemies
   (`spec/09-battle-game.md`), and a cannon watching harpies drift past looks
