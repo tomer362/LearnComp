@@ -49,6 +49,10 @@ uses all live in `spec/09-battle-game.md` — read it before writing a level.
 - **A level must be unwinnable by writing nothing** — `verify-python.mjs`
   asserts this. The default objective is a *perfect* defense: campHp must not
   drop at all unless the level sets `check.campHpAtLeast` lower.
+- **A level must also be unwinnable by a degenerate answer.** From lesson 14 on,
+  run `return 0`, `return enemies[0]` and `return None` against it and confirm
+  they lose. A real near-miss: on one test level `return 0` won while three
+  thoughtful strategies lost. Use `node tools/try-level.mjs` to check.
 - Towers cannot stand on the path, and one further than about 2.6 cells from it
   never fires. Check your coordinates against your own path list.
 - Only the API available at that lesson: build-script calls through lesson 13,

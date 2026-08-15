@@ -207,6 +207,21 @@ levels: [
 constraint holds. The `also` field reuses the existing `source` checker, which is
 how a level says "yes, but you must do it with a loop".
 
+### Three things every level must survive
+
+`verify-python.mjs` enforces the first two automatically; the third is on you.
+
+1. **The declared solution wins.**
+2. **An empty program loses.** A level that can be beaten by writing nothing
+   teaches nothing and she will click straight past it.
+3. **A degenerate answer loses.** This one is easy to miss and it was a real
+   near-miss here: on a level with a tanky leader and fragile followers, three
+   thoughtful strategies (default, weakest-first, closest-to-camp) all lost while
+   `return 0` won — by accident. If a guess passes, the level rewards guessing.
+   When designing a lesson-14-or-later level, run the obvious degenerate
+   strategies against it (`return 0`, `return enemies[0]`, `return None`) and
+   confirm they fail.
+
 ## Rendering
 
 Canvas 2D, one `<canvas>` per level, sized to its container and redrawn on
