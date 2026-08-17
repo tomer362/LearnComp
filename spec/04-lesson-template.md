@@ -215,20 +215,36 @@ Thin and identical apart from two numbers. Script order is load-bearing — see
   <title>שיעור 1 · המילה הראשונה</title>
   <link rel="stylesheet" href="../assets/css/theme.css">
 </head>
-<body class="lesson-page">
+<body class="lesson-page" data-lesson="01">
   <div id="app"></div>
+
+  <!-- Script order is load-bearing: there is no module graph to sort it out.
+       Copy lessons/lesson-01.html rather than retyping this. -->
   <script src="../assets/js/vendor/skulpt.min.js"></script>
   <script src="../assets/js/vendor/skulpt-stdlib.js"></script>
+  <script src="../assets/js/env.js"></script>
   <script src="../assets/js/store.js"></script>
   <script src="../assets/js/i18n.js"></script>
   <script src="../assets/js/curriculum.js"></script>
   <script src="../assets/js/engine.js"></script>
+  <script src="../assets/js/battle/sim.js"></script>
+  <script src="../assets/js/battle/pyapi.js"></script>
+  <script src="../assets/js/battle/play.js"></script>
+  <script src="../assets/js/battle/render.js"></script>
   <script src="../assets/js/editor.js"></script>
   <script src="../assets/js/checker.js"></script>
+  <script src="../assets/js/icons.js"></script>
   <script src="../assets/js/game.js"></script>
+  <script src="../assets/js/sound.js"></script>
+  <script src="../assets/js/rest.js"></script>
+  <script src="../assets/js/steps.js"></script>
   <script src="../assets/js/lesson.js"></script>
   <script src="../content/lesson-01.js"></script>
-  <script>LC.Lesson.mount("01");</script>
+  <script src="../assets/js/boot.js"></script>
 </body>
 </html>
 ```
+
+`boot.js` reads `data-lesson` off `<body>` and mounts the page — there is no
+inline `<script>`, so `script-src` never needs `'unsafe-inline'`. `sound.js`
+must come before `rest.js`, which calls into it.

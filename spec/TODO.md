@@ -44,6 +44,11 @@ battle; there are no written exercises.
 - [x] `tools/smoke-test.mjs` — 68 checks over `file://` with the network blocked,
       including playing battles in a real browser
 - [x] `CLAUDE.md`, `.claude/rules/lesson-authoring.md`, `README.md`
+- [x] **Rest time** — `rest.js` offers a break after 25 min of *active* time,
+      `sound.js` chimes when it ends. The chime mixes with her music instead of
+      taking the audio session: no media element, ambient session, context
+      suspended between sounds. Contract in `spec/01-architecture.md`, behaviour
+      in `spec/02-game-design.md`, asserted in `tools/smoke-test.mjs`
 
 ## Lessons to build
 

@@ -82,6 +82,23 @@ window.LC = window.LC || {};
                             en: "Load progress from this link? This will replace what is currently saved on this device." },
     invalidProgressLink: { he: "הקישור הזה לא תקין.", en: "That link is not valid." },
 
+    /* rest reminders */
+    restTitle:      { he: "הפסקה?",                en: "Break?" },
+    restBody:       { he: "את לומדת ברצף כבר הרבה זמן. כמה דקות של אוויר ואת חוזרת חדה יותר.",
+                      en: "You have been at this a while. A few minutes away and you come back sharper." },
+    restMusicNote:  { he: "המוזיקה שלך ממשיכה לנגן.", en: "Your music keeps playing." },
+    restStart:      { he: "לוקחת הפסקה",           en: "Take a break" },
+    restLater:      { he: "עוד קצת",               en: "A bit longer" },
+    restResting:    { he: "בהפסקה",                en: "On a break" },
+    restBackNow:    { he: "חזרה לקוד",             en: "Back to the code" },
+    restOver:       { he: "ההפסקה נגמרה. הקוד שלך מחכה בדיוק איפה שהשארת.",
+                      en: "Break over. Your code is exactly where you left it." },
+
+    /* settings */
+    settings:       { he: "הגדרות",                en: "Settings" },
+    restToggle:     { he: "תזכורת הפסקה",          en: "Break reminders" },
+    sfxToggle:      { he: "צליל בסוף ההפסקה",      en: "Sound when a break ends" },
+
     /* claiming */
     claimTitle:     { he: "מי את?",               en: "Who are you?" },
     nameQuestion:   { he: "איך קוראים לך?",       en: "What is your name?" },

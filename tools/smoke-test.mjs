@@ -90,6 +90,75 @@ if (shots) await page.screenshot({ path: path.join(shotDir, "hub-en.png"), fullP
 await page.click(".btn-lang");
 check((await page.getAttribute("html", "dir")) === "rtl", "toggling back returns to RTL");
 
+/* ---- rest time -------------------------------------------------------- */
+
+/* The rule this section exists for: a break must never take over her audio.
+ * See the audio contract in spec/01-architecture.md. */
+section("Rest time — breaks that leave her music alone");
+
+/* Shorten the break so the countdown can be watched out in a test, then offer
+ * one. The offer is normally reached by sitting on the page for 25 minutes. */
+await page.evaluate(() => {
+  LC.store.update((s) => { s.rest.restMin = 1; });
+  window.__audioContexts = 0;
+  const Real = window.AudioContext || window.webkitAudioContext;
+  const Counting = function (...args) { window.__audioContexts++; return new Real(...args); };
+  Counting.prototype = Real.prototype;
+  window.AudioContext = Counting;
+  window.webkitAudioContext = Counting;
+});
+
+await page.evaluate(() => { LC.store.update((s) => { s.rest.sfx = false; }); LC.Rest.offerNow(); });
+check(await page.locator(".rest-card").isVisible(), "the break offer appears as a corner card");
+check((await page.locator(".rest-card .btn").count()) === 2, "the offer has both take-it and not-now");
+
+/* Snoozing must clear the card and leave her nothing worse off. */
+await page.locator(".rest-card .btn-ghost").click();
+check((await page.locator(".rest-card").count()) === 0, "'a bit longer' dismisses the offer");
+
+await page.evaluate(() => LC.Rest.offerNow());
+await page.locator(".rest-card .btn").first().click();
+check(await page.locator(".rest-clock").isVisible(), "starting a break shows a countdown");
+const clockDir = await page.locator(".rest-clock").getAttribute("dir");
+check(clockDir === "ltr", "the mm:ss countdown stays dir=ltr in Hebrew mode", "got " + clockDir);
+
+check(await page.evaluate(() => window.__audioContexts === 0),
+  "no AudioContext is built while the chime is switched off");
+
+/* THE check. A media element is what steals the device's audio session and
+ * stops whatever she had playing, so there must never be one. */
+check(await page.evaluate(() => document.querySelectorAll("audio, video").length === 0),
+  "a break creates no <audio>/<video> element — her music keeps playing");
+check(await page.evaluate(() => !("mediaSession" in navigator) ||
+  !navigator.mediaSession.metadata), "nothing claims the media session");
+
+/* Run the break out and confirm it ends cleanly, with sound switched on. */
+await page.evaluate(() => { LC.store.update((s) => { s.rest.sfx = true; }); });
+await page.waitForSelector(".rest-card .rest-body", { timeout: 90000 });
+check((await page.locator(".rest-clock").count()) === 0, "the countdown ends on its own");
+check(await page.evaluate(() => LC.Rest.state().phase === "done"), "the break reports itself finished");
+check(await page.evaluate(() => document.querySelectorAll("audio, video").length === 0),
+  "still no media element after the chime has played");
+
+check(await page.evaluate(() => window.__audioContexts === 1),
+  "with sound on, the chime builds exactly one WebAudio context and no more",
+  "built " + (await page.evaluate(() => window.__audioContexts)));
+
+await page.locator(".rest-card .btn").first().click();
+check((await page.locator(".rest-card").count()) === 0, "'back to the code' clears the card");
+check(await page.evaluate(() => LC.Rest.state().phase === "work"), "the tracker returns to counting work");
+await page.evaluate(() => { LC.store.update((s) => { s.rest.restMin = 5; }); });
+
+/* Both switches are hers to flip, from the last panel of the hub. */
+for (let i = 0; i < 8 && (await page.locator("#lc-rest-on").count()) === 0; i++) {
+  await page.locator(".step-next").click();
+}
+check((await page.locator("#lc-rest-on").count()) === 1, "the hub offers a break-reminder switch");
+check((await page.locator("#lc-rest-sfx").count()) === 1, "the hub offers a sound switch");
+await page.locator("#lc-rest-on").uncheck();
+check(await page.evaluate(() => LC.store.get().rest.on === false), "turning reminders off is saved");
+await page.locator("#lc-rest-on").check();
+
 /* ---- lesson 1 --------------------------------------------------------- */
 
 section("Lesson 1 — running Python from file://");

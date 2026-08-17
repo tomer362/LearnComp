@@ -649,6 +649,60 @@ a.stop-link:hover { background: rgba(255, 255, 255, .09); border-color: var(--br
 .toast-item { background: var(--gold); color: var(--ink-on-gold); }
 .toast-achievement { background: var(--greek-fire); color: var(--ink-on-fire); }
 
+/* ---------- rest card ---------- */
+
+/* Sits in the corner opposite the toast and never covers the editor: a break
+ * is an offer, not a modal. Nothing about it blocks the page. */
+.rest-card {
+  position: fixed;
+  inset-block-end: 1rem;
+  inset-inline-end: 1rem;
+  z-index: 49;
+  width: min(320px, calc(100vw - 2rem));
+  background: var(--sound-lit);
+  border: 1px solid var(--bronze);
+  border-radius: var(--radius);
+  padding: .9rem 1rem;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, .45);
+}
+.rest-card p { margin: 0 0 .5rem; }
+.rest-title {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  color: var(--gold);
+}
+.rest-body { font-size: .95rem; }
+.rest-note {
+  font-size: .85rem;
+  color: var(--marble-dim);
+}
+.rest-clock {
+  font-family: var(--font-code);
+  font-size: 2rem;
+  line-height: 1.2;
+  color: var(--marble);
+  font-variant-numeric: tabular-nums;
+}
+.rest-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  margin-block-start: .3rem;
+}
+/* Room to scroll whatever the card is sitting on top of into view. */
+body.has-rest-card { padding-block-end: 16rem; }
+
+/* ---------- settings ---------- */
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+  margin-block-start: .5rem;
+}
+.setting-row input { width: 18px; height: 18px; accent-color: var(--camp-orange); }
+.setting-row label { cursor: pointer; }
+
 /* ---------- responsive ---------- */
 
 @media (max-width: 719px) {
