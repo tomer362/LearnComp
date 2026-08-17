@@ -177,3 +177,30 @@ Rules: **never** delete a key on load (forward-compatible), always merge over a
 default object, and bump `v` with a migration function if the shape changes.
 Export/Import writes the same JSON to a textarea so progress survives a browser
 wipe or a move to another computer — there is no server to sync with.
+
+## `sound.js` — the audio contract
+
+She learns with music playing. Any sound this app makes must **mix with her
+music, never replace it**, and a break reminder that silences her music is a
+punishment mechanic in disguise. `assets/js/sound.js` is the only file allowed
+to produce audio, and it holds to six rules:
+
+1. **No `<audio>` or `<video>` element, ever.** A media element claims the
+   device media session and stops whatever else is playing.
+2. **No `navigator.mediaSession`**, and nothing anywhere may pause, mute, or
+   change the volume of media it did not create.
+3. **Synthesize with WebAudio** — `OscillatorNode` → `GainNode`. No audio asset
+   means `file://` stays network-free (rule 1 of this document) and `sw.js`
+   gains no binary to cache.
+4. **Declare the session ambient** — `navigator.audioSession.type = "ambient"`
+   where the property exists (Safari 16.4+, feature-detected). Ambient mixes;
+   the default `playback` interrupts. This is the line that keeps her music on.
+5. **Keep the context suspended between sounds.** A *running* `AudioContext`
+   holds the hardware and ducks other apps even in silence. Suspend rather than
+   close, so the iOS gesture unlock survives; `LC.sound.unlock()` is called from
+   a real click so a chime fired later by a timer is permitted.
+6. **Fail silent.** No `AudioContext`, or any throw, is a no-op. A missing
+   chime is a small loss; a broken lesson is not.
+
+`tools/smoke-test.mjs` asserts rule 1 directly by counting `audio`/`video`
+elements after a break has run.

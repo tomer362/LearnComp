@@ -19,6 +19,10 @@ window.LC = window.LC || {};
   }
   mountCurrentPage();
 
+  /* Break reminders run on every page — she reads the map for a while too.
+   * Nothing here pauses or mutes anything. See assets/js/rest.js. */
+  if (LC.Rest) LC.Rest.start();
+
   /* A shared "?progress=" link. Never overwrite her save silently — ask
    * first, exactly like the paste-a-backup flow in hub.js already does. */
   (function importProgressFromUrl() {

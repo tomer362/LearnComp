@@ -8,7 +8,7 @@
  */
 "use strict";
 
-var CACHE_VERSION = "v3";
+var CACHE_VERSION = "v4";
 var CACHE_NAME = "demigod-code-" + CACHE_VERSION;
 
 var PRECACHE = [
@@ -27,6 +27,8 @@ var PRECACHE = [
   "/assets/js/curriculum.js",
   "/assets/js/icons.js",
   "/assets/js/game.js",
+  "/assets/js/sound.js",
+  "/assets/js/rest.js",
   "/assets/js/steps.js",
   "/assets/js/hub.js",
   "/assets/js/engine.js",

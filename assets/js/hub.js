@@ -271,6 +271,41 @@ window.LC = window.LC || {};
     box.appendChild(bar);
     box.appendChild(area);
     panel.appendChild(box);
+    panel.appendChild(buildSettingsBox());
+  }
+
+  /* Break reminders and the end-of-break chime. Both default on, both hers to
+   * turn off, and turning either off takes effect without a reload. */
+  function buildSettingsBox() {
+    var box = el("section", "savebox");
+    box.appendChild(el("h2", "pack-title", LC.esc(LC.s("settings"))));
+
+    function toggle(id, labelKey, read, write) {
+      var row = el("div", "setting-row");
+      var input = document.createElement("input");
+      input.type = "checkbox";
+      input.id = id;
+      input.checked = read(LC.store.get().rest || {});
+      input.addEventListener("change", function () {
+        LC.store.update(function (s) { write(s.rest, input.checked); });
+        if (LC.Rest) LC.Rest.refresh();
+      });
+      var label = document.createElement("label");
+      label.setAttribute("for", id);
+      label.textContent = LC.s(labelKey);
+      row.appendChild(input);
+      row.appendChild(label);
+      return row;
+    }
+
+    box.appendChild(toggle("lc-rest-on", "restToggle",
+      function (r) { return r.on !== false; },
+      function (r, v) { r.on = v; }));
+    box.appendChild(toggle("lc-rest-sfx", "sfxToggle",
+      function (r) { return r.sfx !== false; },
+      function (r, v) { r.sfx = v; }));
+
+    return box;
   }
 
   /* NOTE: mount() must NOT call LC.i18n.init(). The language listener below

@@ -32,7 +32,10 @@ window.LC = window.LC || {};
       ambrosia: 3,
       lessons: {}, // "01": { done, exercisesDone: [], hintsUsed, runs }
       items: [],
-      achievements: []
+      achievements: [],
+      /* Break reminders. A suggestion, never a penalty — see
+       * spec/02-game-design.md. sfx is the end-of-break chime only. */
+      rest: { on: true, sfx: true, workMin: 25, restMin: 5 }
     };
   }
 
@@ -47,6 +50,16 @@ window.LC = window.LC || {};
     if (typeof d.lessons !== "object" || d.lessons === null) d.lessons = {};
     if (!Array.isArray(d.items)) d.items = [];
     if (!Array.isArray(d.achievements)) d.achievements = [];
+    /* A save written before rest reminders existed has no rest key at all,
+     * and a hand-edited one could have anything. Fill the gaps per key so a
+     * partial object keeps whichever settings it does carry. */
+    var rd = defaults().rest;
+    if (typeof d.rest !== "object" || d.rest === null) d.rest = rd;
+    else {
+      for (var rk in rd) {
+        if (d.rest[rk] === undefined) d.rest[rk] = rd[rk];
+      }
+    }
     return d;
   }
 

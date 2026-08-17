@@ -135,3 +135,26 @@ an act).
 Never award an achievement for speed alone, and never show her a leaderboard —
 there is nobody to compare against and comparison is the fastest way to make a
 beginner quit.
+
+## Rest time
+
+After 25 minutes of *active* time on a page, a small card in the corner offers
+her a five-minute break. Both numbers live in the save under `rest`
+(`{ on, sfx, workMin, restMin }`) and are switchable from the hub's settings box.
+
+What "rest time" means here, exactly:
+
+- **It counts only time she is present.** Ticks while the tab is hidden are
+  dropped, so a page left open overnight never greets her with a reminder she
+  did not earn.
+- **It offers; it does not impose.** The card is a corner panel, never a modal.
+  "A bit longer" snoozes it. Ignoring it forever is a supported way to use the
+  app.
+- **It pauses nothing.** Not her music, not the battle replay, not the editor.
+  Her code sits exactly where she left it, and a break costs no XP, no item, no
+  streak — there is no streak. See the no-punishment rule in `CLAUDE.md`.
+- **It ends with a sound**, because she will have looked away from the screen —
+  that is the entire reason a break needs an audio signal rather than a toast
+  alone. The chime is built to play *over* her music; the rules that guarantee
+  that are the audio contract in `spec/01-architecture.md`. Ending a break early
+  is not a failure and gets no chime.
